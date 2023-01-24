@@ -71,7 +71,7 @@ public class Material {
   }
 
 
-  private static final int[] skybox = IOHelp.readImageInt("BG/debug.png");
+  private static final int[] skybox = IOHelp.readImageInt("BG/star_map.png");
   private static final int skyboxSize = (int)Math.sqrt(skybox.length);
   /**
   * A static method for getting a point in a skybox.

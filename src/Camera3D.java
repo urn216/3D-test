@@ -169,7 +169,7 @@ public class Camera3D
         Vector3 rayDir = Matrix.rotateLocal(Math.toRadians(percentAlong*(fieldOfView/zoom)), vUpDir).multiply(vDir);
         // Vector3 vDir = new Quaternion(xAxis*(fieldOfView/zoom), yAxis*(fieldOfView/zoom)*aspRat, 0).rotate(dir);
         // int col = RaySphere.getCol(position, rayDir, bodies, 1, 3);
-        int col = RayTri.getCol(position, rayDir, bodies, 2, 2);
+        int col = RayTri.getCol(position, rayDir, bodies, 0, 1);
         for (int i = 0; i < sparsity; i++) {
           for (int j = 0; j < sparsity; j++) {colourArray[(x+j)+(y+i)*(int)DEFAULT_SCREEN_SIZE.x] = col;}
         }
