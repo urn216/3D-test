@@ -1,8 +1,8 @@
-package code.core.scene.models;
+package code.world.models;
 
-import code.core.scene.Material;
-import code.core.scene.Model;
 import code.math.Vector3;
+import code.world.Material;
+import code.world.Model;
 
 public class LowPoly extends Model {
 

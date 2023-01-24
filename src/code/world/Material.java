@@ -1,4 +1,4 @@
-package code.core.scene;
+package code.world;
 import code.math.IOHelp;
 import code.math.Vector3;
 

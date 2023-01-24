@@ -1,7 +1,7 @@
 package code.math;
-import code.core.scene.Material;
-import code.core.scene.RigidBody;
-import code.core.scene.models.Tri;
+import code.world.Material;
+import code.world.RigidBody;
+import code.world.models.Tri;
 
 public class RayTri {
 

@@ -1,7 +1,7 @@
-package code.core.scene;
+package code.world;
 
-import code.core.scene.models.Tri;
 import code.math.Vector3;
+import code.world.models.Tri;
 
 /**
 * Write a description of class WorldObject here.

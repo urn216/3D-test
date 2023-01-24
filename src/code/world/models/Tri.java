@@ -1,4 +1,4 @@
-package code.core.scene.models;
+package code.world.models;
 import code.math.Vector2;
 import code.math.Vector3;
 

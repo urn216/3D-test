@@ -1,10 +1,12 @@
-package code.core.scene;
+package code.core;
 
-import code.core.scene.models.Dropship;
-import code.core.scene.models.LowPoly;
-import code.core.scene.models.Room;
-import code.core.scene.models.Sphere;
 import code.math.Vector3;
+import code.world.Material;
+import code.world.RigidBody;
+import code.world.models.Dropship;
+import code.world.models.LowPoly;
+import code.world.models.Room;
+import code.world.models.Sphere;
 
 public abstract class Scene {
   public static RigidBody[] s1() {

@@ -1,13 +1,13 @@
-package code.core.scene.models;
+package code.world.models;
 
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-import code.core.scene.Material;
-import code.core.scene.RigidBody;
 import code.math.IOHelp;
 import code.math.Vector3;
+import code.world.Material;
+import code.world.RigidBody;
 
 public class Dropship implements RigidBody {
 

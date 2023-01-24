@@ -19,12 +19,12 @@ import java.awt.event.ComponentAdapter;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import code.core.scene.RigidBody;
-import code.core.scene.Scene;
-import code.core.scene.models.Sphere;
 import code.math.IOHelp;
 import code.math.Vector2;
 import code.math.Vector3;
+import code.world.Camera3D;
+import code.world.RigidBody;
+import code.world.models.Sphere;
 
 import java.awt.Graphics;
 import java.awt.Graphics2D;

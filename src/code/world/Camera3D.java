@@ -1,5 +1,5 @@
-package code.core;
-import code.core.scene.RigidBody;
+package code.world;
+import code.core.Core;
 import code.math.Matrix;
 import code.math.RayTri;
 import code.math.Vector2;

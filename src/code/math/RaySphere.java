@@ -1,6 +1,6 @@
 package code.math;
-import code.core.scene.Material;
-import code.core.scene.RigidBody;
+import code.world.Material;
+import code.world.RigidBody;
 
 public class RaySphere {
 

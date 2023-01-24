@@ -1,12 +1,12 @@
-package code.core.scene;
+package code.world;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-import code.core.scene.models.Tri;
 import code.math.IOHelp;
 import code.math.Vector2;
 import code.math.Vector3;
+import code.world.models.Tri;
 
 public abstract class Model implements RigidBody {
 

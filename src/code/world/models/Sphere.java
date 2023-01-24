@@ -1,9 +1,9 @@
-package code.core.scene.models;
+package code.world.models;
 
-import code.core.scene.Material;
-import code.core.scene.RigidBody;
 import code.math.Vector2;
 import code.math.Vector3;
+import code.world.Material;
+import code.world.RigidBody;
 
 public class Sphere implements RigidBody {
 
