@@ -4,12 +4,12 @@ import code.math.Vector3;
 import code.world.Material;
 import code.world.Model;
 
-public class Room extends Model {
+public class Map extends Model {
 
-  private static final double radius = 14.7;
+  private static final double radius = new Map(new Vector3(), null).calculateRadius();
 
-  public Room(Vector3 position, Material mat) {
-    super(generateMesh("room.obj"));
+  public Map(Vector3 position, Material mat) {
+    super(generateMesh("map.obj"));
     this.position = position;
     this.mat = mat;
   }

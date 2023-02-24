@@ -1,7 +1,7 @@
 package code.math;
 import code.world.Material;
 import code.world.RigidBody;
-import code.world.models.Tri;
+import code.world.Tri;
 
 public class RayTri {
 
@@ -28,7 +28,7 @@ public class RayTri {
       double distSquare = rayStart.subtract(body.getPos()).magsquare();
       double DcosA = dir.dot(body.getPos().subtract(rayStart));
       if (Double.isNaN(Math.sqrt(DcosA*DcosA+rad*rad-distSquare))) {continue;}
-      for (Tri tri : body.getTris()) {
+      for (Tri tri : body.getFaces()) {
         Vector3 n = tri.getNorm();
         double det = -n.dot(dir);
         if (det < 0.000001) {continue;}
@@ -65,7 +65,7 @@ public class RayTri {
       double distSquare = rayStart.subtract(body.getPos()).magsquare();
       double DcosA = dir.dot(body.getPos().subtract(rayStart));
       if (Double.isNaN(Math.sqrt(DcosA*DcosA+rad*rad-distSquare))) {continue;}
-      for (Tri tri : body.getTris()) {
+      for (Tri tri : body.getFaces()) {
         Vector3 n = tri.getNorm();
         double det = -n.dot(dir);
         if (det < 0.000001) {continue;}

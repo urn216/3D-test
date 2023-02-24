@@ -162,7 +162,7 @@ public class Core extends JPanel
     // bodies = new RigidBody[7];
 
     cam = new Camera3D(new Vector3(), 1, screenSizeX, screenSizeY);
-    this.bodies = Scene.s1();
+    this.bodies = Scene.s4();
     lightSource = (Sphere)bodies[0];
 
     // bg = IOHelp.readImage("BG/space.png");

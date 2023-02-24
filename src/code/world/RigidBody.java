@@ -1,7 +1,6 @@
 package code.world;
 
 import code.math.Vector3;
-import code.world.models.Tri;
 
 /**
 * Write a description of class WorldObject here.
@@ -18,7 +17,7 @@ public interface RigidBody
 
   public double getRad();
 
-  public Tri[] getTris();
+  public Tri[] getFaces();
 
   public Material getMat();
 

@@ -4,6 +4,7 @@ import code.math.Vector2;
 import code.math.Vector3;
 import code.world.Material;
 import code.world.RigidBody;
+import code.world.Tri;
 
 public class Sphere implements RigidBody {
 
@@ -30,18 +31,18 @@ public class Sphere implements RigidBody {
   }
 
   public void generateMesh() {
-    tris[0] = new Tri(verts[0], verts[1], verts[2], new Vector2(0, 1), new Vector2(0, 0), new Vector2(1, 0));
-    tris[1] = new Tri(verts[0], verts[2], verts[3], new Vector2(0, 1), new Vector2(1, 0), new Vector2(1, 1));
-    tris[2] = new Tri(verts[3], verts[2], verts[6], new Vector2(0, 1), new Vector2(0, 0), new Vector2(1, 0));
-    tris[3] = new Tri(verts[3], verts[6], verts[7], new Vector2(0, 1), new Vector2(1, 0), new Vector2(1, 1));
-    tris[4] = new Tri(verts[7], verts[6], verts[5], new Vector2(0, 1), new Vector2(0, 0), new Vector2(1, 0));
-    tris[5] = new Tri(verts[7], verts[5], verts[4], new Vector2(0, 1), new Vector2(1, 0), new Vector2(1, 1));
-    tris[6] = new Tri(verts[4], verts[5], verts[1], new Vector2(0, 1), new Vector2(0, 0), new Vector2(1, 0));
-    tris[7] = new Tri(verts[4], verts[1], verts[0], new Vector2(0, 1), new Vector2(1, 0), new Vector2(1, 1));
-    tris[8] = new Tri(verts[1], verts[5], verts[6], new Vector2(0, 1), new Vector2(0, 0), new Vector2(1, 0));
-    tris[9] = new Tri(verts[1], verts[6], verts[2], new Vector2(0, 1), new Vector2(1, 0), new Vector2(1, 1));
-    tris[10] = new Tri(verts[4], verts[0], verts[3], new Vector2(0, 1), new Vector2(0, 0), new Vector2(1, 0));
-    tris[11] = new Tri(verts[4], verts[3], verts[7], new Vector2(0, 1), new Vector2(1, 0), new Vector2(1, 1));
+    tris[0]  = new Tri(new Vector3[] {verts[0], verts[1], verts[2]}, new Vector2[] {new Vector2(0, 1), new Vector2(0, 0), new Vector2(1, 0)}, new int[]{1,2,3}, new int[]{0,0,0});
+    tris[1]  = new Tri(new Vector3[] {verts[0], verts[2], verts[3]}, new Vector2[] {new Vector2(0, 1), new Vector2(1, 0), new Vector2(1, 1)}, new int[]{1,3,4}, new int[]{0,0,0});
+    tris[2]  = new Tri(new Vector3[] {verts[3], verts[2], verts[6]}, new Vector2[] {new Vector2(0, 1), new Vector2(0, 0), new Vector2(1, 0)}, new int[]{4,3,7}, new int[]{0,0,0});
+    tris[3]  = new Tri(new Vector3[] {verts[3], verts[6], verts[7]}, new Vector2[] {new Vector2(0, 1), new Vector2(1, 0), new Vector2(1, 1)}, new int[]{4,7,8}, new int[]{0,0,0});
+    tris[4]  = new Tri(new Vector3[] {verts[7], verts[6], verts[5]}, new Vector2[] {new Vector2(0, 1), new Vector2(0, 0), new Vector2(1, 0)}, new int[]{8,7,6}, new int[]{0,0,0});
+    tris[5]  = new Tri(new Vector3[] {verts[7], verts[5], verts[4]}, new Vector2[] {new Vector2(0, 1), new Vector2(1, 0), new Vector2(1, 1)}, new int[]{8,6,5}, new int[]{0,0,0});
+    tris[6]  = new Tri(new Vector3[] {verts[4], verts[5], verts[1]}, new Vector2[] {new Vector2(0, 1), new Vector2(0, 0), new Vector2(1, 0)}, new int[]{5,6,2}, new int[]{0,0,0});
+    tris[7]  = new Tri(new Vector3[] {verts[4], verts[1], verts[0]}, new Vector2[] {new Vector2(0, 1), new Vector2(1, 0), new Vector2(1, 1)}, new int[]{5,2,1}, new int[]{0,0,0});
+    tris[8]  = new Tri(new Vector3[] {verts[1], verts[5], verts[6]}, new Vector2[] {new Vector2(0, 1), new Vector2(0, 0), new Vector2(1, 0)}, new int[]{2,6,7}, new int[]{0,0,0});
+    tris[9]  = new Tri(new Vector3[] {verts[1], verts[6], verts[2]}, new Vector2[] {new Vector2(0, 1), new Vector2(1, 0), new Vector2(1, 1)}, new int[]{2,7,3}, new int[]{0,0,0});
+    tris[10] = new Tri(new Vector3[] {verts[4], verts[0], verts[3]}, new Vector2[] {new Vector2(0, 1), new Vector2(0, 0), new Vector2(1, 0)}, new int[]{5,1,4}, new int[]{0,0,0});
+    tris[11] = new Tri(new Vector3[] {verts[4], verts[3], verts[7]}, new Vector2[] {new Vector2(0, 1), new Vector2(1, 0), new Vector2(1, 1)}, new int[]{5,4,8}, new int[]{0,0,0});
   }
 
   public Vector3 getPos() {return position;}
@@ -54,7 +55,7 @@ public class Sphere implements RigidBody {
 
   public void setPos(double r) {radius = r;}
 
-  public Tri[] getTris() {return tris;}
+  public Tri[] getFaces() {return tris;}
 
   public Material getMat() {return mat;}
 
