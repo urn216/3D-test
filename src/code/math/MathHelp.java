@@ -1,4 +1,8 @@
 package code.math;
+
+import code.math.vector.Vector2;
+import code.math.vector.Vector3;
+
 /**
 * class helping do file stuff
 */

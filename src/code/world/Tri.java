@@ -1,7 +1,7 @@
 package code.world;
 
-import code.math.Vector2;
-import code.math.Vector3;
+import code.math.vector.Vector2;
+import code.math.vector.Vector3;
 
 public class Tri {
 

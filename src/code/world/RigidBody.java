@@ -1,6 +1,6 @@
 package code.world;
 
-import code.math.Vector3;
+import code.math.vector.Vector3;
 
 /**
 * Write a description of class WorldObject here.

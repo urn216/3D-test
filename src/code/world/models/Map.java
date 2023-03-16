@@ -1,6 +1,6 @@
 package code.world.models;
 
-import code.math.Vector3;
+import code.math.vector.Vector3;
 import code.world.Material;
 import code.world.Model;
 

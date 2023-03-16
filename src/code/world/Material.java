@@ -1,6 +1,6 @@
 package code.world;
 import code.math.IOHelp;
-import code.math.Vector3;
+import code.math.vector.Vector3;
 
 public class Material {
   private static final int RED_MASK = 255 << 16;

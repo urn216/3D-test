@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 import code.math.IOHelp;
-import code.math.Vector2;
-import code.math.Vector3;
+import code.math.vector.Vector2;
+import code.math.vector.Vector3;
 
 public abstract class Model implements RigidBody {
 

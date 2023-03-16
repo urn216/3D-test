@@ -1,6 +1,6 @@
 package code.core;
 
-import code.math.Vector3;
+import code.math.vector.Vector3;
 import code.world.Material;
 import code.world.RigidBody;
 import code.world.models.Dropship;
