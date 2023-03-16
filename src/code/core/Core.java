@@ -15,9 +15,9 @@ import java.awt.Graphics;
 
 public abstract class Core {
   
-  public static final Window WINDOW = new Window();
+  public static final Window WINDOW;
   
-  public static final Settings GLOBAL_SETTINGS = new Settings();
+  public static final Settings GLOBAL_SETTINGS;
   
   private static final double TICKS_PER_SECOND = 60;
   private static final double MILLISECONDS_PER_TICK = 1000/TICKS_PER_SECOND;
@@ -32,16 +32,22 @@ public abstract class Core {
   
   private static Camera3D cam;
   
-  private static BufferedImage image = new BufferedImage(WINDOW.screenWidth(), WINDOW.screenHeight(), BufferedImage.TYPE_INT_ARGB);
-  private static int[] imageContents = new int[image.getWidth() * image.getHeight()];
-  private static double imageAspectRatio = 1.0 * image.getWidth() / image.getHeight();
+  private static BufferedImage image;
+  private static int[] imageContents;
+  private static double imageAspectRatio;
   
   private static long pFTime = System.currentTimeMillis();
   private static double fps = 0;
   private static int fCount = 0;
   
   static {
-    WINDOW.setFullscreen(false);
+    WINDOW = new Window();
+
+    GLOBAL_SETTINGS = new Settings();
+
+    image = new BufferedImage(1280, 720, BufferedImage.TYPE_INT_ARGB);
+    imageContents = new int[image.getWidth() * image.getHeight()];
+    imageAspectRatio = 1.0 * image.getWidth() / image.getHeight();
   }
   
   /**
@@ -50,10 +56,12 @@ public abstract class Core {
   * @param args Ignored for now
   */
   public static void main(String[] args) {
-    bodies = Scene.s4();
+    bodies = Scene.s1();
     lightSource = (Sphere)bodies[0];
 
     cam = new Camera3D(new Vector3(), Renderer.raySphere());
+
+    Controls.initialiseControls(WINDOW.FRAME);
 
     playGame();
   }

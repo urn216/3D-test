@@ -56,7 +56,7 @@ class RayTriRenderer extends Renderer {
 
     //SINGLE THREAD:
 
-    double aspRat = 1.0*width/height;
+    double aspRat = 1.0*height/width;
 
     for (int y = 0; y < height; y++) {
       double percentDown = (-0.5+y/height);
