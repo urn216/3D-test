@@ -1,7 +1,3 @@
 fullScreen false
-nickname 
-scrollSensitivity 5
-soundFX 100
-soundMaster 100
-soundMusic 100
-subtitles false
+resolution_X 16
+resolution_Y 9

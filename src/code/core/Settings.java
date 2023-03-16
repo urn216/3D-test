@@ -10,13 +10,9 @@ class Settings {
   private static final String LOCATION = "../settings.txt";
 
   private static final String[] DEFAULT_SETTINGS = {
-    "fullScreen"        , " " + "true"  + "\n",
-    "nickname"          , " " + ""      + "\n",
-    "scrollSensitivity" , " " + 5       + "\n",
-    "soundFX"           , " " + 100     + "\n",
-    "soundMaster"       , " " + 100     + "\n",
-    "soundMusic"        , " " + 100     + "\n",
-    "subtitles"         , " " + "false" + "\n",
+    "fullScreen"  , " " + "false" + "\n",
+    "resolution_X", " " + 256     + "\n",
+    "resolution_Y", " " + 144     + "\n"
   };
 
   private final SortedMap<String, String> settings = new TreeMap<String, String>();

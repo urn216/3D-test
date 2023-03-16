@@ -35,6 +35,9 @@ public abstract class Core {
   private static BufferedImage image;
   private static int[] imageContents;
   private static double imageAspectRatio;
+
+  private static long previousTick    = System.currentTimeMillis();
+  private static long deltaTimeMillis = 0;
   
   private static long pFTime = System.currentTimeMillis();
   private static double fps = 0;
@@ -45,7 +48,11 @@ public abstract class Core {
 
     GLOBAL_SETTINGS = new Settings();
 
-    image = new BufferedImage(1280, 720, BufferedImage.TYPE_INT_ARGB);
+    image = new BufferedImage(
+      GLOBAL_SETTINGS.getIntSetting("resolution_X"), 
+      GLOBAL_SETTINGS.getIntSetting("resolution_Y"), 
+      BufferedImage.TYPE_INT_ARGB
+    );
     imageContents = new int[image.getWidth() * image.getHeight()];
     imageAspectRatio = 1.0 * image.getWidth() / image.getHeight();
   }
@@ -83,23 +90,25 @@ public abstract class Core {
   public static void playGame() {
     while (true) {
       long tickTime = System.currentTimeMillis();
+      deltaTimeMillis = tickTime - previousTick;
+      previousTick  = tickTime;
       
-      if (Controls.KEY_DOWN[KeyEvent.VK_W]) {cam.move(0, 0, 0.5);}
-      if (Controls.KEY_DOWN[KeyEvent.VK_S]) {cam.move(0, 0, -0.5);}
-      if (Controls.KEY_DOWN[KeyEvent.VK_A]) {cam.move(-0.5, 0, 0);}
-      if (Controls.KEY_DOWN[KeyEvent.VK_D]) {cam.move(0.5, 0, 0);}
-      if (Controls.KEY_DOWN[KeyEvent.VK_SHIFT]) {cam.move(0, -0.5, 0);}
-      if (Controls.KEY_DOWN[KeyEvent.VK_SPACE]) {cam.move(0, 0.5, 0);}
-      if (Controls.KEY_DOWN[KeyEvent.VK_I]) {lightSource.move(0, 0, 0.5);}
-      if (Controls.KEY_DOWN[KeyEvent.VK_K]) {lightSource.move(0, 0, -0.5);}
-      if (Controls.KEY_DOWN[KeyEvent.VK_J]) {lightSource.move(-0.5, 0, 0);}
-      if (Controls.KEY_DOWN[KeyEvent.VK_L]) {lightSource.move(0.5, 0, 0);}
-      if (Controls.KEY_DOWN[KeyEvent.VK_O]) {lightSource.move(0, -0.5, 0);}
-      if (Controls.KEY_DOWN[KeyEvent.VK_U]) {lightSource.move(0, 0.5, 0);}
-      if (Controls.KEY_DOWN[KeyEvent.VK_UP]) {cam.pitchCam(-5);}
-      if (Controls.KEY_DOWN[KeyEvent.VK_DOWN]) {cam.pitchCam(5);}
-      if (Controls.KEY_DOWN[KeyEvent.VK_LEFT]) {cam.yawCam(-5);}
-      if (Controls.KEY_DOWN[KeyEvent.VK_RIGHT]) {cam.yawCam(5);}
+      if (Controls.KEY_DOWN[KeyEvent.VK_W])     {cam.move        (0, 0,  0.01*deltaTimeMillis);}
+      if (Controls.KEY_DOWN[KeyEvent.VK_S])     {cam.move        (0, 0, -0.01*deltaTimeMillis);}
+      if (Controls.KEY_DOWN[KeyEvent.VK_A])     {cam.move        (-0.01*deltaTimeMillis, 0, 0);}
+      if (Controls.KEY_DOWN[KeyEvent.VK_D])     {cam.move        ( 0.01*deltaTimeMillis, 0, 0);}
+      if (Controls.KEY_DOWN[KeyEvent.VK_SHIFT]) {cam.move        (0, -0.005*deltaTimeMillis, 0);}
+      if (Controls.KEY_DOWN[KeyEvent.VK_SPACE]) {cam.move        (0,  0.005*deltaTimeMillis, 0);}
+      if (Controls.KEY_DOWN[KeyEvent.VK_I])     {lightSource.move(0, 0,  0.01*deltaTimeMillis);}
+      if (Controls.KEY_DOWN[KeyEvent.VK_K])     {lightSource.move(0, 0, -0.01*deltaTimeMillis);}
+      if (Controls.KEY_DOWN[KeyEvent.VK_J])     {lightSource.move(-0.01*deltaTimeMillis, 0, 0);}
+      if (Controls.KEY_DOWN[KeyEvent.VK_L])     {lightSource.move( 0.01*deltaTimeMillis, 0, 0);}
+      if (Controls.KEY_DOWN[KeyEvent.VK_O])     {lightSource.move(0, -0.01*deltaTimeMillis, 0);}
+      if (Controls.KEY_DOWN[KeyEvent.VK_U])     {lightSource.move(0,  0.01*deltaTimeMillis, 0);}
+      if (Controls.KEY_DOWN[KeyEvent.VK_UP])    {cam.pitchCam(-0.1*deltaTimeMillis);}
+      if (Controls.KEY_DOWN[KeyEvent.VK_DOWN])  {cam.pitchCam( 0.1*deltaTimeMillis);}
+      if (Controls.KEY_DOWN[KeyEvent.VK_LEFT])  {cam.yawCam  (-0.1*deltaTimeMillis);}
+      if (Controls.KEY_DOWN[KeyEvent.VK_RIGHT]) {cam.yawCam  ( 0.1*deltaTimeMillis);}
       
       if (update || first) {
         image.setRGB(
