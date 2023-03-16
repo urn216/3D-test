@@ -1,3 +1,0 @@
-fullScreen false
-resolution_X 16
-resolution_Y 9
