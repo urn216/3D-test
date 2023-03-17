@@ -32,8 +32,10 @@ public abstract class Core {
   
   private static Camera3D cam;
 
+  private static double defaultMovementSpeed = 0.01;
+  private static double fasterMovementSpeed  = 0.1;
+
   private static long previousTick    = System.currentTimeMillis();
-  private static long deltaTimeMillis = 0;
   
   private static long pFTime = System.currentTimeMillis();
   private static double fps = 0;
@@ -83,15 +85,16 @@ public abstract class Core {
   public static void playGame() {
     while (true) {
       long tickTime = System.currentTimeMillis();
-      deltaTimeMillis = tickTime - previousTick;
+      long deltaTimeMillis = tickTime - previousTick;
       previousTick  = tickTime;
       
-      if (Controls.KEY_DOWN[KeyEvent.VK_W])     {cam.move        (0, 0,  0.01*deltaTimeMillis);}
-      if (Controls.KEY_DOWN[KeyEvent.VK_S])     {cam.move        (0, 0, -0.01*deltaTimeMillis);}
-      if (Controls.KEY_DOWN[KeyEvent.VK_A])     {cam.move        (-0.01*deltaTimeMillis, 0, 0);}
-      if (Controls.KEY_DOWN[KeyEvent.VK_D])     {cam.move        ( 0.01*deltaTimeMillis, 0, 0);}
-      if (Controls.KEY_DOWN[KeyEvent.VK_SHIFT]) {cam.move        (0, -0.005*deltaTimeMillis, 0);}
-      if (Controls.KEY_DOWN[KeyEvent.VK_SPACE]) {cam.move        (0,  0.005*deltaTimeMillis, 0);}
+      double vel = Controls.KEY_DOWN[KeyEvent.VK_CONTROL] ? fasterMovementSpeed : defaultMovementSpeed;
+      if (Controls.KEY_DOWN[KeyEvent.VK_W])     {cam.move(0, 0,  vel*deltaTimeMillis    );}
+      if (Controls.KEY_DOWN[KeyEvent.VK_S])     {cam.move(0, 0, -vel*deltaTimeMillis    );}
+      if (Controls.KEY_DOWN[KeyEvent.VK_A])     {cam.move(-vel*deltaTimeMillis, 0, 0    );}
+      if (Controls.KEY_DOWN[KeyEvent.VK_D])     {cam.move( vel*deltaTimeMillis, 0, 0    );}
+      if (Controls.KEY_DOWN[KeyEvent.VK_SHIFT]) {cam.move(0, -0.5*vel*deltaTimeMillis, 0);}
+      if (Controls.KEY_DOWN[KeyEvent.VK_SPACE]) {cam.move(0,  0.5*vel*deltaTimeMillis, 0);}
       if (Controls.KEY_DOWN[KeyEvent.VK_I])     {lightSource.move(0, 0,  0.01*deltaTimeMillis);}
       if (Controls.KEY_DOWN[KeyEvent.VK_K])     {lightSource.move(0, 0, -0.01*deltaTimeMillis);}
       if (Controls.KEY_DOWN[KeyEvent.VK_J])     {lightSource.move(-0.01*deltaTimeMillis, 0, 0);}
