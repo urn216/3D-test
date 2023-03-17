@@ -1,8 +1,8 @@
 package code.core;
 
-import java.awt.image.BufferedImage;
-
 import java.awt.event.KeyEvent;
+
+import java.awt.image.BufferedImage;
 
 import code.math.vector.Vector3;
 
@@ -31,10 +31,6 @@ public abstract class Core {
   private static Sphere lightSource;
   
   private static Camera3D cam;
-  
-  private static BufferedImage image;
-  private static int[] imageContents;
-  private static double imageAspectRatio;
 
   private static long previousTick    = System.currentTimeMillis();
   private static long deltaTimeMillis = 0;
@@ -47,14 +43,6 @@ public abstract class Core {
     WINDOW = new Window();
 
     GLOBAL_SETTINGS = new Settings();
-
-    image = new BufferedImage(
-      GLOBAL_SETTINGS.getIntSetting("resolution_X"), 
-      GLOBAL_SETTINGS.getIntSetting("resolution_Y"), 
-      BufferedImage.TYPE_INT_ARGB
-    );
-    imageContents = new int[image.getWidth() * image.getHeight()];
-    imageAspectRatio = 1.0 * image.getWidth() / image.getHeight();
   }
   
   /**
@@ -66,7 +54,12 @@ public abstract class Core {
     bodies = Scene.s1();
     lightSource = (Sphere)bodies[0];
 
-    cam = new Camera3D(new Vector3(), Renderer.raySphere());
+    cam = new Camera3D(
+      new Vector3(), 
+      GLOBAL_SETTINGS.getIntSetting("resolution_X"), 
+      GLOBAL_SETTINGS.getIntSetting("resolution_Y"), 
+      Renderer.raySphere()
+    );
 
     Controls.initialiseControls(WINDOW.FRAME);
 
@@ -111,11 +104,7 @@ public abstract class Core {
       if (Controls.KEY_DOWN[KeyEvent.VK_RIGHT]) {cam.yawCam  ( 0.1*deltaTimeMillis);}
       
       if (update || first) {
-        image.setRGB(
-          0, 0, image.getWidth(), image.getHeight(), 
-          cam.draw(imageContents, image.getWidth(), image.getHeight(), bodies), 
-          0, image.getWidth()
-        );
+        cam.draw(bodies);
         first = false;
       }
       
@@ -136,9 +125,9 @@ public abstract class Core {
   * @param gra the supplied {@code Graphics} object
   */
   public static void paintComponent(Graphics gra) {
-    
-    int size = Math.min((int)(WINDOW.screenWidth()/imageAspectRatio), WINDOW.screenHeight());
-    gra.drawImage(image.getScaledInstance((int)(size*imageAspectRatio), size, BufferedImage.SCALE_DEFAULT), 0, 0, null);
+
+    int size = Math.min((int)(WINDOW.screenWidth()/cam.getImageAspectRatio()), WINDOW.screenHeight());
+    gra.drawImage(cam.getImage().getScaledInstance((int)(size*cam.getImageAspectRatio()), size, BufferedImage.SCALE_DEFAULT), 0, 0, null);
     
     if (fCount >= 100) {
       long cFTime = System.currentTimeMillis();

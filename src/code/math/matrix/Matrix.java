@@ -37,9 +37,7 @@ public class Matrix
   }
 
   public static Matrix rotateXLocal(double d, Vector3 dir) {
-    Vector3 axis = dir.copy();
-    if (axis.y != 0) {axis.y = 0; axis = axis.unitize();}
-    axis = Matrix.rotateY(Math.PI*0.5).multiply(axis);
+    Vector3 axis = Matrix.rotateY(Math.PI*0.5).multiply(new Vector3(dir.x, 0, dir.z).unitize());
 
     double cos = Math.cos(d);
     double sin = Math.sin(d);

@@ -5,9 +5,9 @@ package code.math.vector;
 */
 public class Vector3  // implements Comparable<Vector3>
 {
-  public double x;
-  public double y;
-  public double z;
+  public final double x;
+  public final double y;
+  public final double z;
 
   public Vector3(double x, double y, double z) {
     this.x = x;

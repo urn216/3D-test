@@ -1,8 +1,12 @@
 package code.core;
 
+import java.awt.image.BufferedImage;
+
 import code.math.matrix.Matrix;
 import code.math.vector.Vector3;
+
 import code.rendering.Renderer;
+
 import code.world.RigidBody;
 
 /**
@@ -21,14 +25,23 @@ public class Camera3D {
   private Vector3 upDir;
 
   private double currentPitch;
+  
+  private BufferedImage image;
+  private int[] imageContents;
+
+  private int imageWidth;
+  private int imageHeight;
+  private double imageAspectRatio;
 
   /**
   * @Camera
   *
   * Constructs a camera with a position vector, a default zoom level, and the current resolution of the game window.
   */
-  public Camera3D(Vector3 position, Renderer renderer) {
-    this.position = position.copy();
+  public Camera3D(Vector3 position, int imageWidth, int imageHeight, Renderer renderer) {
+    this.position = position;
+
+    setImageDimensions(imageWidth, imageHeight);
 
     this.renderer = renderer;
 
@@ -40,6 +53,14 @@ public class Camera3D {
 
   public double getFieldOfView() {return fieldOfView;}
 
+  public double getImageAspectRatio() {return imageAspectRatio;}
+
+  public int getImageWidth() {return imageWidth;}
+
+  public int getImageHeight() {return imageHeight;}
+
+  public BufferedImage getImage() {return image;}
+
   public Vector3 getPosition() {return position;}
 
   public Vector3 getDir() {return dir;}
@@ -49,6 +70,17 @@ public class Camera3D {
   public Vector3 getRightDir() {return rightDir;}
 
   public void setPos(Vector3 position) {this.position = position;}
+
+  public void setFieldOfView(double fieldOfView) {this.fieldOfView = fieldOfView;}
+
+  public void setImageDimensions(int imageWidth, int imageHeight) {
+    this.imageWidth = imageWidth;
+    this.imageHeight = imageHeight;
+    this.imageAspectRatio = 1.0*imageWidth/imageHeight;
+
+    this.image = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_ARGB); 
+    this.imageContents = new int[imageWidth * imageHeight];
+  }
 
   public void move(double x, double y, double z) {
     position = position.add(dir.multiply(z)).add(rightDir.multiply(x)).add(upDir.multiply(y));
@@ -73,8 +105,8 @@ public class Camera3D {
     upDir = yawMatrix.multiply(upDir);
   }
 
-  public int[] draw(int[] colourArray, int width, int height, RigidBody[] bodies) {
-    renderer.render(colourArray, width, height, position, dir, upDir, fieldOfView, bodies);
-    return colourArray;
+  public void draw(RigidBody[] bodies) {
+    renderer.render(imageContents, imageWidth, imageHeight, position, dir, upDir, fieldOfView, bodies);
+    image.setRGB(0, 0, imageWidth, imageHeight, imageContents, 0, imageWidth);
   }
 }

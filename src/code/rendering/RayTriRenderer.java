@@ -31,6 +31,7 @@ class RayTriRenderer extends Renderer {
     // }
   }
   
+  @Override
   public void render(int[] dest, int width, int height, Vector3 position, Vector3 dir, Vector3 upDir, double fov, RigidBody[] bodies) {
 
     // MULTITHREADING:
