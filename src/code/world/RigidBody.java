@@ -1,5 +1,6 @@
 package code.world;
 
+import code.math.tri.Tri3D;
 import code.math.vector.Vector3;
 
 /**
@@ -15,9 +16,11 @@ public interface RigidBody
 
   public void setPos(Vector3 pos);
 
-  public double getRad();
+  public void move(double x, double y, double z);
 
-  public Tri[] getFaces();
+  public double getRadius();
+
+  public Tri3D[] getFaces();
 
   public Material getMat();
 

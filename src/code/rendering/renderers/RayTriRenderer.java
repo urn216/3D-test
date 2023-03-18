@@ -1,9 +1,9 @@
-package code.rendering;
+package code.rendering.renderers;
 
 import code.math.matrix.Matrix;
-import code.math.rays.RayTri;
+import code.math.ray.RayTri;
 import code.math.vector.Vector3;
-
+import code.rendering.Drawing;
 import code.world.RigidBody;
 
 class RayTriRenderer extends Renderer {
@@ -32,7 +32,7 @@ class RayTriRenderer extends Renderer {
   }
   
   @Override
-  public void render(int[] dest, int width, int height, Vector3 position, Vector3 dir, Vector3 upDir, double fov, RigidBody[] bodies) {
+  public void render(Drawing d, Vector3 position, Vector3 dir, Vector3 upDir, RigidBody[] bodies) {
 
     // MULTITHREADING:
     // WARNING; UNFINISHED. LOOKS LIKE SHIT
@@ -56,18 +56,15 @@ class RayTriRenderer extends Renderer {
     // }
 
     //SINGLE THREAD:
-
-    double aspRat = 1.0*height/width;
-
-    for (int y = 0; y < height; y++) {
-      double percentDown = (-0.5+y/height);
-      Matrix pitchMatrix = Matrix.rotateXLocal(Math.toRadians(percentDown*fov*aspRat), dir);
+    for (int y = 0; y < d.getHeight(); y++) {
+      double percentDown = (-0.5+1.0*y/d.getHeight());
+      Matrix pitchMatrix = Matrix.rotateXLocal(percentDown*fov*d.getAspectRatio(), dir);
       Vector3 vDir = pitchMatrix.multiply(dir);
       Vector3 vUpDir = pitchMatrix.multiply(upDir);
-      for (int x = 0; x < width; x++) {
-        double percentAlong = (-0.5+x/width);
-        Vector3 rayDir = Matrix.rotateLocal(Math.toRadians(percentAlong*fov), vUpDir).multiply(vDir);
-        dest[(x)+(y)*width] = RayTri.getCol(position, rayDir, bodies, 0, 1);
+      for (int x = 0; x < d.getWidth(); x++) {
+        double percentAlong = (-0.5+1.0*x/d.getWidth());
+        Vector3 rayDir = Matrix.rotateLocal(percentAlong*fov, vUpDir).multiply(vDir);
+        d.drawPixel(x, y, RayTri.getCol(position, rayDir, bodies, 0, 3));
       }
     }
 

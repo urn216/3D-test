@@ -1,10 +1,10 @@
-package code.math.rays;
+package code.math.ray;
 import code.math.MathHelp;
+import code.math.tri.Tri3D;
 import code.math.vector.Vector2;
 import code.math.vector.Vector3;
 import code.world.Material;
 import code.world.RigidBody;
-import code.world.Tri;
 
 public class RayTri {
 
@@ -23,16 +23,16 @@ public class RayTri {
   public static int getCol(Vector3 rayStart, Vector3 dir, RigidBody[] bodies, int numSteps, int numRef) {
     double closest = Double.POSITIVE_INFINITY;
     RigidBody close = null;
-    Tri cTri = null;
+    Tri3D cTri = null;
     double cU = 0;
     double cV = 0;
     for (RigidBody body : bodies) {
-      double rad = body.getRad();
+      double rad = body.getRadius();
       double distSquare = rayStart.subtract(body.getPos()).magsquare();
       double DcosA = dir.dot(body.getPos().subtract(rayStart));
       if (Double.isNaN(Math.sqrt(DcosA*DcosA+rad*rad-distSquare))) {continue;}
-      for (Tri tri : body.getFaces()) {
-        Vector3 n = tri.getNorm();
+      for (Tri3D tri : body.getFaces()) {
+        Vector3 n = tri.getNormal();
         double det = -n.dot(dir);
         if (det < 0.000001) {continue;}
         Vector3[] verts = tri.getVerts();
@@ -50,11 +50,11 @@ public class RayTri {
       Vector2 Puv = MathHelp.sphereUVPointInv(dir); //get the uv coordinates for this point in skybox
       return Material.getSkyColour(Puv.x, Puv.y);
     }
-    Vector3 surface = rayStart.add(dir.multiply(closest));
+    Vector3 surface = rayStart.add(dir.scale(closest));
     Vector3 sNormal = cTri.getEdges()[2];
     Vector3 intensity = intensityStep(surface, sNormal, bodies, close, true, numSteps);
     Vector2 Puv = cTri.getUVCoords(cU, cV); //get the uv coordinates for this point
-    if (numRef>0 && close.getMat().getReflectivity() != 0) {return close.getMat().getReflection(getCol(surface, dir.subtract(sNormal.multiply(2*sNormal.dot(dir))), bodies, numSteps-1, numRef-1), intensity, Puv.x, Puv.y);}
+    if (numRef>0 && close.getMat().getReflectivity() != 0) {return close.getMat().getReflection(getCol(surface, dir.subtract(sNormal.scale(2*sNormal.dot(dir))), bodies, numSteps-1, numRef-1), intensity, Puv.x, Puv.y);}
     return close.getMat().getIntenseColour(intensity, Puv.x, Puv.y);
     // return close.getMat().getAbsColour();
   }
@@ -64,12 +64,12 @@ public class RayTri {
     RigidBody close = null;
     for (RigidBody body : bodies) {
       // double rad = body == sourceBody ? 0 : body.getRad();
-      double rad = body.getRad();
+      double rad = body.getRadius();
       double distSquare = rayStart.subtract(body.getPos()).magsquare();
       double DcosA = dir.dot(body.getPos().subtract(rayStart));
       if (Double.isNaN(Math.sqrt(DcosA*DcosA+rad*rad-distSquare))) {continue;}
-      for (Tri tri : body.getFaces()) {
-        Vector3 n = tri.getNorm();
+      for (Tri3D tri : body.getFaces()) {
+        Vector3 n = tri.getNormal();
         double det = -n.dot(dir);
         if (det < 0.000001) {continue;}
         Vector3[] verts = tri.getVerts();
@@ -101,11 +101,11 @@ public class RayTri {
       otherCI = body2.getMat().getIntensity();
       if (numSteps > 0) {
         otherSI = otherSI.add(body2.getMat().getAdjIntensity(
-        intensityStep(rayStart.add(dir.multiply(distToSurface)), dir.multiply(-1), bodies, body2, false, numSteps-1)
+        intensityStep(rayStart.add(dir.scale(distToSurface)), dir.scale(-1), bodies, body2, false, numSteps-1)
         ));
       }
-      intensity = intensity.add(otherCI.multiply(MathHelp.intensity(Math.abs(sNormal.dot(dir)), distToLightSquare)));
-      intensity = intensity.add(otherSI.multiply(MathHelp.intensity(1, distToSurface*distToSurface)));
+      intensity = intensity.add(otherCI.scale(MathHelp.intensity(Math.abs(sNormal.dot(dir)), distToLightSquare)));
+      intensity = intensity.add(otherSI.scale(MathHelp.intensity(1, distToSurface*distToSurface)));
     }
     return intensity;
   }

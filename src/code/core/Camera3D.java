@@ -4,9 +4,8 @@ import java.awt.image.BufferedImage;
 
 import code.math.matrix.Matrix;
 import code.math.vector.Vector3;
-
-import code.rendering.Renderer;
-
+import code.rendering.Drawing;
+import code.rendering.renderers.Renderer;
 import code.world.RigidBody;
 
 /**
@@ -16,7 +15,7 @@ public class Camera3D {
 
   private final Renderer renderer;
 
-  private double fieldOfView = 80;
+  private double fieldOfView = Math.toRadians(80);
 
   private Vector3 position;
 
@@ -27,11 +26,7 @@ public class Camera3D {
   private double currentPitch;
   
   private BufferedImage image;
-  private int[] imageContents;
-
-  private int imageWidth;
-  private int imageHeight;
-  private double imageAspectRatio;
+  private Drawing imageContents;
 
   /**
   * @Camera
@@ -45,6 +40,8 @@ public class Camera3D {
 
     this.renderer = renderer;
 
+    renderer.updateConstants(this.fieldOfView);
+
     this.dir = new Vector3(0, 0, 1);
     this.rightDir = new Vector3(1, 0, 0);
     this.upDir = new Vector3(0, 1, 0);
@@ -53,13 +50,9 @@ public class Camera3D {
 
   public double getFieldOfView() {return fieldOfView;}
 
-  public double getImageAspectRatio() {return imageAspectRatio;}
-
-  public int getImageWidth() {return imageWidth;}
-
-  public int getImageHeight() {return imageHeight;}
-
   public BufferedImage getImage() {return image;}
+
+  public double getImageAspectRatio() {return imageContents.getAspectRatio();}
 
   public Vector3 getPosition() {return position;}
 
@@ -74,16 +67,12 @@ public class Camera3D {
   public void setFieldOfView(double fieldOfView) {this.fieldOfView = fieldOfView;}
 
   public void setImageDimensions(int imageWidth, int imageHeight) {
-    this.imageWidth = imageWidth;
-    this.imageHeight = imageHeight;
-    this.imageAspectRatio = 1.0*imageWidth/imageHeight;
-
     this.image = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_ARGB); 
-    this.imageContents = new int[imageWidth * imageHeight];
+    this.imageContents = new Drawing(imageWidth, imageHeight);
   }
 
   public void move(double x, double y, double z) {
-    position = position.add(dir.multiply(z)).add(rightDir.multiply(x)).add(upDir.multiply(y));
+    position = position.add(dir.scale(z)).add(rightDir.scale(x)).add(upDir.scale(y));
   }
 
   public void pitchCam(double ang) {
@@ -106,7 +95,7 @@ public class Camera3D {
   }
 
   public void draw(RigidBody[] bodies) {
-    renderer.render(imageContents, imageWidth, imageHeight, position, dir, upDir, fieldOfView, bodies);
-    image.setRGB(0, 0, imageWidth, imageHeight, imageContents, 0, imageWidth);
+    renderer.render(imageContents, position, dir, upDir, bodies);
+    imageContents.asBufferedImage(image);
   }
 }

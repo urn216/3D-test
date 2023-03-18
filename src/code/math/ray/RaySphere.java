@@ -1,4 +1,4 @@
-package code.math.rays;
+package code.math.ray;
 import code.math.MathHelp;
 import code.math.vector.Vector2;
 import code.math.vector.Vector3;
@@ -23,7 +23,7 @@ public class RaySphere {
     double closest = Double.POSITIVE_INFINITY;
     RigidBody close = null;
     for (RigidBody body : bodies) {
-      double rad = body.getRad();
+      double rad = body.getRadius();
       double distSquare = rayStart.subtract(body.getPos()).magsquare(); //distance squared between ray and sphere centre.
       double DcosA = dir.dot(body.getPos().subtract(rayStart)); //'adjacent' side of the triangle.
       double distToColl = DcosA-Math.sqrt(DcosA*DcosA+rad*rad-distSquare);
@@ -35,11 +35,11 @@ public class RaySphere {
       return Material.getSkyColour(Puv.x, Puv.y);
     }
     // We did collide with an object, so let's look at it.
-    Vector3 surface = rayStart.add(dir.multiply(closest));
+    Vector3 surface = rayStart.add(dir.scale(closest));
     Vector3 sNormal = surface.subtract(close.getPos()).unitize();
     Vector3 intensity = intensityStep(surface, sNormal, bodies, close, true, numSteps);
     Vector2 Puv = MathHelp.sphereUVPoint(sNormal); //get the uv coordinates for this point
-    if (numRef>0 && close.getMat().getReflectivity() != 0) {return close.getMat().getReflection(getCol(surface, dir.subtract(sNormal.multiply(2*sNormal.dot(dir))), bodies, numSteps-1, numRef-1), intensity, Puv.x, Puv.y);}
+    if (numRef>0 && close.getMat().getReflectivity() != 0) {return close.getMat().getReflection(getCol(surface, dir.subtract(sNormal.scale(2*sNormal.dot(dir))), bodies, numSteps-1, numRef-1), intensity, Puv.x, Puv.y);}
     return close.getMat().getIntenseColour(intensity, Puv.x, Puv.y);
   }
 
@@ -48,7 +48,7 @@ public class RaySphere {
     RigidBody close = null;
     for (RigidBody body : bodies) {
       // if (sourceBody == body) {continue;}
-      double rad = body.getRad();
+      double rad = body.getRadius();
       double distSquare = rayStart.subtract(body.getPos()).magsquare();
       double DcosA = dir.dot(body.getPos().subtract(rayStart));
       double distToColl = DcosA-Math.sqrt(DcosA*DcosA+rad*rad-distSquare);
@@ -73,11 +73,11 @@ public class RaySphere {
       otherCI = body2.getMat().getIntensity();
       if (numSteps > 0) {
         otherSI = otherSI.add(body2.getMat().getAdjIntensity(
-        intensityStep(rayStart.add(dir.multiply(Math.sqrt(distToLightSquare)-body2.getRad())), dir.multiply(-1), bodies, body2, false, numSteps-1)
+        intensityStep(rayStart.add(dir.scale(Math.sqrt(distToLightSquare)-body2.getRadius())), dir.scale(-1), bodies, body2, false, numSteps-1)
         ));
       }
-      intensity = intensity.add(otherCI.multiply(MathHelp.intensity(Math.abs(sNormal.dot(dir)), distToLightSquare)));
-      intensity = intensity.add(otherSI.multiply(MathHelp.intensity(1, distToSurface*distToSurface)));
+      intensity = intensity.add(otherCI.scale(MathHelp.intensity(Math.abs(sNormal.dot(dir)), distToLightSquare)));
+      intensity = intensity.add(otherSI.scale(MathHelp.intensity(1, distToSurface*distToSurface)));
     }
     return intensity;
   }

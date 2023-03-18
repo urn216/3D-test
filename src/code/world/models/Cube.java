@@ -6,7 +6,7 @@ import code.math.vector.Vector3;
 import code.world.Material;
 import code.world.RigidBody;
 
-public class Sphere implements RigidBody {
+public class Cube implements RigidBody {
 
   Vector3 position;
   double radius;
@@ -14,11 +14,11 @@ public class Sphere implements RigidBody {
   Material mat;
   Vector3[] verts = new Vector3[8];
 
-  public Sphere(Vector3 position, double radius, Material mat) {
+  public Cube(Vector3 position, double width, Material mat) {
     this.position = position;
-    this.radius = radius;
+    this.radius = width/(2*Math.sqrt(3)/3);
     this.mat = mat;
-    double sRad = radius*Math.sqrt(3)/3;
+    double sRad = width/2;
     verts[0] = new Vector3(-sRad, -sRad, -sRad);
     verts[1] = new Vector3(-sRad, sRad, -sRad);
     verts[2] = new Vector3(sRad, sRad, -sRad);

@@ -14,5 +14,5 @@ public class Map extends Model {
     this.mat = mat;
   }
 
-  public double getRad() {return radius;}
+  public double getRadius() {return radius;}
 }

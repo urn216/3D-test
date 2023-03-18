@@ -70,11 +70,11 @@ public class Vector3  // implements Comparable<Vector3>
     return new Vector3(this.x+other, this.y+other, this.z+other);
   }
 
-  public Vector3 multiply(Vector3 other) {
+  public Vector3 scale(Vector3 other) {
     return new Vector3(this.x*other.x, this.y*other.y, this.z*other.z);
   }
 
-  public Vector3 multiply(double other) {
+  public Vector3 scale(double other) {
     return new Vector3(this.x*other, this.y*other, this.z*other);
   }
 

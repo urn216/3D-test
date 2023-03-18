@@ -1,9 +1,9 @@
-package code.world;
+package code.math.tri;
 
 import code.math.vector.Vector2;
 import code.math.vector.Vector3;
 
-public class Tri {
+public class Tri3D {
 
   private final Vector3[] verts;
   private final Vector3[] edges;
@@ -14,11 +14,11 @@ public class Tri {
   
   private Vector3 normal;
 
-  public Tri(Vector3[] verts, int[] vertexIndeces) {
+  public Tri3D(Vector3[] verts, int[] vertexIndeces) {
     this(verts, new Vector2[3], vertexIndeces, new int[3]);
   }
 
-  public Tri(Vector3[] verts, Vector2[] vertUVs, int[] vertexIndeces, int[] vertexTextureIndeces) {
+  public Tri3D(Vector3[] verts, Vector2[] vertUVs, int[] vertexIndeces, int[] vertexTextureIndeces) {
     if (verts.length != 3 || vertexIndeces.length != 3 || vertUVs.length != 3 || vertexTextureIndeces.length != 3) {
       throw new RuntimeException("Triangles have 3 points!");
     }
@@ -31,7 +31,7 @@ public class Tri {
     edges[1] = verts[2].subtract(verts[0]);
     edges[2] = edges[0].cross(edges[1]).unitize();
 
-    normal = edges[0].cross(edges[1]);
+    normal = edges[0].cross(edges[1]).unitize();
 
     this.vertUVs = vertUVs;
     this.vertexTextureIndeces = vertexTextureIndeces;
@@ -61,8 +61,16 @@ public class Tri {
   /**
    * @return the normal
    */
-  public Vector3 getNorm() {
+  public Vector3 getNormal() {
   	return normal;
+  }
+
+  public int[] getVertexIndeces() {
+    return vertexIndeces;
+  }
+
+  public int[] getVertexTextureIndeces() {
+    return vertexTextureIndeces;
   }
 
   public Vector2 getUVCoords(double u, double v) {

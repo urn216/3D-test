@@ -5,11 +5,8 @@ import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 
 import code.math.vector.Vector3;
-
-import code.rendering.Renderer;
-
+import code.rendering.renderers.Renderer;
 import code.world.RigidBody;
-import code.world.models.Sphere;
 
 import java.awt.Graphics;
 
@@ -28,7 +25,7 @@ public abstract class Core {
   private static boolean quit = false;
   
   private static RigidBody[] bodies;
-  private static Sphere lightSource;
+  private static RigidBody lightSource;
   
   private static Camera3D cam;
 
@@ -53,14 +50,14 @@ public abstract class Core {
   * @param args Ignored for now
   */
   public static void main(String[] args) {
-    bodies = Scene.s1();
-    lightSource = (Sphere)bodies[0];
+    bodies = Scene.s5();
+    lightSource = bodies[0];
 
     cam = new Camera3D(
       new Vector3(), 
       GLOBAL_SETTINGS.getIntSetting("resolution_X"), 
       GLOBAL_SETTINGS.getIntSetting("resolution_Y"), 
-      Renderer.raySphere()
+      Renderer.projection()
     );
 
     Controls.initialiseControls(WINDOW.FRAME);
@@ -95,12 +92,12 @@ public abstract class Core {
       if (Controls.KEY_DOWN[KeyEvent.VK_D])     {cam.move( vel*deltaTimeMillis, 0, 0    );}
       if (Controls.KEY_DOWN[KeyEvent.VK_SHIFT]) {cam.move(0, -0.5*vel*deltaTimeMillis, 0);}
       if (Controls.KEY_DOWN[KeyEvent.VK_SPACE]) {cam.move(0,  0.5*vel*deltaTimeMillis, 0);}
-      if (Controls.KEY_DOWN[KeyEvent.VK_I])     {lightSource.move(0, 0,  0.01*deltaTimeMillis);}
-      if (Controls.KEY_DOWN[KeyEvent.VK_K])     {lightSource.move(0, 0, -0.01*deltaTimeMillis);}
-      if (Controls.KEY_DOWN[KeyEvent.VK_J])     {lightSource.move(-0.01*deltaTimeMillis, 0, 0);}
-      if (Controls.KEY_DOWN[KeyEvent.VK_L])     {lightSource.move( 0.01*deltaTimeMillis, 0, 0);}
-      if (Controls.KEY_DOWN[KeyEvent.VK_O])     {lightSource.move(0, -0.01*deltaTimeMillis, 0);}
-      if (Controls.KEY_DOWN[KeyEvent.VK_U])     {lightSource.move(0,  0.01*deltaTimeMillis, 0);}
+      if (Controls.KEY_DOWN[KeyEvent.VK_I])     {lightSource.move(0, 0,  0.001*deltaTimeMillis);}
+      if (Controls.KEY_DOWN[KeyEvent.VK_K])     {lightSource.move(0, 0, -0.001*deltaTimeMillis);}
+      if (Controls.KEY_DOWN[KeyEvent.VK_J])     {lightSource.move(-0.001*deltaTimeMillis, 0, 0);}
+      if (Controls.KEY_DOWN[KeyEvent.VK_L])     {lightSource.move( 0.001*deltaTimeMillis, 0, 0);}
+      if (Controls.KEY_DOWN[KeyEvent.VK_O])     {lightSource.move(0, -0.001*deltaTimeMillis, 0);}
+      if (Controls.KEY_DOWN[KeyEvent.VK_U])     {lightSource.move(0,  0.001*deltaTimeMillis, 0);}
       if (Controls.KEY_DOWN[KeyEvent.VK_UP])    {cam.pitchCam(-0.1*deltaTimeMillis);}
       if (Controls.KEY_DOWN[KeyEvent.VK_DOWN])  {cam.pitchCam( 0.1*deltaTimeMillis);}
       if (Controls.KEY_DOWN[KeyEvent.VK_LEFT])  {cam.yawCam  (-0.1*deltaTimeMillis);}
@@ -129,8 +126,8 @@ public abstract class Core {
   */
   public static void paintComponent(Graphics gra) {
 
-    int size = Math.min((int)(WINDOW.screenWidth()/cam.getImageAspectRatio()), WINDOW.screenHeight());
-    gra.drawImage(cam.getImage().getScaledInstance((int)(size*cam.getImageAspectRatio()), size, BufferedImage.SCALE_DEFAULT), 0, 0, null);
+    int size = Math.min(WINDOW.screenWidth(), (int)(WINDOW.screenHeight()/cam.getImageAspectRatio()));
+    gra.drawImage(cam.getImage().getScaledInstance(size, (int)(size*cam.getImageAspectRatio()), BufferedImage.SCALE_DEFAULT), 0, 0, null);
     
     if (fCount >= 100) {
       long cFTime = System.currentTimeMillis();

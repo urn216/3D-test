@@ -222,6 +222,10 @@ public class Vector2  // implements Comparable<Vector2>
     return this.x*other.x + this.y*other.y;
   }
 
+  public Vector2I round() {
+    return new Vector2I((int)Math.round(this.x), (int)Math.round(this.y));
+  }
+
   @Override
   public String toString() {
     return "(" + x + ", " + y + ")";

@@ -45,7 +45,7 @@ public class Quaternion
   }
 
   public Vector3 rotate(Vector3 dir) {
-    Vector3 t = v.multiply(2).cross(dir);
-    return dir.add(t.multiply(q)).add(v.cross(t));
+    Vector3 t = v.scale(2).cross(dir);
+    return dir.add(t.scale(q)).add(v.cross(t));
   }
 }

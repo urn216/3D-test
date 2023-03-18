@@ -3,6 +3,7 @@ package code.core;
 import code.math.vector.Vector3;
 import code.world.Material;
 import code.world.RigidBody;
+import code.world.models.Cube;
 import code.world.models.Dropship;
 import code.world.models.LowPoly;
 import code.world.models.Map;
@@ -49,6 +50,13 @@ public abstract class Scene {
       new Sphere(new Vector3(-1, -1, 2.5), 0.1, new Material(new Vector3(255, 255, 255), 0f, new Vector3(0, 5, 10))),
       new Sphere(new Vector3(2000, 10000, 1000), 80, new Material(new Vector3(255, 255, 255), 0f, new Vector3(2000000000))),
       new Map(new Vector3(0, -28, 0), new Material(new Vector3(150, 150, 150), 0.2f, new Vector3()))
+    };
+    return s;
+  };
+
+  public static RigidBody[] s5() {
+    RigidBody[] s = {
+      new Cube(new Vector3(0, 0, 5), 1, new Material(new Vector3(255, 0, 255), 0f, new Vector3(10)))
     };
     return s;
   };
