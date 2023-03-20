@@ -11,9 +11,9 @@ import code.math.vector.Vector3;
 
 public abstract class Model implements RigidBody {
 
-  protected Vector3 position;
+  protected Vector3 position = new Vector3();
 
-  protected Material mat;
+  protected Material mat = new Material(new Vector3(255), 0, position);
 
   protected final Vector3[] verts;
   protected final Tri3D[]     faces;
@@ -71,6 +71,7 @@ public abstract class Model implements RigidBody {
       scan.close();
     }
     Object[][] res = new Object[][]{vs.toArray(new Vector3[vs.size()]), fs.toArray(new Tri3D[fs.size()]), vts.toArray(new Vector2[vts.size()])};
+    System.out.println("Successfully loaded Model");
     return res;
   }
 

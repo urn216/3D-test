@@ -1,8 +1,6 @@
 package code.rendering.renderers;
 
-import code.math.tri.Tri2D;
 import code.math.tri.Tri3D;
-import code.math.vector.Vector2;
 import code.math.vector.Vector3;
 import code.rendering.Drawing;
 import code.world.Material;
@@ -11,9 +9,11 @@ import code.world.RigidBody;
 class ProjectionRenderer extends Renderer {
 
   private static final double nearClippingPlane = 0.1;
-  private static final double farClippingPlane  = 1000;
+  private static final double farClippingPlane  = 1000000;
 
   private static final double q = farClippingPlane/(farClippingPlane-nearClippingPlane);
+
+  private static final Vector3 lightDir = new Vector3(1, 1.5, 0).unitize();
 
   private double f;
 
@@ -40,26 +40,29 @@ class ProjectionRenderer extends Renderer {
 
     if (tri.getNormal().dot(dir) > 0 || toTri.dot(tri.getNormal()) >= 0) return;
 
-    Tri2D projectedTri = projectTri(tri, offset, d.getWidth(), d.getHeight(), d.getAspectRatio());
-    d.fillTri(projectedTri, mat.getAbsColour());
+    Tri3D projectedTri = projectTri(tri, offset, d.getWidth(), d.getHeight(), d.getAspectRatio());
+    d.fillTri(projectedTri, mat.getIntenseColour(new Vector3((tri.getNormal().dot(lightDir)+1)/2)));
+    // d.drawTri(projectedTri, ~0);
   }
 
-  private Tri2D projectTri(Tri3D triWorld, Vector3 offset, int width, int height, double aspRat) {
-    return new Tri2D(
-      new Vector2[] {
-        projectVector3(triWorld.getVerts()[0].add(offset), aspRat).add(1).scale(0.5*(width-1), 0.5*(height-1)),
-        projectVector3(triWorld.getVerts()[1].add(offset), aspRat).add(1).scale(0.5*(width-1), 0.5*(height-1)),
-        projectVector3(triWorld.getVerts()[2].add(offset), aspRat).add(1).scale(0.5*(width-1), 0.5*(height-1))
+  private Tri3D projectTri(Tri3D triWorld, Vector3 offset, int width, int height, double aspRat) {
+    return new Tri3D(
+      new Vector3[] {
+        projectVector3(triWorld.getVerts()[0].add(offset), aspRat).add(1).scale(0.5*(width-1), 0.5*(height-1), 1),
+        projectVector3(triWorld.getVerts()[1].add(offset), aspRat).add(1).scale(0.5*(width-1), 0.5*(height-1), 1),
+        projectVector3(triWorld.getVerts()[2].add(offset), aspRat).add(1).scale(0.5*(width-1), 0.5*(height-1), 1)
       }, 
       triWorld.getVertUVs(), 
-      0
+      new int[3],
+      new int[3]
     );
   }
 
-  private Vector2 projectVector3(Vector3 vecWorld, double aspRat) {
-    return new Vector2(
+  private Vector3 projectVector3(Vector3 vecWorld, double aspRat) {
+    return new Vector3(
       vecWorld.x*aspRat*f/vecWorld.z, 
-      -vecWorld.y*f/vecWorld.z
+      -vecWorld.y*f/vecWorld.z,
+      (vecWorld.z-1)*q
     );
   }
 }

@@ -15,7 +15,7 @@ public class Vector3  // implements Comparable<Vector3>
     this.z = z;
   }
 
-  private Vector3(Vector3 old) {
+  public Vector3(Vector3 old) {
     this.x = old.x;
     this.y = old.y;
     this.z = old.z;
@@ -78,6 +78,10 @@ public class Vector3  // implements Comparable<Vector3>
     return new Vector3(this.x*other, this.y*other, this.z*other);
   }
 
+  public Vector3 scale(double x, double y, double z) {
+    return new Vector3(this.x*x, this.y*y, this.z*z);
+  }
+
   public double dot(Vector3 other) {
     return this.x*other.x + this.y*other.y + this.z*other.z;
   }
@@ -93,4 +97,8 @@ public class Vector3  // implements Comparable<Vector3>
   public double toAngle() {
     return Math.atan2(y, x);
   }
+
+  public Vector3I castToInt() {return new Vector3I((int)x, (int)y, (int)z);}
+
+  public Vector3I castToInt(int zScale) {return new Vector3I((int)x, (int)y, (int)(z*zScale));}
 }

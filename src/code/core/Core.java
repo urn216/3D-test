@@ -5,6 +5,7 @@ import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 
 import code.math.vector.Vector3;
+import code.rendering.Drawing;
 import code.rendering.renderers.Renderer;
 import code.world.RigidBody;
 
@@ -27,7 +28,9 @@ public abstract class Core {
   private static RigidBody[] bodies;
   private static RigidBody lightSource;
   
-  private static Camera3D cam;
+  private static Camera3D cam = new Camera3D(new Vector3(), 1, 1, new Renderer() {
+    public void render(Drawing d, Vector3 position, Vector3 dir, Vector3 upDir, RigidBody[] bodies) {}
+  });
 
   private static double defaultMovementSpeed = 0.01;
   private static double fasterMovementSpeed  = 0.1;
@@ -37,6 +40,8 @@ public abstract class Core {
   private static long pFTime = System.currentTimeMillis();
   private static double fps = 0;
   private static int fCount = 0;
+
+  public static boolean bad = false;
   
   static {
     WINDOW = new Window();
@@ -102,6 +107,8 @@ public abstract class Core {
       if (Controls.KEY_DOWN[KeyEvent.VK_DOWN])  {cam.pitchCam( 0.1*deltaTimeMillis);}
       if (Controls.KEY_DOWN[KeyEvent.VK_LEFT])  {cam.yawCam  (-0.1*deltaTimeMillis);}
       if (Controls.KEY_DOWN[KeyEvent.VK_RIGHT]) {cam.yawCam  ( 0.1*deltaTimeMillis);}
+      if (Controls.KEY_DOWN[KeyEvent.VK_G]) {bad = false;}
+      if (Controls.KEY_DOWN[KeyEvent.VK_B]) {bad = true;}
       
       if (update || first) {
         cam.draw(bodies);

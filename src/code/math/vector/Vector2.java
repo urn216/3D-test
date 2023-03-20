@@ -226,6 +226,10 @@ public class Vector2  // implements Comparable<Vector2>
     return new Vector2I((int)Math.round(this.x), (int)Math.round(this.y));
   }
 
+  public Vector2I castToInt() {
+    return new Vector2I((int)this.x, (int)this.y);
+  }
+
   @Override
   public String toString() {
     return "(" + x + ", " + y + ")";

@@ -6,7 +6,7 @@ import code.world.Model;
 
 public class Dropship extends Model {
 
-  private static final double radius = new Map(new Vector3(), null).calculateRadius();
+  private static final double radius = 27.01;
 
   public Dropship(Vector3 position, Material mat) {
     super(generateMesh("MKinc Gunship.obj"));
