@@ -249,7 +249,7 @@ public class Drawing {
 
     int[] xs = new int[(int)p[2].y-(int)p[0].y+1];
     int offset = (int)-p[0].y;
-    int sx = ((((int)(p[0].x-p[1].x))>>31)<<1)+1; //good enough for now. Doesn't perfectly make up for underestimation
+    int sx = ((((int)(p[0].x-p[1].x))>>31)<<1)+1; //good enough for now. Doesn't perfectly make up for underestimation casting brings
     xs[0] = (int)p[1].x;
 
     if (p[0].y != p[1].y) MathHelp.line2DToInt((int)p[0].x, (int)p[0].y, (int)p[1].x, (int)p[1].y, (x, y) -> {
