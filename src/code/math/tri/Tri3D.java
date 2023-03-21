@@ -31,7 +31,7 @@ public class Tri3D {
     edges[1] = verts[2].subtract(verts[0]);
     edges[2] = edges[0].cross(edges[1]).unitize();
 
-    normal = edges[0].cross(edges[1]).unitize();
+    normal = edges[2];
 
     this.vertUVs = vertUVs;
     this.vertexTextureIndeces = vertexTextureIndeces;

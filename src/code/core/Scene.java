@@ -34,7 +34,7 @@ public abstract class Scene {
   public static RigidBody[] s2() {
     RigidBody[] s = {
       new Sphere(new Vector3(-1, -1, 2.5), 0.1, new Material(new Vector3(255, 255, 255), 0f, new Vector3(0, 5, 10))),
-      new Sphere(new Vector3(2000, 10000, 1000), 80, new Material(new Vector3(255, 255, 255), 0f, new Vector3(2000000000))),
+      // new Sphere(new Vector3(2000, 10000, 1000), 80, new Material(new Vector3(255, 255, 255), 0f, new Vector3(2000000000))),
       new Dropship(new Vector3(0, 0, 40), new Material(new Vector3(255, 255, 255), 0.4f, new Vector3()))
     };
     return s;
