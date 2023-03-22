@@ -1,5 +1,7 @@
 package code.rendering.renderers;
 
+import java.util.stream.Stream;
+
 import code.math.tri.Tri3D;
 import code.math.vector.Vector3;
 import code.rendering.Drawing;
@@ -26,14 +28,27 @@ class ProjectionRenderer extends Renderer {
   @Override
   public void render(Drawing d, Vector3 position, Vector3 dir, Vector3 upDir, RigidBody[] bodies) {
     d.fill(-16777216);
-    for (int i = 0; i < bodies.length; i++) {
-      RigidBody body = bodies[i];
-      Vector3 offset = body.getPos().subtract(position);
-      for (int j = 0; j < body.getFaces().length; j++) {
-        renderTri(d, body.getFaces()[j], offset, dir, body.getMat());
-      }
-    }
+    Stream.of(bodies).parallel().forEach((b) -> {
+      Vector3 offset = b.getPos().subtract(position);
+      Stream.of(b.getFaces()).parallel().forEach((tri) -> renderTri(d, tri, offset, dir, b.getMat()));
+    });
   }
+
+  ///////////                 /////////
+  ////////// SEQUENTIAL CODE //////////
+  /////////                 ///////////
+  //
+  // @Override
+  // public void render(Drawing d, Vector3 position, Vector3 dir, Vector3 upDir, RigidBody[] bodies) {
+  //   d.fill(-16777216);
+  //   for (int i = 0; i < bodies.length; i++) {
+  //     RigidBody body = bodies[i];
+  //     Vector3 offset = body.getPos().subtract(position);
+  //     for (int j = 0; j < body.getFaces().length; j++) {
+  //       renderTri(d, body.getFaces()[j], offset, dir, body.getMat());
+  //     }
+  //   }
+  // }
 
   private void renderTri(Drawing d, Tri3D tri, Vector3 offset, Vector3 dir, Material mat) {
     Vector3 toTri = tri.getVerts()[0].add(offset);

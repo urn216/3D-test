@@ -51,7 +51,7 @@ public class Drawing {
    * 
    * @param c The colour to fill the canvas with
    */
-  public void fill(int c) {
+  public synchronized void fill(int c) {
     for (int i = 0; i < contents.length; i++) {
       contents[i] = c;
       depths[i] = 0;
@@ -66,7 +66,7 @@ public class Drawing {
    * @param z The {@code z} coordinate to represent the depth of the pixel in world-space from the viewing camera
    * @param c The colour of the pixel
    */
-  public void drawPixel(int x, int y, double z, int c) {
+  public synchronized void drawPixel(int x, int y, double z, int c) {
     int i = x+y*width;
     z = 1/z;
     if (depths[i] > z) return;
@@ -81,7 +81,7 @@ public class Drawing {
    * @param y The {@code y} coordinate to draw to
    * @param c The colour of the pixel
    */
-  public void drawPixel(int x, int y, int c) {
+  public synchronized void drawPixel(int x, int y, int c) {
     int i = x+y*width;
     contents[i] = c;
     depths[i] = Double.MAX_VALUE;
@@ -249,14 +249,14 @@ public class Drawing {
 
     int[] xs = new int[(int)p[2].y-(int)p[0].y+1];
     int offset = (int)-p[0].y;
-    int sx = ((((int)(p[0].x-p[1].x))>>31)<<1)+1; //good enough for now. Doesn't perfectly make up for underestimation casting brings
+    // int sx = ((((int)(p[0].x-p[1].x))>>31)<<1)+1; //good enough for now. Doesn't perfectly make up for underestimation casting brings
     xs[0] = (int)p[1].x;
 
     if (p[0].y != p[1].y) MathHelp.line2DToInt((int)p[0].x, (int)p[0].y, (int)p[1].x, (int)p[1].y, (x, y) -> {
-      xs[y+offset] = x-sx;
+      xs[y+offset] = x;
     });
     if (p[1].y != p[2].y) MathHelp.line2DToInt((int)p[1].x, (int)p[1].y, (int)p[2].x, (int)p[2].y, (x, y) -> {
-      xs[y+offset] = x-sx;
+      xs[y+offset] = x;
     });
     MathHelp.line2DToInt((int)p[0].x, (int)p[0].y, (int)p[2].x, (int)p[2].y, (x, y) -> {
       drawLineHoriz(x, xs[y+offset], y, p[0], tri.getNormal(), c);
