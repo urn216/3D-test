@@ -101,6 +101,22 @@ public class Drawing {
   }
 
   /**
+   * Draws a line across this {@code Drawing} canvas with a depth calculation at each pixel.
+   * 
+   * @param x1 One of the {@code x} coordinate endpoints of the line
+   * @param y1 One of the {@code y} coordinate endpoints of the line
+   * @param x2 The other {@code x} coordinate endpoint of the line
+   * @param y2 The other {@code y} coordinate endpoint of the line
+   * @param c The colour of the line
+   */
+  public void drawLine(int x1, int y1, int x2, int y2, Vector3 p0, Vector3 normal, int c) {
+    double a = normal.x/normal.z;
+    double b = normal.y/normal.z;
+    double zOff = a*p0.x+b*p0.y+p0.z*0.9999;
+    MathHelp.line2DToInt(x1, y1, x2, y2, (x, y) -> drawPixel(x, y, zOff-a*x-b*y, c));
+  }
+
+  /**
    * Draws a horizontal line across this {@code Drawing} canvas with no depth.
    * 
    * @param x1 One of the endpoints of the horizontal line
@@ -191,9 +207,10 @@ public class Drawing {
    */
   public void drawTri(Tri3D tri, int c) {
     Vector3[] vs = tri.getVerts();
-    drawLine((int)vs[0].x, (int)vs[0].y, (int)vs[1].x, (int)vs[1].y, c);
-    drawLine((int)vs[0].x, (int)vs[0].y, (int)vs[2].x, (int)vs[2].y, c);
-    drawLine((int)vs[1].x, (int)vs[1].y, (int)vs[2].x, (int)vs[2].y, c);
+    Vector3 norm = tri.getNormal();
+    drawLine((int)vs[0].x, (int)vs[0].y, (int)vs[1].x, (int)vs[1].y, vs[0], norm, c);
+    drawLine((int)vs[0].x, (int)vs[0].y, (int)vs[2].x, (int)vs[2].y, vs[0], norm, c);
+    drawLine((int)vs[1].x, (int)vs[1].y, (int)vs[2].x, (int)vs[2].y, vs[0], norm, c);
   }
 
   public void fillTri(Tri2D tri, Material mat) {

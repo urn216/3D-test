@@ -11,7 +11,7 @@ import code.world.RigidBody;
 class ProjectionRenderer extends Renderer {
 
   private static final double nearClippingPlane = 0.1;
-  private static final double farClippingPlane  = 1000000;
+  private static final double farClippingPlane  = 100;
 
   private static final double q = farClippingPlane/(farClippingPlane-nearClippingPlane);
 
@@ -58,15 +58,15 @@ class ProjectionRenderer extends Renderer {
     Tri3D projectedTri = projectTri(tri, offset, d.getWidth(), d.getHeight(), d.getAspectRatio());
     int colour = mat.getIntenseColour(new Vector3((tri.getNormal().dot(lightDir)+1)/2));
     d.fillTri(projectedTri, colour);
-    // d.drawTri(projectedTri, -16777216|~colour);
+    d.drawTri(projectedTri, -16777216|~colour);
   }
 
   private Tri3D projectTri(Tri3D triWorld, Vector3 offset, int width, int height, double aspRat) {
     return new Tri3D(
       new Vector3[] {
-        projectVector3(triWorld.getVerts()[0].add(offset), aspRat).add(1).scale(0.5*(width-1), 0.5*(height-1), 1),
-        projectVector3(triWorld.getVerts()[1].add(offset), aspRat).add(1).scale(0.5*(width-1), 0.5*(height-1), 1),
-        projectVector3(triWorld.getVerts()[2].add(offset), aspRat).add(1).scale(0.5*(width-1), 0.5*(height-1), 1)
+        projectVector3(triWorld.getVerts()[0].add(offset), aspRat).add(1, 1, 0).scale(0.5*width-1, 0.5*height-1, 1),
+        projectVector3(triWorld.getVerts()[1].add(offset), aspRat).add(1, 1, 0).scale(0.5*width-1, 0.5*height-1, 1),
+        projectVector3(triWorld.getVerts()[2].add(offset), aspRat).add(1, 1, 0).scale(0.5*width-1, 0.5*height-1, 1)
       }, 
       triWorld.getVertUVs(), 
       new int[3],
@@ -78,7 +78,7 @@ class ProjectionRenderer extends Renderer {
     return new Vector3(
       vecWorld.x*aspRat*f/vecWorld.z, 
       -vecWorld.y*f/vecWorld.z,
-      (vecWorld.z-1)*q
+      (-nearClippingPlane/vecWorld.z+1)*q
     );
   }
 }
