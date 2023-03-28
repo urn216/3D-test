@@ -53,12 +53,12 @@ class ProjectionRenderer extends Renderer {
   private void renderTri(Drawing d, Tri3D tri, Vector3 offset, Vector3 dir, Material mat) {
     Vector3 toTri = tri.getVerts()[0].add(offset);
 
-    if (toTri.dot(tri.getNormal()) >= 0) return;
+    if (toTri.dot(tri.getNormal()) >= -0.01) return;
 
     Tri3D projectedTri = projectTri(tri, offset, d.getWidth(), d.getHeight(), d.getAspectRatio());
     int colour = mat.getIntenseColour(new Vector3((tri.getNormal().dot(lightDir)+1)/2));
     d.fillTri(projectedTri, colour);
-    d.drawTri(projectedTri, -16777216|~colour);
+    // d.drawTri(projectedTri, -16777216|~colour);
   }
 
   private Tri3D projectTri(Tri3D triWorld, Vector3 offset, int width, int height, double aspRat) {

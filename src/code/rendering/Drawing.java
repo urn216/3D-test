@@ -269,14 +269,23 @@ public class Drawing {
     // int sx = ((((int)(p[0].x-p[1].x))>>31)<<1)+1; //good enough for now. Doesn't perfectly make up for underestimation casting brings
     xs[0] = (int)p[1].x;
 
+    Vector3 normal = tri.getNormal();
+    
+    double a = normal.x/normal.z;
+    double b = normal.y/normal.z; // Maybe...
+    double zOff = a*p[0].x + b*p[0].y + p[0].z;
+
     if (p[0].y != p[1].y) MathHelp.line2DToInt((int)p[0].x, (int)p[0].y, (int)p[1].x, (int)p[1].y, (x, y) -> {
       xs[y+offset] = x;
+      drawPixel(x, y, zOff-a*x-b*y, c);
     });
     if (p[1].y != p[2].y) MathHelp.line2DToInt((int)p[1].x, (int)p[1].y, (int)p[2].x, (int)p[2].y, (x, y) -> {
       xs[y+offset] = x;
+      drawPixel(x, y, zOff-a*x-b*y, c);
     });
     MathHelp.line2DToInt((int)p[0].x, (int)p[0].y, (int)p[2].x, (int)p[2].y, (x, y) -> {
-      drawLineHoriz(x, xs[y+offset], y, p[0], tri.getNormal(), c);
+      drawLineHoriz(x, xs[y+offset], y, p[0], normal, c);
+      drawPixel(x, y, zOff-a*x-b*y, c);
     });
   }
 }

@@ -55,7 +55,7 @@ public abstract class Core {
   * @param args Ignored for now
   */
   public static void main(String[] args) {
-    bodies = Scene.s5();
+    bodies = Scene.s2();
     lightSource = bodies[0];
 
     cam = new Camera3D(
