@@ -27,16 +27,16 @@ public class RayTri {
     double cU = 0;
     double cV = 0;
     for (RigidBody body : bodies) {
-      double rad = body.getRadius();
-      double distSquare = rayStart.subtract(body.getPos()).magsquare();
-      double DcosA = dir.dot(body.getPos().subtract(rayStart));
+      double rad = body.getModel().getRadius();
+      double distSquare = rayStart.subtract(body.getPosition()).magsquare();
+      double DcosA = dir.dot(body.getPosition().subtract(rayStart));
       if (Double.isNaN(Math.sqrt(DcosA*DcosA+rad*rad-distSquare))) {continue;}
-      for (Tri3D tri : body.getFaces()) {
+      for (Tri3D tri : body.getModel().getFaces()) {
         Vector3 n = tri.getNormal();
         double det = -n.dot(dir);
         if (det < 0.000001) {continue;}
         Vector3[] verts = tri.getVerts();
-        Vector3 toTri = rayStart.subtract(verts[0].add(body.getPos()));
+        Vector3 toTri = rayStart.subtract(verts[0].add(body.getPosition()));
         double distToColl = toTri.dot(n)/det;
         if (distToColl < -0.000001 || distToColl > closest) {continue;}
         Vector3[] edges = tri.getEdges();
@@ -54,8 +54,8 @@ public class RayTri {
     Vector3 sNormal = cTri.getEdges()[2];
     Vector3 intensity = intensityStep(surface, sNormal, bodies, close, true, numSteps);
     Vector2 Puv = cTri.getUVCoords(cU, cV); //get the uv coordinates for this point
-    if (numRef>0 && close.getMat().getReflectivity() != 0) {return close.getMat().getReflection(getCol(surface, dir.subtract(sNormal.scale(2*sNormal.dot(dir))), bodies, numSteps-1, numRef-1), intensity, Puv.x, Puv.y);}
-    return close.getMat().getIntenseColour(intensity, Puv.x, Puv.y);
+    if (numRef>0 && close.getModel().getMat().getReflectivity() != 0) {return close.getModel().getMat().getReflection(getCol(surface, dir.subtract(sNormal.scale(2*sNormal.dot(dir))), bodies, numSteps-1, numRef-1), intensity, Puv.x, Puv.y);}
+    return close.getModel().getMat().getIntenseColour(intensity, Puv.x, Puv.y);
     // return close.getMat().getAbsColour();
   }
 
@@ -64,16 +64,16 @@ public class RayTri {
     RigidBody close = null;
     for (RigidBody body : bodies) {
       // double rad = body == sourceBody ? 0 : body.getRad();
-      double rad = body.getRadius();
-      double distSquare = rayStart.subtract(body.getPos()).magsquare();
-      double DcosA = dir.dot(body.getPos().subtract(rayStart));
+      double rad = body.getModel().getRadius();
+      double distSquare = rayStart.subtract(body.getPosition()).magsquare();
+      double DcosA = dir.dot(body.getPosition().subtract(rayStart));
       if (Double.isNaN(Math.sqrt(DcosA*DcosA+rad*rad-distSquare))) {continue;}
-      for (Tri3D tri : body.getFaces()) {
+      for (Tri3D tri : body.getModel().getFaces()) {
         Vector3 n = tri.getNormal();
         double det = -n.dot(dir);
         if (det < 0.000001) {continue;}
         Vector3[] verts = tri.getVerts();
-        Vector3 toTri = rayStart.subtract(verts[0].add(body.getPos()));
+        Vector3 toTri = rayStart.subtract(verts[0].add(body.getPosition()));
         double distToColl = toTri.dot(n)/det;
         if (distToColl < -0.000001 || distToColl > closest) {continue;}
         Vector3[] edges = tri.getEdges();
@@ -89,18 +89,18 @@ public class RayTri {
 
   public static Vector3 intensityStep(Vector3 rayStart, Vector3 sNormal, RigidBody[] bodies, RigidBody sourceBody, boolean first, int numSteps) {
     Vector3 intensity = new Vector3();
-    if (first) {intensity = intensity.add(sourceBody.getMat().getIntensity());} //add its own brightness only if first step. Stops endless light buildup.
+    if (first) {intensity = intensity.add(sourceBody.getModel().getMat().getIntensity());} //add its own brightness only if first step. Stops endless light buildup.
     for (RigidBody body2 : bodies) {
       if (body2 == sourceBody) {continue;} //don't want to endlessly add own light to self.
       Vector3 otherCI = new Vector3(); //core intensity (emitted)
       Vector3 otherSI = new Vector3(); //surface intensity (reflected)
-      Vector3 dir = body2.getPos().subtract(rayStart).unitize(); //direction from this surface point to other object
+      Vector3 dir = body2.getPosition().subtract(rayStart).unitize(); //direction from this surface point to other object
       double distToSurface = reaches(rayStart, dir, bodies, body2, sourceBody);
       if (Double.isNaN(distToSurface)) {continue;}
-      double distToLightSquare = rayStart.subtract(body2.getPos()).magsquare();
-      otherCI = body2.getMat().getIntensity();
+      double distToLightSquare = rayStart.subtract(body2.getPosition()).magsquare();
+      otherCI = body2.getModel().getMat().getIntensity();
       if (numSteps > 0) {
-        otherSI = otherSI.add(body2.getMat().getAdjIntensity(
+        otherSI = otherSI.add(body2.getModel().getMat().getAdjIntensity(
         intensityStep(rayStart.add(dir.scale(distToSurface)), dir.scale(-1), bodies, body2, false, numSteps-1)
         ));
       }

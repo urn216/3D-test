@@ -1,29 +1,31 @@
 package code.world;
 
-import code.math.tri.Tri3D;
 import code.math.vector.Vector3;
 
 /**
-* Write a description of class WorldObject here.
+* Write a description of class RigidBody here.
 *
 * @author (your name)
 * @version (a version number or a date)
 */
-public interface RigidBody
-{
+public abstract class RigidBody {
 
-  public Vector3 getPos();
+  protected Vector3 position;
 
-  public void setPos(Vector3 pos);
+  protected Model model;
 
-  public void move(double x, double y, double z);
+  public RigidBody(Vector3 position, Model model) {
+    this.position = position;
 
-  public double getRadius();
+    this.model = model;
+  }
 
-  public Tri3D[] getFaces();
+  public Vector3 getPosition() {return position;}
 
-  public Material getMat();
+  public void setPosition(Vector3 pos) {position = pos;}
 
-  public void setMat(Material mat);
+  public void move(double x, double y, double z) {position = position.add(new Vector3(x, y, z));}
+
+  public Model getModel() {return model;}
 
 }

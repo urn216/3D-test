@@ -1,4 +1,4 @@
-package code.core;
+package code.world;
 
 import java.awt.image.BufferedImage;
 
@@ -6,7 +6,6 @@ import code.math.matrix.Matrix;
 import code.math.vector.Vector3;
 import code.rendering.Drawing;
 import code.rendering.renderers.Renderer;
-import code.world.RigidBody;
 
 /**
 * A camera allows a player to see what's happening in the game.
@@ -62,7 +61,7 @@ public class Camera3D {
 
   public Vector3 getRightDir() {return rightDir;}
 
-  public void setPos(Vector3 position) {this.position = position;}
+  public void setPosition(Vector3 position) {this.position = position;}
 
   public void setFieldOfView(double fieldOfView) {this.fieldOfView = fieldOfView;}
 

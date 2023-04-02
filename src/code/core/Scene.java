@@ -6,12 +6,12 @@ import code.math.vector.Vector3;
 import code.world.Material;
 import code.world.Model;
 import code.world.RigidBody;
-import code.world.models.Cube;
-import code.world.models.Dropship;
-import code.world.models.LowPoly;
-import code.world.models.Map;
-import code.world.models.Room;
-import code.world.models.Sphere;
+import code.world.object.Cube;
+import code.world.object.Dropship;
+import code.world.object.LowPoly;
+import code.world.object.Map;
+import code.world.object.Room;
+import code.world.object.Sphere;
 
 public abstract class Scene {
   public static RigidBody[] s1() {
@@ -79,7 +79,7 @@ public abstract class Scene {
       new Tri3D(new Vector3[] {vs[0], vs[2], vs[3]}, new Vector2[] {new Vector2(0, 1), new Vector2(1, 0), new Vector2(1, 1)}, new int[]{1,3,4}, new int[]{0,0,0})
     };
     RigidBody[] s = {
-      new Model(vs, ts, new Vector2[]{}) {}
+      new RigidBody(new Vector3(), new Model(vs, ts, new Vector2[]{})) {}
     };
     return s;
   };

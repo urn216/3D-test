@@ -29,8 +29,8 @@ class ProjectionRenderer extends Renderer {
   public void render(Drawing d, Vector3 position, Vector3 dir, Vector3 upDir, RigidBody[] bodies) {
     d.fill(-16777216);
     Stream.of(bodies).parallel().forEach((b) -> {
-      Vector3 offset = b.getPos().subtract(position);
-      Stream.of(b.getFaces()).parallel().forEach((tri) -> renderTri(d, tri, offset, dir, b.getMat()));
+      Vector3 offset = b.getPosition().subtract(position);
+      Stream.of(b.getModel().getFaces()).parallel().forEach((tri) -> renderTri(d, tri, offset, dir, b.getModel().getMat()));
     });
   }
 

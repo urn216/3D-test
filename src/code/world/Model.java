@@ -9,32 +9,24 @@ import code.math.tri.Tri3D;
 import code.math.vector.Vector2;
 import code.math.vector.Vector3;
 
-public abstract class Model implements RigidBody {
-
-  protected Vector3 position = new Vector3();
-
-  protected Material mat = new Material(new Vector3(255), 0, position);
+public class Model {
 
   protected final Vector3[] verts;
   protected final Tri3D[]     faces;
   protected final Vector2[] vertUVs;
 
-  protected Model(Vector3[] verts, Tri3D[] faces, Vector2[] vertUVs) {
+  protected Material mat = new Material(new Vector3(255), 0, new Vector3());
+
+  protected double radius = 1;
+
+  public Model(Vector3[] verts, Tri3D[] faces, Vector2[] vertUVs) {
     if (verts == null || faces == null || vertUVs == null) throw new RuntimeException("3D models cannot have null fields");
     this.verts   = verts;
     this.faces   = faces;
     this.vertUVs = vertUVs;
   }
 
-  protected Model(Object[][] elems) {
-    this(
-      (Vector3[])elems[0],
-      (Tri3D    [])elems[1],
-      (Vector2[])elems[2]
-    );
-  }
-
-  protected static Object[][] generateMesh(String model) {
+  public static Model generateMesh(String model) {
     List<Vector3> vs = new ArrayList<Vector3>();
     List<Vector2> vts = new ArrayList<Vector2>();
     List<Tri3D> fs = new ArrayList<Tri3D>();
@@ -70,9 +62,8 @@ public abstract class Model implements RigidBody {
       }
       scan.close();
     }
-    Object[][] res = new Object[][]{vs.toArray(new Vector3[vs.size()]), fs.toArray(new Tri3D[fs.size()]), vts.toArray(new Vector2[vts.size()])};
     System.out.println("Successfully loaded Model");
-    return res;
+    return new Model(vs.toArray(new Vector3[vs.size()]), fs.toArray(new Tri3D[fs.size()]), vts.toArray(new Vector2[vts.size()]));
   }
 
   public double calculateRadius() {
@@ -83,18 +74,19 @@ public abstract class Model implements RigidBody {
     }
     System.out.println("RADIUS   : "+ biggest);
     System.out.println("NUM VERTS: "+ verts.length);
+    this.radius = biggest;
     return biggest;
   }
 
-  public Vector3 getPos() {return position;}
-
-  public void setPos(Vector3 pos) {position = pos;}
-
-  public void move(double x, double y, double z) {position = position.add(new Vector3(x, y, z));}
-
-  public double getRadius() {return 1;}
-
   public Tri3D[] getFaces() {return faces;}
+
+  public void setRadius(double radius) {this.radius = radius;}
+
+  public double getRadius() {return radius;}
+
+  public Material getMat() {return mat;}
+
+  public void setMat(Material mat) {this.mat = mat;}
 
   public String toString() {
     StringBuilder res = new StringBuilder(1000);
@@ -105,8 +97,4 @@ public abstract class Model implements RigidBody {
     for (Tri3D f : faces) res.append("f " + f.toString() + "\n");
     return res.toString();
   }
-
-  public Material getMat() {return mat;}
-
-  public void setMat(Material mat) {this.mat = mat;}
 }

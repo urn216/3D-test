@@ -7,6 +7,7 @@ import java.awt.image.BufferedImage;
 import code.math.vector.Vector3;
 import code.rendering.Drawing;
 import code.rendering.renderers.Renderer;
+import code.world.Camera3D;
 import code.world.RigidBody;
 
 import java.awt.Graphics;
@@ -55,7 +56,7 @@ public abstract class Core {
   * @param args Ignored for now
   */
   public static void main(String[] args) {
-    bodies = Scene.s2();
+    bodies = Scene.s5();
     lightSource = bodies[0];
 
     cam = new Camera3D(
