@@ -1,7 +1,9 @@
 package code.math.ray;
-import code.math.MathHelp;
-import code.math.vector.Vector2;
-import code.math.vector.Vector3;
+
+import mki.math.MathHelp;
+import mki.math.vector.Vector2;
+import mki.math.vector.Vector3;
+
 import code.world.Material;
 import code.world.RigidBody;
 

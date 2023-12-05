@@ -1,8 +1,9 @@
 package code.world.object;
 
+import mki.math.vector.Vector2;
+import mki.math.vector.Vector3;
+
 import code.math.tri.Tri3D;
-import code.math.vector.Vector2;
-import code.math.vector.Vector3;
 import code.world.Material;
 import code.world.Model;
 import code.world.RigidBody;

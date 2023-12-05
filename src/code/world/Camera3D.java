@@ -2,8 +2,8 @@ package code.world;
 
 import java.awt.image.BufferedImage;
 
-import code.math.matrix.Matrix;
-import code.math.vector.Vector3;
+import mki.math.matrix.Matrix;
+import mki.math.vector.Vector3;
 import code.rendering.Drawing;
 import code.rendering.renderers.Renderer;
 

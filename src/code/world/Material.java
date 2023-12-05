@@ -1,6 +1,8 @@
 package code.world;
-import code.math.IOHelp;
-import code.math.vector.Vector3;
+
+import mki.io.FileIO;
+
+import mki.math.vector.Vector3;
 
 public class Material {
   private static final int RED_MASK = 255 << 16;
@@ -35,7 +37,7 @@ public class Material {
     this.emissive = intensity.x+intensity.y+intensity.z != 0;
     this.intensity = intensity;
 
-    texture = IOHelp.readImageInt(tFile);
+    texture = FileIO.readImageInt(tFile);
     tSize = (int)Math.sqrt(texture.length);
   }
 
@@ -75,7 +77,7 @@ public class Material {
   }
 
 
-  private static final int[] skybox = IOHelp.readImageInt("BG/star_map.png");
+  private static final int[] skybox = FileIO.readImageInt("BG/star_map.png");
   private static final int skyboxSize = (int)Math.sqrt(skybox.length);
   /**
   * A static method for getting a point in a skybox.

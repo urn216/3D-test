@@ -9,7 +9,7 @@ import java.awt.event.MouseEvent;
 
 import javax.swing.JFrame;
 
-import code.math.vector.Vector2I;
+import mki.math.vector.Vector2I;
 
 /**
  * Handles all user input within the game

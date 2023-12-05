@@ -4,10 +4,12 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-import code.math.IOHelp;
+import mki.io.FileIO;
+
+import mki.math.vector.Vector2;
+import mki.math.vector.Vector3;
+
 import code.math.tri.Tri3D;
-import code.math.vector.Vector2;
-import code.math.vector.Vector3;
 
 public class Model {
 
@@ -31,7 +33,7 @@ public class Model {
     List<Vector2> vts = new ArrayList<Vector2>();
     List<Tri3D> fs = new ArrayList<Tri3D>();
     String filename = "data/" + model;
-    List<String> allLines = IOHelp.readAllLines(filename, false);
+    List<String> allLines = FileIO.readAllLines(filename, false);
     for (String line : allLines) {
       Scanner scan = new Scanner(line);
       scan.useDelimiter("[/ ]+");

@@ -2,12 +2,13 @@ package code.rendering;
 
 import java.awt.image.BufferedImage;
 
-import code.math.MathHelp;
+import mki.math.MathHelp;
+import mki.math.vector.Vector2;
+import mki.math.vector.Vector2I;
+import mki.math.vector.Vector3;
+
 import code.math.tri.Tri2D;
 import code.math.tri.Tri3D;
-import code.math.vector.Vector2;
-import code.math.vector.Vector2I;
-import code.math.vector.Vector3;
 import code.world.Material;
 
 public class Drawing {

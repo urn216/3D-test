@@ -1,7 +1,7 @@
 package code.math.tri;
 
-import code.math.vector.Vector2;
-import code.math.vector.Vector3;
+import mki.math.vector.Vector2;
+import mki.math.vector.Vector3;
 
 public class Tri3D {
 

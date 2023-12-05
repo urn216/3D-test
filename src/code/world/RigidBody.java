@@ -1,6 +1,6 @@
 package code.world;
 
-import code.math.vector.Vector3;
+import mki.math.vector.Vector3;
 
 /**
 * Write a description of class RigidBody here.

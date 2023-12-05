@@ -1,6 +1,6 @@
 package code.math.tri;
 
-import code.math.vector.Vector2;
+import mki.math.vector.Vector2;
 
 public class Tri2D {
   private final Vector2[] verts;

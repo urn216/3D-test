@@ -3,11 +3,13 @@ package code.core;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import code.math.IOHelp;
-import code.math.vector.Vector2;
+import mki.io.FileIO;
+
+import mki.math.vector.Vector2;
 
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import java.util.function.BiConsumer;
 import java.awt.Insets;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
@@ -21,7 +23,7 @@ public final class Window {
   
   public static final Vector2 DEFAULT_SCREEN_SIZE = new Vector2(1920, 1080);
 
-  public final JFrame FRAME = new JFrame("3DTest");
+  public final JFrame FRAME;
   public final JPanel PANEL = new JPanel() {public void paintComponent(Graphics gra) {Core.paintComponent(gra);}};
   
   private int screenSizeX, screenSizeY;
@@ -29,11 +31,13 @@ public final class Window {
   
   int toolBarLeft, toolBarRight, toolBarTop, toolBarBot;
 
-  Window() {
+  Window(String title, BiConsumer<Integer, Integer> onResize) {
+    FRAME = new JFrame(title);
+
     FRAME.getContentPane().add(PANEL);
     FRAME.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
     FRAME.setResizable(true);
-    BufferedImage image = IOHelp.readImage("icon.png");
+    BufferedImage image = FileIO.readImage("icon.png");
     FRAME.setIconImage(image);
     
     GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
@@ -55,11 +59,12 @@ public final class Window {
         screenSizeX = FRAME.getWidth() - toolBarLeft - toolBarRight;
         screenSizeY = FRAME.getHeight() - toolBarTop - toolBarBot;
 
+        onResize.accept(screenSizeX, screenSizeY);
+
         if (!isFullScreen()) {
           smallScreenX = screenSizeX;
           smallScreenY = screenSizeY;
         }
-        // System.out.println(screenSizeX + ", " + screenSizeY);
       }
     });
   }

@@ -2,8 +2,9 @@ package code.rendering.renderers;
 
 import java.util.stream.Stream;
 
+import mki.math.vector.Vector3;
+
 import code.math.tri.Tri3D;
-import code.math.vector.Vector3;
 import code.rendering.Drawing;
 import code.world.Material;
 import code.world.RigidBody;

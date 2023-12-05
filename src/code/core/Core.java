@@ -4,7 +4,8 @@ import java.awt.event.KeyEvent;
 
 import java.awt.image.BufferedImage;
 
-import code.math.vector.Vector3;
+import mki.math.vector.Vector3;
+
 import code.rendering.Drawing;
 import code.rendering.renderers.Renderer;
 import code.world.Camera3D;
@@ -45,7 +46,7 @@ public abstract class Core {
   public static boolean bad = false;
   
   static {
-    WINDOW = new Window();
+    WINDOW = new Window("3D Test", (x, y) -> {});
 
     GLOBAL_SETTINGS = new Settings();
   }

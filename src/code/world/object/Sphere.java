@@ -1,6 +1,7 @@
 package code.world.object;
 
-import code.math.vector.Vector3;
+import mki.math.vector.Vector3;
+
 import code.world.Material;
 import code.world.RigidBody;
 

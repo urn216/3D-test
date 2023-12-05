@@ -1,6 +1,7 @@
 package code.rendering.renderers;
 
-import code.math.vector.Vector3;
+import mki.math.vector.Vector3;
+
 import code.rendering.Drawing;
 import code.world.RigidBody;
 
