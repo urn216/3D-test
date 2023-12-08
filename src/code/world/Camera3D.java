@@ -12,7 +12,7 @@ import code.rendering.renderers.Renderer;
 */
 public class Camera3D {
 
-  private final Renderer renderer;
+  private Renderer renderer;
 
   private double fieldOfView = Math.toRadians(80);
 
@@ -33,13 +33,14 @@ public class Camera3D {
   * Constructs a camera with a position vector, a default zoom level, and the current resolution of the game window.
   */
   public Camera3D(Vector3 position, int imageWidth, int imageHeight, Renderer renderer) {
+    if (position == null) throw new IllegalArgumentException("Camera must have a position Vector!");
+    if (renderer == null) throw new IllegalArgumentException("Camera must have a rendering method!");
+
     this.position = position;
 
     setImageDimensions(imageWidth, imageHeight);
 
-    this.renderer = renderer;
-
-    renderer.updateConstants(this.fieldOfView);
+    setRenderer(renderer);
 
     this.dir = new Vector3(0, 0, 1);
     this.rightDir = new Vector3(1, 0, 0);
@@ -47,7 +48,7 @@ public class Camera3D {
     this.currentPitch = 0;
   }
 
-  public double getFieldOfView() {return fieldOfView;}
+  public double getFieldOfView() {return Math.toDegrees(fieldOfView);}
 
   public BufferedImage getImage() {return image;}
 
@@ -63,11 +64,19 @@ public class Camera3D {
 
   public void setPosition(Vector3 position) {this.position = position;}
 
-  public void setFieldOfView(double fieldOfView) {this.fieldOfView = fieldOfView;}
+  public void setFieldOfView(double fieldOfView) {
+    this.fieldOfView = Math.toRadians(fieldOfView);
+    this.renderer.updateConstants(this.fieldOfView);
+  }
 
   public void setImageDimensions(int imageWidth, int imageHeight) {
     this.image = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_ARGB); 
     this.imageContents = new Drawing(imageWidth, imageHeight);
+  }
+
+  public void setRenderer(Renderer renderer) {
+    this.renderer = renderer;
+    this.renderer.updateConstants(this.fieldOfView);
   }
 
   public void move(double x, double y, double z) {

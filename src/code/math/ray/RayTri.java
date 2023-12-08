@@ -34,14 +34,14 @@ public class RayTri {
       double DcosA = dir.dot(body.getPosition().subtract(rayStart));
       if (Double.isNaN(Math.sqrt(DcosA*DcosA+rad*rad-distSquare))) {continue;}
       for (Tri3D tri : body.getModel().getFaces()) {
-        Vector3 n = tri.getNormal();
+        Vector3[] edges = tri.getEdges();
+        Vector3 n = edges[2];
         double det = -n.dot(dir);
         if (det < 0.000001) {continue;}
         Vector3[] verts = tri.getVerts();
         Vector3 toTri = rayStart.subtract(verts[0].add(body.getPosition()));
         double distToColl = toTri.dot(n)/det;
         if (distToColl < -0.000001 || distToColl > closest) {continue;}
-        Vector3[] edges = tri.getEdges();
         Vector3 DToTri = toTri.cross(dir);
         double u = edges[1].dot(DToTri)/det;
         double v = -edges[0].dot(DToTri)/det;
@@ -53,7 +53,7 @@ public class RayTri {
       return Material.getSkyColour(Puv.x, Puv.y);
     }
     Vector3 surface = rayStart.add(dir.scale(closest));
-    Vector3 sNormal = cTri.getEdges()[2];
+    Vector3 sNormal = cTri.getNormal();
     Vector3 intensity = intensityStep(surface, sNormal, bodies, close, true, numSteps);
     Vector2 Puv = cTri.getUVCoords(cU, cV); //get the uv coordinates for this point
     if (numRef>0 && close.getModel().getMat().getReflectivity() != 0) {return close.getModel().getMat().getReflection(getCol(surface, dir.subtract(sNormal.scale(2*sNormal.dot(dir))), bodies, numSteps-1, numRef-1), intensity, Puv.x, Puv.y);}
@@ -71,14 +71,14 @@ public class RayTri {
       double DcosA = dir.dot(body.getPosition().subtract(rayStart));
       if (Double.isNaN(Math.sqrt(DcosA*DcosA+rad*rad-distSquare))) {continue;}
       for (Tri3D tri : body.getModel().getFaces()) {
-        Vector3 n = tri.getNormal();
+        Vector3[] edges = tri.getEdges();
+        Vector3 n = edges[2];
         double det = -n.dot(dir);
         if (det < 0.000001) {continue;}
         Vector3[] verts = tri.getVerts();
         Vector3 toTri = rayStart.subtract(verts[0].add(body.getPosition()));
         double distToColl = toTri.dot(n)/det;
         if (distToColl < -0.000001 || distToColl > closest) {continue;}
-        Vector3[] edges = tri.getEdges();
         Vector3 DToTri = toTri.cross(dir);
         double u = edges[1].dot(DToTri)/det;
         double v = -edges[0].dot(DToTri)/det;

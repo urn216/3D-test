@@ -26,12 +26,13 @@ public class Tri3D {
     this.verts = verts;
     this.vertexIndeces = vertexIndeces;
 
-    this.edges = new Vector3[3];
-    edges[0] = verts[1].subtract(verts[0]);
-    edges[1] = verts[2].subtract(verts[0]);
-    edges[2] = edges[0].cross(edges[1]).unitize();
+    this.edges = new Vector3[]{
+      verts[1].subtract(verts[0]),
+      verts[2].subtract(verts[0]),
+      verts[1].subtract(verts[0]).cross(verts[2].subtract(verts[0]))
+    };
 
-    normal = edges[2];
+    normal = edges[2].unitize();
 
     this.vertUVs = vertUVs;
     this.vertexTextureIndeces = vertexTextureIndeces;

@@ -58,13 +58,12 @@ class RayTriRenderer extends Renderer {
 
     //SINGLE THREAD:
     for (int y = 0; y < d.getHeight(); y++) {
-      double percentDown = (-0.5+1.0*y/d.getHeight());
+      double percentDown = (-0.5+(double)y/d.getHeight());
       Matrix pitchMatrix = Matrix.rotateXLocal(percentDown*fov*d.getAspectRatio(), dir);
       Vector3 vDir = pitchMatrix.multiply(dir);
-      Vector3 vUpDir = pitchMatrix.multiply(upDir);
       for (int x = 0; x < d.getWidth(); x++) {
-        double percentAlong = (-0.5+1.0*x/d.getWidth());
-        Vector3 rayDir = Matrix.rotateLocal(percentAlong*fov, vUpDir).multiply(vDir);
+        double percentAlong = (-0.5+(double)x/d.getWidth());
+        Vector3 rayDir = Matrix.rotateLocal(percentAlong*fov, upDir).multiply(vDir);
         d.drawPixel(x, y, RayTri.getCol(position, rayDir, bodies, 0, 3));
       }
     }

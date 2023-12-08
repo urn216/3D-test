@@ -5,13 +5,13 @@ import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 
 import mki.math.vector.Vector3;
-
-import code.rendering.Drawing;
+import mki.ui.control.UIController;
 import code.rendering.renderers.Renderer;
 import code.world.Camera3D;
 import code.world.RigidBody;
 
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 
 public abstract class Core {
   
@@ -30,9 +30,7 @@ public abstract class Core {
   private static RigidBody[] bodies;
   private static RigidBody lightSource;
   
-  private static Camera3D cam = new Camera3D(new Vector3(), 1, 1, new Renderer() {
-    public void render(Drawing d, Vector3 position, Vector3 dir, Vector3 upDir, RigidBody[] bodies) {}
-  });
+  private static Camera3D cam;
 
   private static double defaultMovementSpeed = 0.01;
   private static double fasterMovementSpeed  = 0.1;
@@ -42,13 +40,26 @@ public abstract class Core {
   private static long pFTime = System.currentTimeMillis();
   private static double fps = 0;
   private static int fCount = 0;
-
-  public static boolean bad = false;
   
   static {
     WINDOW = new Window("3D Test", (x, y) -> {});
 
+    UIController.putPane("Main Menu", UICreator.createMain());
+    UIController.setCurrentPane("Main Menu");
+    
     GLOBAL_SETTINGS = new Settings();
+    
+    bodies = Scene.s5();
+    lightSource = bodies[0];
+
+    cam = new Camera3D(
+      new Vector3(), 
+      GLOBAL_SETTINGS.getIntSetting("resolution_X"), 
+      GLOBAL_SETTINGS.getIntSetting("resolution_Y"), 
+      Renderer.raySphere()
+    );
+
+    Controls.initialiseControls(WINDOW.FRAME);
   }
   
   /**
@@ -57,18 +68,6 @@ public abstract class Core {
   * @param args Ignored for now
   */
   public static void main(String[] args) {
-    bodies = Scene.s5();
-    lightSource = bodies[0];
-
-    cam = new Camera3D(
-      new Vector3(), 
-      GLOBAL_SETTINGS.getIntSetting("resolution_X"), 
-      GLOBAL_SETTINGS.getIntSetting("resolution_Y"), 
-      Renderer.projection()
-    );
-
-    Controls.initialiseControls(WINDOW.FRAME);
-
     playGame();
   }
   
@@ -77,6 +76,14 @@ public abstract class Core {
   */
   public static Camera3D getActiveCam() {
     return cam;
+  }
+
+  public static double getFps() {
+    return fps;
+  }
+
+  public static void setRenderer(Renderer r) {
+    cam.setRenderer(r);
   }
   
   /**
@@ -109,8 +116,16 @@ public abstract class Core {
       if (Controls.KEY_DOWN[KeyEvent.VK_DOWN])  {cam.pitchCam( 0.1*deltaTimeMillis);}
       if (Controls.KEY_DOWN[KeyEvent.VK_LEFT])  {cam.yawCam  (-0.1*deltaTimeMillis);}
       if (Controls.KEY_DOWN[KeyEvent.VK_RIGHT]) {cam.yawCam  ( 0.1*deltaTimeMillis);}
-      if (Controls.KEY_DOWN[KeyEvent.VK_G]) {bad = false;}
-      if (Controls.KEY_DOWN[KeyEvent.VK_B]) {bad = true;}
+
+      if (Controls.KEY_DOWN[KeyEvent.VK_T]) {
+        setRenderer(Renderer.rayTri());
+      }
+      if (Controls.KEY_DOWN[KeyEvent.VK_G]) {
+        setRenderer(Renderer.raySphere());
+      }
+      if (Controls.KEY_DOWN[KeyEvent.VK_B]) {
+        setRenderer(Renderer.projection());
+      }
       
       if (update || first) {
         cam.draw(bodies);
@@ -138,13 +153,17 @@ public abstract class Core {
     int size = Math.min(WINDOW.screenWidth(), (int)(WINDOW.screenHeight()/cam.getImageAspectRatio()));
     gra.drawImage(cam.getImage().getScaledInstance(size, (int)(size*cam.getImageAspectRatio()), BufferedImage.SCALE_DEFAULT), 0, 0, null);
     
-    if (fCount >= 100) {
-      long cFTime = System.currentTimeMillis();
+    UIController.draw((Graphics2D)gra, WINDOW.screenWidth(), WINDOW.screenHeight());
+
+    long cFTime = System.currentTimeMillis();
+
+    if (cFTime-pFTime >= 1000) {
       fps = fCount*1000.0/(cFTime-pFTime);
       System.out.println(fps);
       pFTime = cFTime;
       fCount=0;
     }
+    
     fCount++;
   }
 }

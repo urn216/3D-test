@@ -10,6 +10,7 @@ import java.awt.event.MouseEvent;
 import javax.swing.JFrame;
 
 import mki.math.vector.Vector2I;
+import mki.ui.control.UIController;
 
 /**
  * Handles all user input within the game
@@ -46,18 +47,13 @@ abstract class Controls {
 
         MOUSE_DOWN[e.getButton()] = true;
         
-        // if (UIController.getHighlightedInteractable() == null) MOUSE_DOWN[e.getButton()] = true;
-        // mousePre = mousePos;
+        if (UIController.getHighlightedInteractable() == null) MOUSE_DOWN[e.getButton()] = true;
+        mousePre = mousePos;
         
-        // //left click
-        // if (e.getButton() == 1) {
-        //   // if (UIController.press()) return;
-        // }
-        
-        // //right click
-        // if (e.getButton() == 3) {
-
-        // }
+        //left click
+        if (e.getButton() == 1) {
+          if (UIController.press()) return;
+        }
       }
       
       @Override
@@ -66,17 +62,10 @@ abstract class Controls {
         
         MOUSE_DOWN[e.getButton()] = false;
         
-        // Core.getCurrentScene().unsetIn();
-        
-        // //left click
-        // if (e.getButton() == 1) {
-        //   // UIController.release();
-        // }
-        
-        // //right click
-        // if (e.getButton() == 3) {
-          
-        // }
+        //left click
+        if (e.getButton() == 1) {
+          UIController.release();
+        }
       }
       
       @Override
@@ -102,20 +91,20 @@ abstract class Controls {
         if(KEY_DOWN[keyCode]) return; //Key already in
         KEY_DOWN[keyCode] = true;
         
-        // System.out.print(keyCode);
-        if (keyCode == KeyEvent.VK_F11) {
+        switch (keyCode) {
+          case KeyEvent.VK_F11:
           Core.WINDOW.toggleFullscreen();
-          return;
+          break;
+          case KeyEvent.VK_ESCAPE:
+          UIController.release();
+          UIController.back();
+          break;
+          case KeyEvent.VK_ENTER:
+          UIController.press();
+          break;
+          default:
+          break;
         }
-        // if (keyCode == KeyEvent.VK_ESCAPE) {
-        //   UIController.release();
-        //   UIController.back();
-        //   return;
-        // }
-        // if (keyCode == KeyEvent.VK_ENTER) {
-        //   UIController.press();
-        //   return;
-        // }
       }
       
       @Override
@@ -123,9 +112,9 @@ abstract class Controls {
         int keyCode = e.getKeyCode();
         KEY_DOWN[keyCode] = false;
         
-        // if (keyCode == KeyEvent.VK_ENTER) {
-        //   UIController.release();
-        // }
+        if (keyCode == KeyEvent.VK_ENTER) {
+          UIController.release();
+        }
       }
     });
   }
@@ -140,6 +129,6 @@ abstract class Controls {
     int y = e.getY() - Core.WINDOW.toolBarTop;
     mousePos = new Vector2I(x, y);
     
-    // UIController.cursorMove(mousePos);
+    UIController.cursorMove(mousePos);
   }
 }

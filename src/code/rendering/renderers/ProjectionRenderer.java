@@ -77,8 +77,8 @@ class ProjectionRenderer extends Renderer {
 
   private Vector3 projectVector3(Vector3 vecWorld, double aspRat) {
     return new Vector3(
-      vecWorld.x*aspRat*f/vecWorld.z, 
-      -vecWorld.y*f/vecWorld.z,
+      vecWorld.x*f/vecWorld.z, 
+      -vecWorld.y*f/(vecWorld.z*aspRat),
       (-nearClippingPlane/vecWorld.z+1)*q
     );
   }

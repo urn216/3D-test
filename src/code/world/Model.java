@@ -32,7 +32,7 @@ public class Model {
     List<Vector3> vs = new ArrayList<Vector3>();
     List<Vector2> vts = new ArrayList<Vector2>();
     List<Tri3D> fs = new ArrayList<Tri3D>();
-    String filename = "data/" + model;
+    String filename = "../data/" + model;
     List<String> allLines = FileIO.readAllLines(filename, false);
     for (String line : allLines) {
       Scanner scan = new Scanner(line);

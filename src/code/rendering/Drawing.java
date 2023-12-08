@@ -68,6 +68,8 @@ public class Drawing {
    * @param c The colour of the pixel
    */
   public synchronized void drawPixel(int x, int y, double z, int c) {
+    if (y < 0 || y >= height || x < 0 || x >=width) return; //remove
+
     int i = x+y*width;
     z = 1/z;
     if (depths[i] > z) return;
