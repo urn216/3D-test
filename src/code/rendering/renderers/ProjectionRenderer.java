@@ -2,6 +2,7 @@ package code.rendering.renderers;
 
 import java.util.stream.Stream;
 
+import mki.math.matrix.Quaternion;
 import mki.math.vector.Vector3;
 
 import code.math.tri.Tri3D;
@@ -27,11 +28,11 @@ class ProjectionRenderer extends Renderer {
   }
 
   @Override
-  public void render(Drawing d, Vector3 position, Vector3 dir, Vector3 upDir, RigidBody[] bodies) {
+  public void render(Drawing d, Vector3 cameraPosition, Quaternion cameraRotation, RigidBody[] bodies) {
     d.fill(-16777216);
     Stream.of(bodies).parallel().forEach((b) -> {
-      Vector3 offset = b.getPosition().subtract(position);
-      Stream.of(b.getModel().getFaces()).parallel().forEach((tri) -> renderTri(d, tri, offset, dir, b.getModel().getMat()));
+      Vector3 offset = b.getPosition().subtract(cameraPosition);
+      Stream.of(b.getModel().getFaces()).parallel().forEach((tri) -> renderTri(d, tri, offset, cameraRotation.reverse(), b.getModel().getMat()));
     });
   }
 
@@ -51,23 +52,23 @@ class ProjectionRenderer extends Renderer {
   //   }
   // }
 
-  private void renderTri(Drawing d, Tri3D tri, Vector3 offset, Vector3 dir, Material mat) {
+  private void renderTri(Drawing d, Tri3D tri, Vector3 offset, Quaternion cameraRotation, Material mat) {
     Vector3 toTri = tri.getVerts()[0].add(offset);
 
     if (toTri.dot(tri.getNormal()) >= -0.01) return;
 
-    Tri3D projectedTri = projectTri(tri, offset, d.getWidth(), d.getHeight(), d.getAspectRatio());
+    Tri3D projectedTri = projectTri(tri, offset, cameraRotation, d.getWidth(), d.getHeight(), d.getAspectRatio());
     int colour = mat.getIntenseColour(new Vector3((tri.getNormal().dot(lightDir)+1)/2));
     d.fillTri(projectedTri, colour);
     // d.drawTri(projectedTri, -16777216|~colour);
   }
 
-  private Tri3D projectTri(Tri3D triWorld, Vector3 offset, int width, int height, double aspRat) {
+  private Tri3D projectTri(Tri3D triWorld, Vector3 offset, Quaternion cameraRotation, int width, int height, double aspRat) {
     return new Tri3D(
       new Vector3[] {
-        projectVector3(triWorld.getVerts()[0].add(offset), aspRat).add(1, 1, 0).scale(0.5*width-1, 0.5*height-1, 1),
-        projectVector3(triWorld.getVerts()[1].add(offset), aspRat).add(1, 1, 0).scale(0.5*width-1, 0.5*height-1, 1),
-        projectVector3(triWorld.getVerts()[2].add(offset), aspRat).add(1, 1, 0).scale(0.5*width-1, 0.5*height-1, 1)
+        projectVector3(cameraRotation.rotate(triWorld.getVerts()[0].add(offset)), aspRat).add(1, 1, 0).scale(0.5*width-1, 0.5*height-1, 1),
+        projectVector3(cameraRotation.rotate(triWorld.getVerts()[1].add(offset)), aspRat).add(1, 1, 0).scale(0.5*width-1, 0.5*height-1, 1),
+        projectVector3(cameraRotation.rotate(triWorld.getVerts()[2].add(offset)), aspRat).add(1, 1, 0).scale(0.5*width-1, 0.5*height-1, 1)
       }, 
       triWorld.getVertUVs(), 
       new int[3],

@@ -2,7 +2,8 @@ package code.world;
 
 import java.awt.image.BufferedImage;
 
-import mki.math.matrix.Matrix;
+import mki.math.MathHelp;
+import mki.math.matrix.Quaternion;
 import mki.math.vector.Vector3;
 import code.rendering.Drawing;
 import code.rendering.renderers.Renderer;
@@ -22,7 +23,11 @@ public class Camera3D {
   private Vector3 rightDir;
   private Vector3 upDir;
 
-  private double currentPitch;
+  private double pitch;
+  private double yaw;
+  private double roll;
+
+  private Quaternion q;
   
   private BufferedImage image;
   private Drawing imageContents;
@@ -45,7 +50,8 @@ public class Camera3D {
     this.dir = new Vector3(0, 0, 1);
     this.rightDir = new Vector3(1, 0, 0);
     this.upDir = new Vector3(0, 1, 0);
-    this.currentPitch = 0;
+
+    this.q = Quaternion.fromAxisAngle(0, new Vector3());
   }
 
   public double getFieldOfView() {return Math.toDegrees(fieldOfView);}
@@ -61,6 +67,18 @@ public class Camera3D {
   public Vector3 getUpDir() {return upDir;}
 
   public Vector3 getRightDir() {return rightDir;}
+
+  public Quaternion getRotationQ() {
+    return q;
+  }
+
+  public void offsetPositionGlobal(double x, double y, double z) {
+    position = position.add(x, y, z);
+  }
+  
+  public void offsetPositionLocal(double x, double y, double z) {
+    position = position.add(dir.scale(z)).add(rightDir.scale(x)).add(upDir.scale(y));
+  }
 
   public void setPosition(Vector3 position) {this.position = position;}
 
@@ -79,31 +97,46 @@ public class Camera3D {
     this.renderer.updateConstants(this.fieldOfView);
   }
 
-  public void move(double x, double y, double z) {
-    position = position.add(dir.scale(z)).add(rightDir.scale(x)).add(upDir.scale(y));
+  public void offsetPitch(double theta) {
+    setPitch(this.pitch+theta);
   }
 
-  public void pitchCam(double ang) {
-    if (currentPitch+ang > 85) ang = 85-currentPitch;
-    if (currentPitch+ang < -85) ang = -85-currentPitch;
-    currentPitch+=ang;
-    ang = Math.toRadians(ang);
-    Matrix pitchMatrix = Matrix.rotateXLocal(ang, dir);
-    dir = pitchMatrix.multiply(dir);
-    rightDir = pitchMatrix.multiply(rightDir);
-    upDir = pitchMatrix.multiply(upDir);
+  public void setPitch(double theta) {
+    this.pitch = MathHelp.clamp(theta, -85, 85);
+
+    updateQ();
   }
 
-  public void yawCam(double ang) {
-    ang = Math.toRadians(ang);
-    Matrix yawMatrix = Matrix.rotateY(ang);
-    dir = yawMatrix.multiply(dir);
-    rightDir = yawMatrix.multiply(rightDir);
-    upDir = yawMatrix.multiply(upDir);
+  public void offsetYaw(double theta) {
+    setYaw(this.yaw+theta);
+  }
+
+  public void setYaw(double theta) {
+    this.yaw = (360 + theta) % 360;
+
+    updateQ();
+  }
+
+  public void offsetRoll(double theta) {
+    setRoll(this.roll+theta);
+  }
+
+  public void setRoll(double theta) {
+    this.roll = theta;
+
+    updateQ();
+  }
+
+  private void updateQ() {
+    this.q = Quaternion.fromPitchYawRoll(Math.toRadians(this.pitch), Math.toRadians(this.yaw), Math.toRadians(this.roll));
+
+    this.dir = this.q.rotate(new Vector3(0, 0, 1));
+    this.rightDir = this.q.rotate(new Vector3(1, 0, 0));
+    this.upDir = this.q.rotate(new Vector3(0, 1, 0));
   }
 
   public void draw(RigidBody[] bodies) {
-    renderer.render(imageContents, position, dir, upDir, bodies);
+    renderer.render(imageContents, position, q, bodies);
     imageContents.asBufferedImage(image);
   }
 }

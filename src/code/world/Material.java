@@ -48,7 +48,7 @@ public class Material {
   public int getIntenseColour(Vector3 oIntensity) {return (ALPHA_MASK) | (colourFix(r*oIntensity.x) << 16) | (colourFix(g*oIntensity.y) << 8) | (colourFix(b*oIntensity.z));}
 
   public int getIntenseColour(Vector3 oIntensity, double u, double v) {
-    int rgb = texture[(int)(u*(tSize))+(int)(v*(tSize))*tSize];
+    int rgb = texture[((int)(u*(tSize))+(int)(v*(tSize))*tSize) % texture.length];
     return (ALPHA_MASK) | (colourFix(((rgb & RED_MASK) >> 16)*(this.r/255f)*oIntensity.x) << 16) | (colourFix(((rgb & GREEN_MASK) >> 8)*(this.g/255f)*oIntensity.y) << 8) | (colourFix((rgb & BLUE_MASK)*(this.b/255f)*oIntensity.z));
   }
 
@@ -68,7 +68,7 @@ public class Material {
   }
 
   public int getReflection(int other, Vector3 oIntensity, double u, double v) {
-    int rgb = texture[(int)(u*(tSize))+(int)(v*(tSize))*tSize];
+    int rgb = texture[((int)(u*(tSize))+(int)(v*(tSize))*tSize) % texture.length];
 
     double r = ((other & RED_MASK) >> 16)*reflectivity+((rgb & RED_MASK) >> 16)*(this.r/255f)*(1f-reflectivity);
     double g = ((other & GREEN_MASK) >> 8)*reflectivity+((rgb & GREEN_MASK) >> 8)*(this.g/255f)*(1f-reflectivity);

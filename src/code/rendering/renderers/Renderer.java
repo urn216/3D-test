@@ -1,5 +1,6 @@
 package code.rendering.renderers;
 
+import mki.math.matrix.Quaternion;
 import mki.math.vector.Vector3;
 
 import code.rendering.Drawing;
@@ -17,5 +18,5 @@ public abstract class Renderer {
     this.fov = fov;
   }
 
-  public abstract void render(Drawing d, Vector3 position, Vector3 dir, Vector3 upDir, RigidBody[] bodies);
+  public abstract void render(Drawing d, Vector3 cameraPosition, Quaternion cameraRotation, RigidBody[] bodies);
 }

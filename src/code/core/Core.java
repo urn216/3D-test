@@ -50,6 +50,7 @@ public abstract class Core {
     GLOBAL_SETTINGS = new Settings();
     
     bodies = Scene.s5();
+    // bodies = new RigidBody[] {new RigidBody(new Vector3(), new Model(new Vector3[0], new Tri3D[0], new Vector2[0])) {}};
     lightSource = bodies[0];
 
     cam = new Camera3D(
@@ -100,22 +101,22 @@ public abstract class Core {
       previousTick  = tickTime;
       
       double vel = Controls.KEY_DOWN[KeyEvent.VK_CONTROL] ? fasterMovementSpeed : defaultMovementSpeed;
-      if (Controls.KEY_DOWN[KeyEvent.VK_W])     {cam.move(0, 0,  vel*deltaTimeMillis    );}
-      if (Controls.KEY_DOWN[KeyEvent.VK_S])     {cam.move(0, 0, -vel*deltaTimeMillis    );}
-      if (Controls.KEY_DOWN[KeyEvent.VK_A])     {cam.move(-vel*deltaTimeMillis, 0, 0    );}
-      if (Controls.KEY_DOWN[KeyEvent.VK_D])     {cam.move( vel*deltaTimeMillis, 0, 0    );}
-      if (Controls.KEY_DOWN[KeyEvent.VK_SHIFT]) {cam.move(0, -0.5*vel*deltaTimeMillis, 0);}
-      if (Controls.KEY_DOWN[KeyEvent.VK_SPACE]) {cam.move(0,  0.5*vel*deltaTimeMillis, 0);}
+      if (Controls.KEY_DOWN[KeyEvent.VK_W])     {cam.offsetPositionLocal(0, 0,  vel*deltaTimeMillis    );}
+      if (Controls.KEY_DOWN[KeyEvent.VK_S])     {cam.offsetPositionLocal(0, 0, -vel*deltaTimeMillis    );}
+      if (Controls.KEY_DOWN[KeyEvent.VK_A])     {cam.offsetPositionLocal(-vel*deltaTimeMillis, 0, 0    );}
+      if (Controls.KEY_DOWN[KeyEvent.VK_D])     {cam.offsetPositionLocal( vel*deltaTimeMillis, 0, 0    );}
+      if (Controls.KEY_DOWN[KeyEvent.VK_SHIFT]) {cam.offsetPositionLocal(0, -0.5*vel*deltaTimeMillis, 0);}
+      if (Controls.KEY_DOWN[KeyEvent.VK_SPACE]) {cam.offsetPositionLocal(0,  0.5*vel*deltaTimeMillis, 0);}
       if (Controls.KEY_DOWN[KeyEvent.VK_I])     {lightSource.move(0, 0,  0.001*deltaTimeMillis);}
       if (Controls.KEY_DOWN[KeyEvent.VK_K])     {lightSource.move(0, 0, -0.001*deltaTimeMillis);}
       if (Controls.KEY_DOWN[KeyEvent.VK_J])     {lightSource.move(-0.001*deltaTimeMillis, 0, 0);}
       if (Controls.KEY_DOWN[KeyEvent.VK_L])     {lightSource.move( 0.001*deltaTimeMillis, 0, 0);}
       if (Controls.KEY_DOWN[KeyEvent.VK_O])     {lightSource.move(0, -0.001*deltaTimeMillis, 0);}
       if (Controls.KEY_DOWN[KeyEvent.VK_U])     {lightSource.move(0,  0.001*deltaTimeMillis, 0);}
-      if (Controls.KEY_DOWN[KeyEvent.VK_UP])    {cam.pitchCam(-0.1*deltaTimeMillis);}
-      if (Controls.KEY_DOWN[KeyEvent.VK_DOWN])  {cam.pitchCam( 0.1*deltaTimeMillis);}
-      if (Controls.KEY_DOWN[KeyEvent.VK_LEFT])  {cam.yawCam  (-0.1*deltaTimeMillis);}
-      if (Controls.KEY_DOWN[KeyEvent.VK_RIGHT]) {cam.yawCam  ( 0.1*deltaTimeMillis);}
+      if (Controls.KEY_DOWN[KeyEvent.VK_UP])    {cam.offsetPitch(-0.1*deltaTimeMillis);}
+      if (Controls.KEY_DOWN[KeyEvent.VK_DOWN])  {cam.offsetPitch( 0.1*deltaTimeMillis);}
+      if (Controls.KEY_DOWN[KeyEvent.VK_LEFT])  {cam.offsetYaw  (-0.1*deltaTimeMillis);}
+      if (Controls.KEY_DOWN[KeyEvent.VK_RIGHT]) {cam.offsetYaw  ( 0.1*deltaTimeMillis);}
 
       if (Controls.KEY_DOWN[KeyEvent.VK_T]) {
         setRenderer(Renderer.rayTri());
