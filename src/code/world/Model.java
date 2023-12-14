@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 import mki.io.FileIO;
-
+import mki.math.matrix.Quaternion;
 import mki.math.vector.Vector2;
 import mki.math.vector.Vector3;
 
@@ -14,7 +14,7 @@ import code.math.tri.Tri3D;
 public class Model {
 
   protected final Vector3[] verts;
-  protected final Tri3D[]     faces;
+  protected final Tri3D  [] faces;
   protected final Vector2[] vertUVs;
 
   protected Material mat = new Material(new Vector3(255), 0, new Vector3());
@@ -29,6 +29,10 @@ public class Model {
   }
 
   public static Model generateMesh(String model) {
+    return generateMesh(model, 1);
+  }
+
+  public static Model generateMesh(String model, double scale) {
     List<Vector3> vs = new ArrayList<Vector3>();
     List<Vector2> vts = new ArrayList<Vector2>();
     List<Tri3D> fs = new ArrayList<Tri3D>();
@@ -42,7 +46,7 @@ public class Model {
         type = scan.next();
       }
       else {type = "gap";}
-      if (type.equals("v")) {vs.add(new Vector3(scan.nextDouble(), scan.nextDouble(), scan.nextDouble()));}
+      if (type.equals("v")) {vs.add(new Vector3(scan.nextDouble()*scale, scan.nextDouble()*scale, scan.nextDouble()*scale));}
       else if (type.equals("vt")) {vts.add(new Vector2(scan.nextDouble(), scan.nextDouble()));}
       else if (type.equals("f")) {
         if (vts.isEmpty()) {
@@ -89,6 +93,17 @@ public class Model {
   public Material getMat() {return mat;}
 
   public void setMat(Material mat) {this.mat = mat;}
+
+  public void setRotation(Quaternion rotation) {
+    Vector3[] rotatedVs = new Vector3[verts.length];
+    for (int i = 0; i < rotatedVs.length; i++) {
+      rotatedVs[i] = rotation.rotate(verts[i]);
+    }
+    for (int i = 0; i < faces.length; i++) {
+      int[] indices = faces[i].getVertexIndeces();
+      faces[i].setVerts(rotatedVs[indices[0]-1], rotatedVs[indices[1]-1], rotatedVs[indices[2]-1]);
+    }
+  }
 
   public String toString() {
     StringBuilder res = new StringBuilder(1000);

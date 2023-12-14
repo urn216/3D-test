@@ -26,13 +26,13 @@ public class Tri3D {
     this.verts = verts;
     this.vertexIndeces = vertexIndeces;
 
-    this.edges = new Vector3[]{
-      verts[1].subtract(verts[0]),
-      verts[2].subtract(verts[0]),
-      verts[1].subtract(verts[0]).cross(verts[2].subtract(verts[0]))
-    };
+    this.edges = new Vector3[3];
 
-    normal = edges[2].unitize();
+    this.edges[0] = verts[1].subtract(verts[0]);
+    this.edges[1] = verts[2].subtract(verts[0]);
+    this.edges[2] = this.edges[0].cross(this.edges[1]);
+
+    this.normal = edges[2].unitize();
 
     this.vertUVs = vertUVs;
     this.vertexTextureIndeces = vertexTextureIndeces;
@@ -76,6 +76,18 @@ public class Tri3D {
 
   public Vector2 getUVCoords(double u, double v) {
     return vertUVs[0] == null ? new Vector2() : vertUVs[1].scale(u).add(vertUVs[2].scale(v)).add(vertUVs[0].scale(1-u-v));
+  }
+
+  public void setVerts(Vector3 v0, Vector3 v1, Vector3 v2) {
+    this.verts[0] = v0;
+    this.verts[1] = v1;
+    this.verts[2] = v2;
+
+    this.edges[0] = v1.subtract(v0);
+    this.edges[1] = v2.subtract(v0);
+    this.edges[2] = this.edges[0].cross(this.edges[1]);
+
+    this.normal = edges[2].unitize();
   }
 
   public String toString() {

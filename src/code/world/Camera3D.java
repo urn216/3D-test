@@ -5,6 +5,7 @@ import java.awt.image.BufferedImage;
 import mki.math.MathHelp;
 import mki.math.matrix.Quaternion;
 import mki.math.vector.Vector3;
+
 import code.rendering.Drawing;
 import code.rendering.renderers.Renderer;
 
@@ -56,7 +57,7 @@ public class Camera3D {
 
   public double getFieldOfView() {return Math.toDegrees(fieldOfView);}
 
-  public BufferedImage getImage() {return image;}
+  public synchronized BufferedImage getImage() {return image;}
 
   public double getImageAspectRatio() {return imageContents.getAspectRatio();}
 
@@ -137,6 +138,8 @@ public class Camera3D {
 
   public void draw(RigidBody[] bodies) {
     renderer.render(imageContents, position, q, bodies);
-    imageContents.asBufferedImage(image);
+    synchronized (this) {
+      imageContents.asBufferedImage(image);
+    }
   }
 }

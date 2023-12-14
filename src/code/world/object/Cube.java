@@ -22,13 +22,13 @@ public class Cube extends RigidBody {
 
     Vector3[] verts = {
       new Vector3(-sRad, -sRad, -sRad),
-      new Vector3(-sRad, sRad, -sRad),
-      new Vector3(sRad, sRad, -sRad),
-      new Vector3(sRad, -sRad, -sRad),
-      new Vector3(-sRad, -sRad, sRad),
-      new Vector3(-sRad, sRad, sRad),
-      new Vector3(sRad, sRad, sRad),
-      new Vector3(sRad, -sRad, sRad)
+      new Vector3(-sRad,  sRad, -sRad),
+      new Vector3( sRad,  sRad, -sRad),
+      new Vector3( sRad, -sRad, -sRad),
+      new Vector3(-sRad, -sRad,  sRad),
+      new Vector3(-sRad,  sRad,  sRad),
+      new Vector3( sRad,  sRad,  sRad),
+      new Vector3( sRad, -sRad,  sRad)
     };
     Vector2[] vertUVs = {
       new Vector2(0, 1),

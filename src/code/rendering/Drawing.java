@@ -6,7 +6,7 @@ import mki.math.MathHelp;
 import mki.math.vector.Vector2;
 import mki.math.vector.Vector2I;
 import mki.math.vector.Vector3;
-
+import mki.math.vector.Vector3I;
 import code.math.tri.Tri2D;
 import code.math.tri.Tri3D;
 import code.world.Material;
@@ -262,33 +262,34 @@ public class Drawing {
   }
 
   public void fillTri(Tri3D tri, int c) {
-    Vector3[] p = new Vector3[] {tri.getVerts()[0], tri.getVerts()[1], tri.getVerts()[2]};
+    Vector3I[] p = new Vector3I[] {MathHelp.round(tri.getVerts()[0]), MathHelp.round(tri.getVerts()[1]), MathHelp.round(tri.getVerts()[2])};
     if (p[1].y < p[0].y) {MathHelp.swap(p, 0, 1);}
     if (p[2].y < p[0].y) {MathHelp.swap(p, 0, 2);} //Ordering vertices so p[0] is the highest and p[2] is the lowest
     if (p[2].y < p[1].y) {MathHelp.swap(p, 1, 2);}
 
-    int[] xs = new int[(int)p[2].y-(int)p[0].y+1];
-    int offset = (int)-p[0].y;
+    int[] xs = new int[p[2].y-p[0].y+1];
+    int offset = -p[0].y;
     // int sx = ((((int)(p[0].x-p[1].x))>>31)<<1)+1; //good enough for now. Doesn't perfectly make up for underestimation casting brings
-    xs[0] = (int)p[1].x;
-
+    xs[0] = p[1].x;
+    
+    Vector3 origin = tri.getVerts()[0];
     Vector3 normal = tri.getNormal();
     
     double a = normal.x/normal.z;
     double b = normal.y/normal.z; // Maybe...
-    double zOff = a*p[0].x + b*p[0].y + p[0].z;
+    double zOff = a*origin.x + b*origin.y + origin.z;
 
-    if (p[0].y != p[1].y) MathHelp.line2DToInt((int)p[0].x, (int)p[0].y, (int)p[1].x, (int)p[1].y, (x, y) -> {
+    if (p[0].y != p[1].y) MathHelp.line2DToInt(p[0].x, p[0].y, p[1].x, p[1].y, (x, y) -> {
       xs[y+offset] = x;
       drawPixel(x, y, zOff-a*x-b*y, c);
     });
-    if (p[1].y != p[2].y) MathHelp.line2DToInt((int)p[1].x, (int)p[1].y, (int)p[2].x, (int)p[2].y, (x, y) -> {
+    if (p[1].y != p[2].y) MathHelp.line2DToInt(p[1].x, p[1].y, p[2].x, p[2].y, (x, y) -> {
       xs[y+offset] = x;
-      drawPixel(x, y, zOff-a*x-b*y, c);
+      // drawPixel(x, y, zOff-a*x-b*y, c);
     });
-    MathHelp.line2DToInt((int)p[0].x, (int)p[0].y, (int)p[2].x, (int)p[2].y, (x, y) -> {
-      drawLineHoriz(x, xs[y+offset], y, p[0], normal, c);
-      drawPixel(x, y, zOff-a*x-b*y, c);
+    MathHelp.line2DToInt(p[0].x, p[0].y, p[2].x, p[2].y, (x, y) -> {
+      drawLineHoriz(x, xs[y+offset], y, origin, normal, c);
+      // drawPixel(x, y, zOff-a*x-b*y, c);
     });
   }
 }

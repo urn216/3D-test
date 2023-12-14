@@ -54,7 +54,7 @@ public class RayTri {
     }
     Vector3 surface = rayStart.add(dir.scale(closest));
     Vector3 sNormal = cTri.getNormal();
-    Vector3 intensity = intensityStep(surface, sNormal, bodies, close, true, numSteps);
+    Vector3 intensity = intensityStep(surface, sNormal, bodies, close, close.getModel().getMat().getIntensity(), numSteps);
     Vector2 Puv = cTri.getUVCoords(cU, cV); //get the uv coordinates for this point
     if (numRef>0 && close.getModel().getMat().getReflectivity() != 0) {return close.getModel().getMat().getReflection(getCol(surface, dir.subtract(sNormal.scale(2*sNormal.dot(dir))), bodies, numSteps-1, numRef-1), intensity, Puv.x, Puv.y);}
     return close.getModel().getMat().getIntenseColour(intensity, Puv.x, Puv.y);
@@ -85,13 +85,10 @@ public class RayTri {
         if (u>=0 && v>=0 && u+v<=1) {closest = distToColl; close = body;}
       }
     }
-    if (close == null || close != goal) {return Double.NaN;}
-    return closest;
+    return (close == null || close != goal) ? Double.NaN : closest;
   }
 
-  public static Vector3 intensityStep(Vector3 rayStart, Vector3 sNormal, RigidBody[] bodies, RigidBody sourceBody, boolean first, int numSteps) {
-    Vector3 intensity = new Vector3();
-    if (first) {intensity = intensity.add(sourceBody.getModel().getMat().getIntensity());} //add its own brightness only if first step. Stops endless light buildup.
+  public static Vector3 intensityStep(Vector3 rayStart, Vector3 sNormal, RigidBody[] bodies, RigidBody sourceBody, Vector3 intensity, int numSteps) {
     for (RigidBody body2 : bodies) {
       if (body2 == sourceBody) {continue;} //don't want to endlessly add own light to self.
       Vector3 otherCI = new Vector3(); //core intensity (emitted)
@@ -103,7 +100,7 @@ public class RayTri {
       otherCI = body2.getModel().getMat().getIntensity();
       if (numSteps > 0) {
         otherSI = otherSI.add(body2.getModel().getMat().getAdjIntensity(
-        intensityStep(rayStart.add(dir.scale(distToSurface)), dir.scale(-1), bodies, body2, false, numSteps-1)
+          intensityStep(rayStart.add(dir.scale(distToSurface)), dir.scale(-1), bodies, body2, new Vector3(), numSteps-1)
         ));
       }
       intensity = intensity.add(otherCI.scale(MathHelp.intensity(Math.abs(sNormal.dot(dir)), distToLightSquare)));

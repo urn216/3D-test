@@ -2,6 +2,7 @@ package code.rendering.renderers;
 
 import java.util.stream.Stream;
 
+import mki.math.MathHelp;
 import mki.math.matrix.Quaternion;
 import mki.math.vector.Vector3;
 
@@ -17,7 +18,9 @@ class ProjectionRenderer extends Renderer {
 
   private static final double q = farClippingPlane/(farClippingPlane-nearClippingPlane);
 
-  private static final Vector3 lightDir = new Vector3(1, 1.5, 0).unitize();
+  private static final double lightDistSquared = new Vector3(4000, 10000, 1000).magsquare();
+  private static final Vector3 lightDir = new Vector3(0.4, 1, 0.1).unitize();
+  private static final Vector3 lightCol = new Vector3(Integer.MAX_VALUE);
 
   private double f;
 
@@ -30,45 +33,33 @@ class ProjectionRenderer extends Renderer {
   @Override
   public void render(Drawing d, Vector3 cameraPosition, Quaternion cameraRotation, RigidBody[] bodies) {
     d.fill(-16777216);
+
+    Quaternion worldRotation = cameraRotation.reverse();
+
     Stream.of(bodies).parallel().forEach((b) -> {
       Vector3 offset = b.getPosition().subtract(cameraPosition);
-      Stream.of(b.getModel().getFaces()).parallel().forEach((tri) -> renderTri(d, tri, offset, cameraRotation.reverse(), b.getModel().getMat()));
+      if (offset.z-nearClippingPlane + b.getModel().getRadius() > 0)
+        Stream.of(b.getModel().getFaces()).parallel().forEach((tri) -> renderTri(d, tri, offset, worldRotation, b.getModel().getMat()));
     });
   }
 
-  ///////////                 /////////
-  ////////// SEQUENTIAL CODE //////////
-  /////////                 ///////////
-  //
-  // @Override
-  // public void render(Drawing d, Vector3 position, Vector3 dir, Vector3 upDir, RigidBody[] bodies) {
-  //   d.fill(-16777216);
-  //   for (int i = 0; i < bodies.length; i++) {
-  //     RigidBody body = bodies[i];
-  //     Vector3 offset = body.getPos().subtract(position);
-  //     for (int j = 0; j < body.getFaces().length; j++) {
-  //       renderTri(d, body.getFaces()[j], offset, dir, body.getMat());
-  //     }
-  //   }
-  // }
-
-  private void renderTri(Drawing d, Tri3D tri, Vector3 offset, Quaternion cameraRotation, Material mat) {
+  private void renderTri(Drawing d, Tri3D tri, Vector3 offset, Quaternion worldRotation, Material mat) {
     Vector3 toTri = tri.getVerts()[0].add(offset);
 
     if (toTri.dot(tri.getNormal()) >= -0.01) return;
 
-    Tri3D projectedTri = projectTri(tri, offset, cameraRotation, d.getWidth(), d.getHeight(), d.getAspectRatio());
-    int colour = mat.getIntenseColour(new Vector3((tri.getNormal().dot(lightDir)+1)/2));
+    Tri3D projectedTri = projectTri(tri, offset, worldRotation, d.getWidth(), d.getHeight(), d.getAspectRatio());
+    int colour = mat.getIntenseColour(lightCol.scale(MathHelp.intensity(Math.max(tri.getNormal().dot(lightDir), 0), lightDistSquared)));
     d.fillTri(projectedTri, colour);
     // d.drawTri(projectedTri, -16777216|~colour);
   }
 
-  private Tri3D projectTri(Tri3D triWorld, Vector3 offset, Quaternion cameraRotation, int width, int height, double aspRat) {
+  private Tri3D projectTri(Tri3D triWorld, Vector3 offset, Quaternion worldRotation, int width, int height, double aspRat) {
     return new Tri3D(
       new Vector3[] {
-        projectVector3(cameraRotation.rotate(triWorld.getVerts()[0].add(offset)), aspRat).add(1, 1, 0).scale(0.5*width-1, 0.5*height-1, 1),
-        projectVector3(cameraRotation.rotate(triWorld.getVerts()[1].add(offset)), aspRat).add(1, 1, 0).scale(0.5*width-1, 0.5*height-1, 1),
-        projectVector3(cameraRotation.rotate(triWorld.getVerts()[2].add(offset)), aspRat).add(1, 1, 0).scale(0.5*width-1, 0.5*height-1, 1)
+        projectVector3(worldRotation.rotate(triWorld.getVerts()[0].add(offset)), aspRat).add(1, 1, 0).scale(0.5*width-1, 0.5*height-1, 1),
+        projectVector3(worldRotation.rotate(triWorld.getVerts()[1].add(offset)), aspRat).add(1, 1, 0).scale(0.5*width-1, 0.5*height-1, 1),
+        projectVector3(worldRotation.rotate(triWorld.getVerts()[2].add(offset)), aspRat).add(1, 1, 0).scale(0.5*width-1, 0.5*height-1, 1)
       }, 
       triWorld.getVertUVs(), 
       new int[3],

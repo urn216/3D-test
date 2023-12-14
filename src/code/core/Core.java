@@ -5,7 +5,9 @@ import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 
 import mki.math.vector.Vector3;
+
 import mki.ui.control.UIController;
+
 import code.rendering.renderers.Renderer;
 import code.world.Camera3D;
 import code.world.RigidBody;
@@ -22,9 +24,6 @@ public abstract class Core {
   private static final double TICKS_PER_SECOND = 60;
   private static final double MILLISECONDS_PER_TICK = 1000/TICKS_PER_SECOND;
   
-  private static boolean update = true;
-  private static boolean first = true;
-  
   private static boolean quit = false;
   
   private static RigidBody[] bodies;
@@ -35,9 +34,9 @@ public abstract class Core {
   private static double defaultMovementSpeed = 0.01;
   private static double fasterMovementSpeed  = 0.1;
 
-  private static long previousTick    = System.currentTimeMillis();
-  
+  private static long pTTime = System.currentTimeMillis();
   private static long pFTime = System.currentTimeMillis();
+  
   private static double fps = 0;
   private static int fCount = 0;
   
@@ -50,7 +49,6 @@ public abstract class Core {
     GLOBAL_SETTINGS = new Settings();
     
     bodies = Scene.s5();
-    // bodies = new RigidBody[] {new RigidBody(new Vector3(), new Model(new Vector3[0], new Tri3D[0], new Vector2[0])) {}};
     lightSource = bodies[0];
 
     cam = new Camera3D(
@@ -91,14 +89,16 @@ public abstract class Core {
   * Sets a flag to close the program at the nearest convenience
   */
   public static void quitToDesk() {
+    if (quit) System.exit(1);
+    
     quit = true;
   }
   
   public static void playGame() {
     while (true) {
       long tickTime = System.currentTimeMillis();
-      long deltaTimeMillis = tickTime - previousTick;
-      previousTick  = tickTime;
+      long deltaTimeMillis = tickTime - pTTime;
+      pTTime  = tickTime;
       
       double vel = Controls.KEY_DOWN[KeyEvent.VK_CONTROL] ? fasterMovementSpeed : defaultMovementSpeed;
       if (Controls.KEY_DOWN[KeyEvent.VK_W])     {cam.offsetPositionLocal(0, 0,  vel*deltaTimeMillis    );}
@@ -107,12 +107,12 @@ public abstract class Core {
       if (Controls.KEY_DOWN[KeyEvent.VK_D])     {cam.offsetPositionLocal( vel*deltaTimeMillis, 0, 0    );}
       if (Controls.KEY_DOWN[KeyEvent.VK_SHIFT]) {cam.offsetPositionLocal(0, -0.5*vel*deltaTimeMillis, 0);}
       if (Controls.KEY_DOWN[KeyEvent.VK_SPACE]) {cam.offsetPositionLocal(0,  0.5*vel*deltaTimeMillis, 0);}
-      if (Controls.KEY_DOWN[KeyEvent.VK_I])     {lightSource.move(0, 0,  0.001*deltaTimeMillis);}
-      if (Controls.KEY_DOWN[KeyEvent.VK_K])     {lightSource.move(0, 0, -0.001*deltaTimeMillis);}
-      if (Controls.KEY_DOWN[KeyEvent.VK_J])     {lightSource.move(-0.001*deltaTimeMillis, 0, 0);}
-      if (Controls.KEY_DOWN[KeyEvent.VK_L])     {lightSource.move( 0.001*deltaTimeMillis, 0, 0);}
-      if (Controls.KEY_DOWN[KeyEvent.VK_O])     {lightSource.move(0, -0.001*deltaTimeMillis, 0);}
-      if (Controls.KEY_DOWN[KeyEvent.VK_U])     {lightSource.move(0,  0.001*deltaTimeMillis, 0);}
+      if (Controls.KEY_DOWN[KeyEvent.VK_I])     {lightSource.offsetPosition(new Vector3(0, 0,  0.001*deltaTimeMillis));}
+      if (Controls.KEY_DOWN[KeyEvent.VK_K])     {lightSource.offsetPosition(new Vector3(0, 0, -0.001*deltaTimeMillis));}
+      if (Controls.KEY_DOWN[KeyEvent.VK_J])     {lightSource.offsetPosition(new Vector3(-0.001*deltaTimeMillis, 0, 0));}
+      if (Controls.KEY_DOWN[KeyEvent.VK_L])     {lightSource.offsetPosition(new Vector3( 0.001*deltaTimeMillis, 0, 0));}
+      if (Controls.KEY_DOWN[KeyEvent.VK_O])     {lightSource.offsetPosition(new Vector3(0, -0.001*deltaTimeMillis, 0));}
+      if (Controls.KEY_DOWN[KeyEvent.VK_U])     {lightSource.offsetPosition(new Vector3(0,  0.001*deltaTimeMillis, 0));}
       if (Controls.KEY_DOWN[KeyEvent.VK_UP])    {cam.offsetPitch(-0.1*deltaTimeMillis);}
       if (Controls.KEY_DOWN[KeyEvent.VK_DOWN])  {cam.offsetPitch( 0.1*deltaTimeMillis);}
       if (Controls.KEY_DOWN[KeyEvent.VK_LEFT])  {cam.offsetYaw  (-0.1*deltaTimeMillis);}
@@ -127,12 +127,11 @@ public abstract class Core {
       if (Controls.KEY_DOWN[KeyEvent.VK_B]) {
         setRenderer(Renderer.projection());
       }
+
+      lightSource.offsetYaw(0.05*deltaTimeMillis);
       
-      if (update || first) {
-        cam.draw(bodies);
-        first = false;
-      }
-      
+      cam.draw(bodies);
+
       if (quit) {
         System.exit(0);
       }
