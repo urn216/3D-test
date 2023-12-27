@@ -44,9 +44,9 @@ public class Camera3D {
 
     this.position = position;
 
-    setImageDimensions(imageWidth, imageHeight);
+    this.renderer = renderer;
 
-    setRenderer(renderer);
+    setImageDimensions(imageWidth, imageHeight);
 
     this.dir = new Vector3(0, 0, 1);
     this.rightDir = new Vector3(1, 0, 0);
@@ -85,17 +85,18 @@ public class Camera3D {
 
   public void setFieldOfView(double fieldOfView) {
     this.fieldOfView = Math.toRadians(fieldOfView);
-    this.renderer.updateConstants(this.fieldOfView);
+    this.renderer.updateConstants(this.fieldOfView, this.image.getWidth(), this.image.getHeight());
   }
 
   public void setImageDimensions(int imageWidth, int imageHeight) {
     this.image = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_ARGB); 
     this.imageContents = new Drawing(imageWidth, imageHeight);
+    this.renderer.updateConstants(this.fieldOfView, imageWidth, imageHeight);
   }
 
   public void setRenderer(Renderer renderer) {
     this.renderer = renderer;
-    this.renderer.updateConstants(this.fieldOfView);
+    this.renderer.updateConstants(this.fieldOfView, this.image.getWidth(), this.image.getHeight());
   }
 
   public void offsetPitch(double theta) {

@@ -1,16 +1,20 @@
 package code.core;
 
+import java.awt.Cursor;
+import java.awt.AWTException;
 import java.awt.MouseInfo;
-
+import java.awt.Point;
+import java.awt.Robot;
 import java.awt.event.KeyAdapter;
 import java.awt.event.MouseAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 
 import javax.swing.JFrame;
 
 import mki.math.vector.Vector2I;
-
+import mki.ui.control.UIActionSetter;
 import mki.ui.control.UIController;
 
 /**
@@ -22,34 +26,47 @@ abstract class Controls {
   public static final boolean[] MOUSE_DOWN = new boolean[Math.max(MouseInfo.getNumberOfButtons(), 3)];
   
   public static Vector2I mousePos = new Vector2I();
-  public static Vector2I mousePre = new Vector2I();
+  public static Vector2I mouseOff = new Vector2I();
+
+  public static Cursor backupCursor;
+  public static UIActionSetter<MouseEvent> mouseUpdateAction = Controls::updateMousePos;
+  public static UIActionSetter<MouseEvent> mouseBackupAction = Controls::captureMousePos;
+
+  private static Robot robot = null;
   
   /**
   * Starts up all the listeners for the window. Only to be called once on startup.
   */
   public static void initialiseControls(JFrame FRAME) {
+
+    try {
+      robot = new Robot();
+    } catch (AWTException e) {
+      e.printStackTrace();
+    }
+
+    backupCursor = FRAME.getToolkit().createCustomCursor(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB), new Point(), null);
     
     // Mouse Controls
     FRAME.addMouseMotionListener(new MouseAdapter() {
       @Override
       public void mouseMoved(MouseEvent e) {
-        updateMousePos(e);
+        mouseUpdateAction.set(e);
       }
       
       @Override
       public void mouseDragged(MouseEvent e) {
-        updateMousePos(e);
+        mouseUpdateAction.set(e);
       }
     });
     FRAME.addMouseListener(new MouseAdapter() {
       @Override
       public void mousePressed(MouseEvent e) {
-        updateMousePos(e);
+        mouseUpdateAction.set(e);
 
         MOUSE_DOWN[e.getButton()] = true;
         
         if (UIController.getHighlightedInteractable() == null) MOUSE_DOWN[e.getButton()] = true;
-        mousePre = mousePos;
         
         //left click
         if (e.getButton() == 1) {
@@ -59,13 +76,26 @@ abstract class Controls {
       
       @Override
       public void mouseReleased(MouseEvent e) {
-        updateMousePos(e);
+        mouseUpdateAction.set(e);
         
         MOUSE_DOWN[e.getButton()] = false;
         
         //left click
         if (e.getButton() == 1) {
           UIController.release();
+        }
+
+        if (e.getButton() == 3) {
+          mousePos = new Vector2I(FRAME.getX()+FRAME.getWidth()/2, FRAME.getY()+FRAME.getHeight()/2);
+          robot.mouseMove(mousePos.x, mousePos.y);
+
+          Cursor tempCursor = FRAME.getCursor();
+          FRAME.setCursor(backupCursor);
+          backupCursor = tempCursor;
+
+          UIActionSetter<MouseEvent> tempAction = mouseUpdateAction;
+          mouseUpdateAction = mouseBackupAction;
+          mouseBackupAction = tempAction;
         }
       }
       
@@ -131,5 +161,14 @@ abstract class Controls {
     mousePos = new Vector2I(x, y);
     
     UIController.cursorMove(mousePos);
+  }
+
+  public static void captureMousePos(MouseEvent e) {
+    mouseOff = mouseOff.add(
+      e.getXOnScreen() - mousePos.x, 
+      e.getYOnScreen() - mousePos.y
+    );
+
+    robot.mouseMove(mousePos.x, mousePos.y);
   }
 }

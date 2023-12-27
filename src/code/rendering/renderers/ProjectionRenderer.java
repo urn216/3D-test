@@ -15,6 +15,7 @@ class ProjectionRenderer extends Renderer {
 
   private static final double nearClippingPlane = 0.1;
   private static final double farClippingPlane  = 100;
+  private static final Vector3[] clippingPlanes = new Vector3[4];
 
   private static final double q = farClippingPlane/(farClippingPlane-nearClippingPlane);
 
@@ -25,9 +26,19 @@ class ProjectionRenderer extends Renderer {
   private double f;
 
   @Override
-  public void updateConstants(double fov) {
-    super.updateConstants(fov);
+  public void updateConstants(double fov, int width, int height) {
+    super.updateConstants(fov, width, height);
     this.f = 1/Math.tan(fov/2);
+    double sin = Math.sin(fov/2);
+    double cos = Math.cos(fov/2);
+    clippingPlanes[0] = new Vector3( cos, 0, sin).unitize();
+    clippingPlanes[1] = new Vector3(-cos, 0, sin).unitize();
+    clippingPlanes[2] = new Vector3(0,  cos, sin*height/width).unitize();
+    clippingPlanes[3] = new Vector3(0, -cos, sin*height/width).unitize();
+
+    for (int i = 0; i < clippingPlanes.length; i++) {
+      System.out.println(clippingPlanes[i]);
+    }
   }
 
   @Override
@@ -38,7 +49,14 @@ class ProjectionRenderer extends Renderer {
 
     Stream.of(bodies).parallel().forEach((b) -> {
       Vector3 offset = b.getPosition().subtract(cameraPosition);
-      if (offset.z-nearClippingPlane + b.getModel().getRadius() > 0)
+      Vector3 rotoff = worldRotation.rotate(offset);
+      if (
+        rotoff.z - nearClippingPlane  > b.getModel().getRadius() &&
+        rotoff.dot(clippingPlanes[0]) > b.getModel().getRadius() &&
+        rotoff.dot(clippingPlanes[1]) > b.getModel().getRadius() &&
+        rotoff.dot(clippingPlanes[2]) > b.getModel().getRadius() &&
+        rotoff.dot(clippingPlanes[3]) > b.getModel().getRadius()
+      )
         Stream.of(b.getModel().getFaces()).parallel().forEach((tri) -> renderTri(d, tri, offset, worldRotation, b.getModel().getMat()));
     });
   }

@@ -4,6 +4,7 @@ import java.awt.event.KeyEvent;
 
 import java.awt.image.BufferedImage;
 
+import mki.math.vector.Vector2I;
 import mki.math.vector.Vector3;
 
 import mki.ui.control.UIController;
@@ -128,7 +129,15 @@ public abstract class Core {
         setRenderer(Renderer.projection());
       }
 
-      lightSource.offsetYaw(0.05*deltaTimeMillis);
+      if (Controls.mouseOff.x != 0 || Controls.mouseOff.y != 0) {
+        cam.offsetPitch(Controls.mouseOff.y*0.4);
+        cam.offsetYaw  (Controls.mouseOff.x*0.5);
+        Controls.mouseOff = new Vector2I();
+      }
+
+      lightSource.offsetYaw  (0.05*deltaTimeMillis);
+      lightSource.offsetPitch(0.01*deltaTimeMillis);
+      lightSource.offsetRoll (0.02*deltaTimeMillis);
       
       cam.draw(bodies);
 

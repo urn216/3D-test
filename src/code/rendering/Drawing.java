@@ -128,8 +128,11 @@ public class Drawing {
    * @param c The colour of the line
    */
   public void drawLineHoriz(int x1, int x2, int y, int c) {
-    int sx = (((x2-x1)>>31)<<1)+1;
-    for (; x1!=x2; x1+=sx) {
+    int incrx = (x2-x1)>>31;
+    x1+=incrx; x2+=incrx;
+    int sx = (incrx<<1)+1;
+    
+    for (; x1!=x2+sx; x1+=sx) {
       drawPixel(x1, y, c);
     }
   }
@@ -148,7 +151,10 @@ public class Drawing {
     double a = normal.x/normal.z;
     double b = normal.y/normal.z;
     double zOff = a*p0.x+b*(p0.y-y)+p0.z;
-    int sx = (((x2-x1)>>31)<<1)+1;
+    int incrx = (x2-x1)>>31;
+    x1+=incrx; x2+=incrx;
+    int sx = (incrx<<1)+1;
+
     for (; x1!=x2; x1+=sx) {
       drawPixel(x1, y, zOff-a*x1, c);
     }
@@ -224,6 +230,7 @@ public class Drawing {
 
     int[] xs = new int[p[2].y-p[0].y+1];
     int offset = -p[0].y;
+    xs[0] = p[1].x;
     
     MathHelp.line2DToInt(p[0].x, p[0].y, p[1].x, p[1].y, (x, y) -> {
       xs[y+offset] = x;
@@ -232,10 +239,7 @@ public class Drawing {
       xs[y+offset] = x;
     });
     MathHelp.line2DToInt(p[0].x, p[0].y, p[2].x, p[2].y, (x, y) -> {
-      if (xs[y+offset] >= 0) {
-        drawLineHoriz(x, xs[y+offset], y, mat.getAbsColour());
-        xs[y+offset] = -1;
-      }
+      drawLineHoriz(x, xs[y+offset], y, mat.getAbsColour());
     });
   }
 
@@ -247,7 +251,6 @@ public class Drawing {
 
     int[] xs = new int[p[2].y-p[0].y+1];
     int offset = -p[0].y;
-    int sx = (((p[0].x-p[1].x)>>31)<<1)+1; //good enough for now
     xs[0] = p[1].x;
 
     if (p[0].y != p[1].y) MathHelp.line2DToInt(p[0].x, p[0].y, p[1].x, p[1].y, (x, y) -> {
@@ -257,7 +260,7 @@ public class Drawing {
       xs[y+offset] = x;
     });
     MathHelp.line2DToInt(p[0].x, p[0].y, p[2].x, p[2].y, (x, y) -> {
-      drawLineHoriz(x+sx, xs[y+offset]-sx, y, c);
+      drawLineHoriz(x, xs[y+offset], y, c);
     });
   }
 
@@ -269,27 +272,19 @@ public class Drawing {
 
     int[] xs = new int[p[2].y-p[0].y+1];
     int offset = -p[0].y;
-    // int sx = ((((int)(p[0].x-p[1].x))>>31)<<1)+1; //good enough for now. Doesn't perfectly make up for underestimation casting brings
     xs[0] = p[1].x;
     
     Vector3 origin = tri.getVerts()[0];
     Vector3 normal = tri.getNormal();
-    
-    double a = normal.x/normal.z;
-    double b = normal.y/normal.z; // Maybe...
-    double zOff = a*origin.x + b*origin.y + origin.z;
 
     if (p[0].y != p[1].y) MathHelp.line2DToInt(p[0].x, p[0].y, p[1].x, p[1].y, (x, y) -> {
       xs[y+offset] = x;
-      drawPixel(x, y, zOff-a*x-b*y, c);
     });
     if (p[1].y != p[2].y) MathHelp.line2DToInt(p[1].x, p[1].y, p[2].x, p[2].y, (x, y) -> {
       xs[y+offset] = x;
-      // drawPixel(x, y, zOff-a*x-b*y, c);
     });
     MathHelp.line2DToInt(p[0].x, p[0].y, p[2].x, p[2].y, (x, y) -> {
       drawLineHoriz(x, xs[y+offset], y, origin, normal, c);
-      // drawPixel(x, y, zOff-a*x-b*y, c);
     });
   }
 }

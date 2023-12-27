@@ -14,7 +14,7 @@ public abstract class Renderer {
   public static Renderer raySphere() {return new RaySphereRenderer();}
   public static Renderer projection() {return new ProjectionRenderer();}
 
-  public void updateConstants(double fov) {
+  public void updateConstants(double fov, int width, int height) {
     this.fov = fov;
   }
 
