@@ -38,6 +38,26 @@ public class Tri3D {
     this.vertexTextureIndeces = vertexTextureIndeces;
   }
 
+  private Tri3D(Vector3[] verts, Vector2[] vertUVs, int[] vertexIndeces, int[] vertexTextureIndeces, Vector3 normal) {
+    this.verts = verts;
+    this.vertexIndeces = vertexIndeces;
+
+    this.edges = new Vector3[3];
+
+    this.edges[0] = verts[1].subtract(verts[0]);
+    this.edges[1] = verts[2].subtract(verts[0]);
+    this.edges[2] = this.edges[0].cross(this.edges[1]);
+
+    this.normal = normal;
+
+    this.vertUVs = vertUVs;
+    this.vertexTextureIndeces = vertexTextureIndeces;
+  }
+
+  public Tri3D projectVerts(Vector3 v0, Vector3 v1, Vector3 v2) {
+    return new Tri3D(new Vector3[]{v0, v1, v2}, this.vertUVs, this.vertexIndeces, this.vertexTextureIndeces, this.normal);
+  }
+
   /**
    * @return the verts
    */

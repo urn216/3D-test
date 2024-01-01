@@ -34,6 +34,7 @@ public abstract class Core {
 
   private static double defaultMovementSpeed = 0.01;
   private static double fasterMovementSpeed  = 0.1;
+  private static double reducedMovementSpeed  = 0.001;
 
   private static long pTTime = System.currentTimeMillis();
   private static long pFTime = System.currentTimeMillis();
@@ -56,7 +57,7 @@ public abstract class Core {
       new Vector3(), 
       GLOBAL_SETTINGS.getIntSetting("resolution_X"), 
       GLOBAL_SETTINGS.getIntSetting("resolution_Y"), 
-      Renderer.raySphere()
+      Renderer.projection()
     );
 
     Controls.initialiseControls(WINDOW.FRAME);
@@ -101,7 +102,9 @@ public abstract class Core {
       long deltaTimeMillis = tickTime - pTTime;
       pTTime  = tickTime;
       
-      double vel = Controls.KEY_DOWN[KeyEvent.VK_CONTROL] ? fasterMovementSpeed : defaultMovementSpeed;
+      double vel = 
+        Controls.KEY_DOWN[KeyEvent.VK_CONTROL] ? fasterMovementSpeed : 
+        Controls.KEY_DOWN[KeyEvent.VK_ALT] ?    reducedMovementSpeed : defaultMovementSpeed;
       if (Controls.KEY_DOWN[KeyEvent.VK_W])     {cam.offsetPositionLocal(0, 0,  vel*deltaTimeMillis    );}
       if (Controls.KEY_DOWN[KeyEvent.VK_S])     {cam.offsetPositionLocal(0, 0, -vel*deltaTimeMillis    );}
       if (Controls.KEY_DOWN[KeyEvent.VK_A])     {cam.offsetPositionLocal(-vel*deltaTimeMillis, 0, 0    );}
