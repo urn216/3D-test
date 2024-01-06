@@ -68,8 +68,6 @@ public class Drawing {
    * @param c The colour of the pixel
    */
   public synchronized void drawPixel(int x, int y, double z, int c) {
-    if (y < 0 || y >= height || x < 0 || x >=width) return; //remove
-
     int i = x+y*width;
     z = 1/z;
     if (depths[i] > z) return;
@@ -132,7 +130,7 @@ public class Drawing {
     x1+=incrx; x2+=incrx;
     int sx = (incrx<<1)+1;
     
-    for (; x1!=x2+sx; x1+=sx) {
+    for (; x1!=x2; x1+=sx) {
       drawPixel(x1, y, c);
     }
   }

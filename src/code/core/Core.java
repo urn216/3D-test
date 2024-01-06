@@ -62,9 +62,10 @@ public abstract class Core {
     UIController.putPane("HUD"      , UICreator.createHUD ());
 
     cam = new Camera3D(
-      new Vector3(), 
-      GLOBAL_SETTINGS.getIntSetting("resolution_X"), 
-      GLOBAL_SETTINGS.getIntSetting("resolution_Y"), 
+      new Vector3(),
+      GLOBAL_SETTINGS.getIntSetting("resolution_X"),
+      GLOBAL_SETTINGS.getIntSetting("resolution_Y"),
+      GLOBAL_SETTINGS.getDoubleSetting("fieldOfView"),
       Renderer.projection()
     );
   }

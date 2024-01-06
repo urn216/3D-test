@@ -17,23 +17,18 @@ import code.world.RigidBody;
 
 class ProjectionRenderer extends Renderer {
 
-  private static final double nearClippingPlane = 0.1;
-  private static final double farClippingPlane  = 100;
   private static final Vector3[] clippingPlanes = new Vector3[4];
 
-  private static final double q = farClippingPlane/(farClippingPlane-nearClippingPlane);
+  private static final double q = FAR_CLIPPING_PLANE/(FAR_CLIPPING_PLANE-NEAR_CLIPPING_PLANE);
 
   private static final double lightDistSquared = new Vector3(4000, 10000, 1000).magsquare();
   private static final Vector3 lightDir = new Vector3(0.4, 1, 0.1).unitize();
   private static final Vector3 lightCol = new Vector3(Integer.MAX_VALUE);
   // private static final Vector3 glowLCol  = new Vector3(25, 25, 50);
 
-  private double f;
-
   @Override
   public void updateConstants(double fov, int width, int height) {
     super.updateConstants(fov, width, height);
-    this.f = 1/Math.tan(fov/2);
     double sin = Math.sin(fov/2);
     double cos = Math.cos(fov/2);
     clippingPlanes[0] = new Vector3( cos, 0, sin).unitize();
@@ -57,7 +52,7 @@ class ProjectionRenderer extends Renderer {
       double rad  = b.getModel().getRadius();
       boolean partial = false;
       
-      double clip = offrot.z - nearClippingPlane;
+      double clip = offrot.z - NEAR_CLIPPING_PLANE;
       if (clip < -rad) return;
       if (clip <= rad) partial = true;
 
@@ -69,7 +64,7 @@ class ProjectionRenderer extends Renderer {
       
       //drawing tris
       Stream<Tri3D> s = Stream.of(b.getModel().getFaces()).parallel()
-      .filter((tri) -> tri.getVerts()[0].add(offset).dot(tri.getNormal()) < -0.01)
+      .filter((tri) -> tri.getVerts()[0].add(offset).dot(tri.getNormal()) < -0.00001)
       .map((tri) -> tri.projectVerts(
         worldRotation.rotate(tri.getVerts()[0].add(offset)),
         worldRotation.rotate(tri.getVerts()[1].add(offset)),
@@ -128,8 +123,8 @@ class ProjectionRenderer extends Renderer {
     }
 
     againstPlane(
-      i, o, iTris, (v) -> v.z - nearClippingPlane < 0, (a, b) -> c.accept(a),
-      (a, b) -> (nearClippingPlane-a.z)/b.z
+      i, o, iTris, (v) -> v.z - NEAR_CLIPPING_PLANE < 0, (a, b) -> c.accept(a),
+      (a, b) -> (NEAR_CLIPPING_PLANE-a.z)/b.z
     );
   }
 
@@ -239,7 +234,7 @@ class ProjectionRenderer extends Renderer {
     return new Vector3(
       vecWorld.x*f/vecWorld.z, 
       -vecWorld.y*f/(vecWorld.z*aspRat),
-      (-nearClippingPlane/vecWorld.z+1)*q
+      (-NEAR_CLIPPING_PLANE/vecWorld.z+1)*q
     );
   }
 }

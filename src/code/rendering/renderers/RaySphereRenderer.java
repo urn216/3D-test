@@ -11,29 +11,31 @@ import code.world.RigidBody;
 
 class RaySphereRenderer extends Renderer {
 
+  private double offset;
+  
+  private int numSteps = 0;
+  private int numReflections = 3;
+
+  @Override
+  public void updateConstants(double fov, int width, int height) {
+    super.updateConstants(fov, width, height);
+    this.offset = 2*NEAR_CLIPPING_PLANE/(f*width);
+  }
+
   @Override
   public void render(Drawing d, Vector3 cameraPosition, Quaternion cameraRotation, RigidBody[] bodies) {
-    // for (int y = 0; y < d.getHeight(); y++) {
-    //   double percentDown = (-0.5+(double)y/d.getHeight());
-    //   Matrix pitchMatrix = Matrix.rotateXLocal(percentDown*fov*d.getAspectRatio(), dir);
-    //   Vector3 vDir = pitchMatrix.multiply(dir);
-    //   for (int x = 0; x < d.getWidth(); x++) {
-    //     double percentAlong = (-0.5+(double)x/d.getWidth());
-    //     Vector3 rayDir = Matrix.rotateLocal(percentAlong*fov, upDir).multiply(vDir);
-    //     d.drawPixel(x, y, RaySphere.getCol(position, rayDir, bodies, 0, 3));
-    //   }
-    // }
-    Vector3 forward = new Vector3(0, 0, 1);
+    int canvasWidth  = d.getWidth ();
+    int canvasHeight = d.getHeight();
 
-    IntStream.range(0, d.getHeight()).parallel().forEach((y) -> {
-      double pitch = (-0.5+(double)y/d.getHeight())*fov*d.getAspectRatio();
-      IntStream.range(0, d.getWidth()).parallel().forEach((x) -> {
-        double yaw = (-0.5+(double)x/d.getWidth())*fov;
-        Quaternion pixelRotation = Quaternion.fromPitchYawRoll(pitch, yaw, 0);
-        Vector3 rayDir = cameraRotation.rotate(pixelRotation.rotate(forward));
-        d.drawPixel(x, y, RaySphere.getCol(cameraPosition, rayDir, bodies, 0, 3));
+    IntStream.range(0, canvasHeight).parallel().forEach((y) -> {
+      double pitch = -(y-canvasHeight/2) * offset;
+      IntStream.range(0, canvasWidth).parallel().forEach((x) -> {
+        double yaw =  (x-canvasWidth /2) * offset;
+        
+        Vector3 pixelDir = new Vector3(yaw, pitch, NEAR_CLIPPING_PLANE).unitize();
+        Vector3 rayDir = cameraRotation.rotate(pixelDir);
+        d.drawPixel(x, y, RaySphere.getCol(cameraPosition, rayDir, bodies, numSteps, numReflections));
       });
     });
   }
-  
 }

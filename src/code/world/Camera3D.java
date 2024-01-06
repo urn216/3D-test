@@ -17,7 +17,7 @@ public class Camera3D {
 
   private Renderer renderer;
 
-  private double fieldOfView = Math.toRadians(80);
+  private double fieldOfView;
 
   private Vector3 position;
 
@@ -39,13 +39,15 @@ public class Camera3D {
   *
   * Constructs a camera with a position vector, a default zoom level, and the current resolution of the game window.
   */
-  public Camera3D(Vector3 position, int imageWidth, int imageHeight, Renderer renderer) {
+  public Camera3D(Vector3 position, int imageWidth, int imageHeight, double fieldOfView, Renderer renderer) {
     if (position == null) throw new IllegalArgumentException("Camera must have a position Vector!");
     if (renderer == null) throw new IllegalArgumentException("Camera must have a rendering method!");
 
     this.position = position;
 
     this.renderer = renderer;
+
+    this.fieldOfView = Math.toRadians(fieldOfView);
 
     setImageDimensions(imageWidth, imageHeight);
 
