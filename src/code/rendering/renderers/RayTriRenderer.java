@@ -3,6 +3,8 @@ package code.rendering.renderers;
 import mki.math.matrix.Quaternion;
 import mki.math.vector.Vector3;
 
+import java.util.stream.IntStream;
+
 import code.math.ray.RayTri;
 import code.rendering.Drawing;
 import code.world.RigidBody;
@@ -59,15 +61,15 @@ class RayTriRenderer extends Renderer {
     //SINGLE THREAD:
     Vector3 forward = new Vector3(0, 0, 1);
 
-    for (int y = 0; y < d.getHeight(); y++) {
+    IntStream.range(0, d.getHeight()).parallel().forEach((y) -> {
       double pitch = (-0.5+(double)y/d.getHeight())*fov*d.getAspectRatio();
-      for (int x = 0; x < d.getWidth(); x++) {
+      IntStream.range(0, d.getWidth()).parallel().forEach((x) -> {
         double yaw = (-0.5+(double)x/d.getWidth())*fov;
         Quaternion pixelRotation = Quaternion.fromPitchYawRoll(pitch, yaw, 0);
         Vector3 rayDir = cameraRotation.rotate(pixelRotation.rotate(forward));
         d.drawPixel(x, y, RayTri.getCol(cameraPosition, rayDir, bodies, 0, 3));
-      }
-    }
+      });
+    });
 
     //DEPRECATED:
     // for (int y = 0; y < DEFAULT_SCREEN_SIZE.y; y+=sparsity) {
