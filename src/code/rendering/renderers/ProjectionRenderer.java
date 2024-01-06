@@ -206,9 +206,9 @@ class ProjectionRenderer extends Renderer {
     // double distSquared = verts[0].magsquare();
 
     tri.setVerts(
-      projectVector3(verts[0], aspRat).add(1, 1, 0).scale(0.5*width-1, 0.5*height-1, 1),
-      projectVector3(verts[1], aspRat).add(1, 1, 0).scale(0.5*width-1, 0.5*height-1, 1),
-      projectVector3(verts[2], aspRat).add(1, 1, 0).scale(0.5*width-1, 0.5*height-1, 1)
+      projectVector3(verts[0], aspRat).add(1, 1, 0).scale(0.5*width, 0.5*height-1, 1),
+      projectVector3(verts[1], aspRat).add(1, 1, 0).scale(0.5*width, 0.5*height-1, 1),
+      projectVector3(verts[2], aspRat).add(1, 1, 0).scale(0.5*width, 0.5*height-1, 1)
     );
 
     //COLOUR
