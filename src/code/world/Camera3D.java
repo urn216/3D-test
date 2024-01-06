@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage;
 
 import mki.math.MathHelp;
 import mki.math.matrix.Quaternion;
+import mki.math.vector.Vector2I;
 import mki.math.vector.Vector3;
 
 import code.rendering.Drawing;
@@ -48,11 +49,7 @@ public class Camera3D {
 
     setImageDimensions(imageWidth, imageHeight);
 
-    this.dir = new Vector3(0, 0, 1);
-    this.rightDir = new Vector3(1, 0, 0);
-    this.upDir = new Vector3(0, 1, 0);
-
-    this.q = Quaternion.fromAxisAngle(0, new Vector3());
+    resetRotation();
   }
 
   public double getFieldOfView() {return Math.toDegrees(fieldOfView);}
@@ -60,6 +57,10 @@ public class Camera3D {
   public synchronized BufferedImage getImage() {return image;}
 
   public double getImageAspectRatio() {return imageContents.getAspectRatio();}
+
+  public Vector2I getImageDimensions() {
+    return new Vector2I(imageContents.getWidth(), imageContents.getHeight());
+  }
 
   public Vector3 getPosition() {return position;}
 
@@ -97,6 +98,16 @@ public class Camera3D {
   public void setRenderer(Renderer renderer) {
     this.renderer = renderer;
     this.renderer.updateConstants(this.fieldOfView, this.image.getWidth(), this.image.getHeight());
+  }
+
+  public void resetRotation() {
+    this.pitch = this.yaw = this.roll = 0;
+
+    this.dir = new Vector3(0, 0, 1);
+    this.rightDir = new Vector3(1, 0, 0);
+    this.upDir = new Vector3(0, 1, 0);
+
+    this.q = Quaternion.fromAxisAngle(0, new Vector3());
   }
 
   public void offsetPitch(double theta) {

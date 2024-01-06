@@ -10,6 +10,7 @@ import code.world.RigidBody;
 import code.world.object.Dropship;
 import code.world.object.LowPoly;
 import code.world.object.Map;
+import code.world.object.MapBlock;
 import code.world.object.Room;
 import code.world.object.Sphere;
 
@@ -55,6 +56,14 @@ public abstract class Scene {
       new Sphere(new Vector3(-1, -1, 2.5), 0.1, new Material(new Vector3(255, 255, 255), 0f, new Vector3(0, 5, 10))),
       new Sphere(new Vector3(4000, 10000, 1000), 80, new Material(new Vector3(255, 255, 255), 0f, new Vector3(Integer.MAX_VALUE))),
       new Map(new Vector3(0, -28, 0), 1, new Material(new Vector3(150, 150, 150), 0f, new Vector3()))
+    };
+  };
+
+  public static RigidBody[] s4_1() {
+    return new RigidBody[] {
+      new Sphere(new Vector3(-1, -1, 2.5), 0.1, new Material(new Vector3(255, 255, 255), 0f, new Vector3(0, 5, 10))),
+      new Sphere(new Vector3(4000, 10000, 1000), 80, new Material(new Vector3(255, 255, 255), 0f, new Vector3(Integer.MAX_VALUE))),
+      new MapBlock(new Vector3(0, -28, 0), 1, new Material(new Vector3(150, 150, 150), 0f, new Vector3()))
     };
   };
 

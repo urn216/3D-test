@@ -1,10 +1,8 @@
 package code.core;
 
-import java.awt.event.KeyEvent;
-
 import java.awt.image.BufferedImage;
 
-import mki.math.vector.Vector2I;
+import mki.io.FileIO;
 import mki.math.vector.Vector3;
 
 import mki.ui.control.UIController;
@@ -13,8 +11,15 @@ import code.rendering.renderers.Renderer;
 import code.world.Camera3D;
 import code.world.RigidBody;
 
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+
+enum State {
+  MAINMENU,
+  RUN,
+  SPLASH
+}
 
 public abstract class Core {
   
@@ -24,17 +29,20 @@ public abstract class Core {
   
   private static final double TICKS_PER_SECOND = 60;
   private static final double MILLISECONDS_PER_TICK = 1000/TICKS_PER_SECOND;
+
+  private static final long START_TIME = System.currentTimeMillis();
+  private static final int SPLASH_TIME = 1000;
+  
+  private static final BufferedImage SPLASH;
+
+  private static State state = State.SPLASH;
   
   private static boolean quit = false;
   
-  private static RigidBody[] bodies;
-  private static RigidBody lightSource;
+  private static RigidBody[] bodies = {};
+  private static RigidBody lightSource = null;
   
   private static Camera3D cam;
-
-  private static double defaultMovementSpeed = 0.01;
-  private static double fasterMovementSpeed  = 0.1;
-  private static double reducedMovementSpeed  = 0.001;
 
   private static long pTTime = System.currentTimeMillis();
   private static long pFTime = System.currentTimeMillis();
@@ -44,14 +52,14 @@ public abstract class Core {
   
   static {
     WINDOW = new Window("3D Test", (x, y) -> {});
-
-    UIController.putPane("Main Menu", UICreator.createMain());
-    UIController.setCurrentPane("Main Menu");
     
     GLOBAL_SETTINGS = new Settings();
-    
-    bodies = Scene.s5();
-    lightSource = bodies[0];
+
+    SPLASH = FileIO.readImage("splash.png");
+    WINDOW.FRAME.setBackground(new Color(173, 173, 173));
+
+    UIController.putPane("Main Menu", UICreator.createMain());
+    UIController.putPane("HUD"      , UICreator.createHUD ());
 
     cam = new Camera3D(
       new Vector3(), 
@@ -59,8 +67,6 @@ public abstract class Core {
       GLOBAL_SETTINGS.getIntSetting("resolution_Y"), 
       Renderer.projection()
     );
-
-    Controls.initialiseControls(WINDOW.FRAME);
   }
   
   /**
@@ -83,8 +89,30 @@ public abstract class Core {
     return fps;
   }
 
+  public static State getState() {
+    return state;
+  }
+
   public static void setRenderer(Renderer r) {
     cam.setRenderer(r);
+  }
+
+  public static void quitToMenu() {
+    cam.setPosition(new Vector3());
+    cam.resetRotation();
+    Core.bodies = new RigidBody[0];
+    Core.lightSource = null;
+    Core.state = State.MAINMENU;
+    UIController.setCurrentPane("Main Menu");
+  }
+
+  public static void loadScene(RigidBody[] bodies) {
+    cam.setPosition(new Vector3());
+    cam.resetRotation();
+    Core.bodies = bodies;
+    Core.lightSource = bodies[0];
+    Core.state = State.RUN;
+    UIController.setCurrentPane("HUD");
   }
   
   /**
@@ -101,46 +129,22 @@ public abstract class Core {
       long tickTime = System.currentTimeMillis();
       long deltaTimeMillis = tickTime - pTTime;
       pTTime  = tickTime;
-      
-      double vel = 
-        Controls.KEY_DOWN[KeyEvent.VK_CONTROL] ? fasterMovementSpeed : 
-        Controls.KEY_DOWN[KeyEvent.VK_ALT] ?    reducedMovementSpeed : defaultMovementSpeed;
-      if (Controls.KEY_DOWN[KeyEvent.VK_W])     {cam.offsetPositionLocal(0, 0,  vel*deltaTimeMillis    );}
-      if (Controls.KEY_DOWN[KeyEvent.VK_S])     {cam.offsetPositionLocal(0, 0, -vel*deltaTimeMillis    );}
-      if (Controls.KEY_DOWN[KeyEvent.VK_A])     {cam.offsetPositionLocal(-vel*deltaTimeMillis, 0, 0    );}
-      if (Controls.KEY_DOWN[KeyEvent.VK_D])     {cam.offsetPositionLocal( vel*deltaTimeMillis, 0, 0    );}
-      if (Controls.KEY_DOWN[KeyEvent.VK_SHIFT]) {cam.offsetPositionLocal(0, -0.5*vel*deltaTimeMillis, 0);}
-      if (Controls.KEY_DOWN[KeyEvent.VK_SPACE]) {cam.offsetPositionLocal(0,  0.5*vel*deltaTimeMillis, 0);}
-      if (Controls.KEY_DOWN[KeyEvent.VK_I])     {lightSource.offsetPosition(new Vector3(0, 0,  0.001*deltaTimeMillis));}
-      if (Controls.KEY_DOWN[KeyEvent.VK_K])     {lightSource.offsetPosition(new Vector3(0, 0, -0.001*deltaTimeMillis));}
-      if (Controls.KEY_DOWN[KeyEvent.VK_J])     {lightSource.offsetPosition(new Vector3(-0.001*deltaTimeMillis, 0, 0));}
-      if (Controls.KEY_DOWN[KeyEvent.VK_L])     {lightSource.offsetPosition(new Vector3( 0.001*deltaTimeMillis, 0, 0));}
-      if (Controls.KEY_DOWN[KeyEvent.VK_O])     {lightSource.offsetPosition(new Vector3(0, -0.001*deltaTimeMillis, 0));}
-      if (Controls.KEY_DOWN[KeyEvent.VK_U])     {lightSource.offsetPosition(new Vector3(0,  0.001*deltaTimeMillis, 0));}
-      if (Controls.KEY_DOWN[KeyEvent.VK_UP])    {cam.offsetPitch(-0.1*deltaTimeMillis);}
-      if (Controls.KEY_DOWN[KeyEvent.VK_DOWN])  {cam.offsetPitch( 0.1*deltaTimeMillis);}
-      if (Controls.KEY_DOWN[KeyEvent.VK_LEFT])  {cam.offsetYaw  (-0.1*deltaTimeMillis);}
-      if (Controls.KEY_DOWN[KeyEvent.VK_RIGHT]) {cam.offsetYaw  ( 0.1*deltaTimeMillis);}
 
-      if (Controls.KEY_DOWN[KeyEvent.VK_T]) {
-        setRenderer(Renderer.rayTri());
+      if (state == State.SPLASH && tickTime-START_TIME >= SPLASH_TIME) {
+        Controls.initialiseControls(WINDOW.FRAME);
+        quitToMenu();
       }
-      if (Controls.KEY_DOWN[KeyEvent.VK_G]) {
-        setRenderer(Renderer.raySphere());
-      }
-      if (Controls.KEY_DOWN[KeyEvent.VK_B]) {
-        setRenderer(Renderer.projection());
-      }
+      else if (state == State.RUN) {
+        Controls.doInput(deltaTimeMillis, cam);
 
-      if (Controls.mouseOff.x != 0 || Controls.mouseOff.y != 0) {
-        cam.offsetPitch(Controls.mouseOff.y*0.4);
-        cam.offsetYaw  (Controls.mouseOff.x*0.5);
-        Controls.mouseOff = new Vector2I();
-      }
+        if (lightSource != null) {
+          Controls.targetInput(deltaTimeMillis, lightSource);
 
-      lightSource.offsetYaw  (0.05*deltaTimeMillis);
-      lightSource.offsetPitch(0.01*deltaTimeMillis);
-      lightSource.offsetRoll (0.02*deltaTimeMillis);
+          lightSource.offsetYaw  (0.05*deltaTimeMillis);
+          lightSource.offsetPitch(0.01*deltaTimeMillis);
+          lightSource.offsetRoll (0.02*deltaTimeMillis);
+        }
+      }
       
       cam.draw(bodies);
 
@@ -162,10 +166,17 @@ public abstract class Core {
   */
   public static void paintComponent(Graphics gra) {
 
-    int size = Math.min(WINDOW.screenWidth(), (int)(WINDOW.screenHeight()/cam.getImageAspectRatio()));
-    gra.drawImage(cam.getImage().getScaledInstance(size, (int)(size*cam.getImageAspectRatio()), BufferedImage.SCALE_DEFAULT), 0, 0, null);
+    switch (state) {
+      case SPLASH:
+        gra.drawImage(SPLASH, (WINDOW.screenWidth()-SPLASH.getWidth())/2, (WINDOW.screenHeight()-SPLASH.getHeight())/2, null);
+      break;
+      default:
+        int size = Math.min(WINDOW.screenWidth(), (int)(WINDOW.screenHeight()/cam.getImageAspectRatio()));
+        gra.drawImage(cam.getImage().getScaledInstance(size, (int)(size*cam.getImageAspectRatio()), BufferedImage.SCALE_DEFAULT), 0, 0, null);
     
-    UIController.draw((Graphics2D)gra, WINDOW.screenWidth(), WINDOW.screenHeight());
+        UIController.draw((Graphics2D)gra, WINDOW.screenWidth(), WINDOW.screenHeight());
+      break;
+    }
 
     long cFTime = System.currentTimeMillis();
 

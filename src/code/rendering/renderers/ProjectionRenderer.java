@@ -219,8 +219,8 @@ class ProjectionRenderer extends Renderer {
     //COLOUR
 
     int colour = mat.getIntenseColour(
-      // lightCol.scale(MathHelp.intensity((normal.dot(lightDir)+1)/2, lightDistSquared))
-      lightCol.scale(MathHelp.intensity(Math.max(normal.dot(lightDir), 0), lightDistSquared))
+      lightCol.scale(MathHelp.intensity((normal.dot(lightDir)+1)/2, lightDistSquared))
+      // lightCol.scale(MathHelp.intensity(Math.max(normal.dot(lightDir), 0), lightDistSquared))
       // .add(glowLCol.scale(MathHelp.intensity(Math.max(normal.dot(vert0), 0),distSquared)))
     );
     d.fillTri(tri, colour);

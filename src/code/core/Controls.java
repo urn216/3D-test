@@ -13,7 +13,11 @@ import java.awt.image.BufferedImage;
 
 import javax.swing.JFrame;
 
+import code.rendering.renderers.Renderer;
+import code.world.Camera3D;
+import code.world.RigidBody;
 import mki.math.vector.Vector2I;
+import mki.math.vector.Vector3;
 import mki.ui.control.UIActionSetter;
 import mki.ui.control.UIController;
 
@@ -33,6 +37,10 @@ abstract class Controls {
   public static UIActionSetter<MouseEvent> mouseBackupAction = Controls::captureMousePos;
 
   private static Robot robot = null;
+
+  private static double defaultMovementSpeed = 0.01;
+  private static double fasterMovementSpeed  = 0.1;
+  private static double reducedMovementSpeed  = 0.001;
   
   /**
   * Starts up all the listeners for the window. Only to be called once on startup.
@@ -85,7 +93,7 @@ abstract class Controls {
           UIController.release();
         }
 
-        if (e.getButton() == 3) {
+        if (e.getButton() == 3 && Core.getState() == State.RUN) {
           mousePos = new Vector2I(FRAME.getX()+FRAME.getWidth()/2, FRAME.getY()+FRAME.getHeight()/2);
           robot.mouseMove(mousePos.x, mousePos.y);
 
@@ -170,5 +178,46 @@ abstract class Controls {
     );
 
     robot.mouseMove(mousePos.x, mousePos.y);
+  }
+
+  public static void doInput(long deltaTimeMillis, Camera3D cam) {
+    double vel = 
+      Controls.KEY_DOWN[KeyEvent.VK_CONTROL] ? fasterMovementSpeed : 
+      Controls.KEY_DOWN[KeyEvent.VK_ALT] ?    reducedMovementSpeed : defaultMovementSpeed;
+    if (Controls.KEY_DOWN[KeyEvent.VK_W])     {cam.offsetPositionLocal(0, 0,  vel*deltaTimeMillis    );}
+    if (Controls.KEY_DOWN[KeyEvent.VK_S])     {cam.offsetPositionLocal(0, 0, -vel*deltaTimeMillis    );}
+    if (Controls.KEY_DOWN[KeyEvent.VK_A])     {cam.offsetPositionLocal(-vel*deltaTimeMillis, 0, 0    );}
+    if (Controls.KEY_DOWN[KeyEvent.VK_D])     {cam.offsetPositionLocal( vel*deltaTimeMillis, 0, 0    );}
+    if (Controls.KEY_DOWN[KeyEvent.VK_SHIFT]) {cam.offsetPositionLocal(0, -0.5*vel*deltaTimeMillis, 0);}
+    if (Controls.KEY_DOWN[KeyEvent.VK_SPACE]) {cam.offsetPositionLocal(0,  0.5*vel*deltaTimeMillis, 0);}
+    if (Controls.KEY_DOWN[KeyEvent.VK_UP])    {cam.offsetPitch(-0.1*deltaTimeMillis);}
+    if (Controls.KEY_DOWN[KeyEvent.VK_DOWN])  {cam.offsetPitch( 0.1*deltaTimeMillis);}
+    if (Controls.KEY_DOWN[KeyEvent.VK_LEFT])  {cam.offsetYaw  (-0.1*deltaTimeMillis);}
+    if (Controls.KEY_DOWN[KeyEvent.VK_RIGHT]) {cam.offsetYaw  ( 0.1*deltaTimeMillis);}
+
+    if (Controls.KEY_DOWN[KeyEvent.VK_T]) {
+      Core.setRenderer(Renderer.rayTri());
+    }
+    if (Controls.KEY_DOWN[KeyEvent.VK_G]) {
+      Core.setRenderer(Renderer.raySphere());
+    }
+    if (Controls.KEY_DOWN[KeyEvent.VK_B]) {
+      Core.setRenderer(Renderer.projection());
+    }
+
+    if (Controls.mouseOff.x != 0 || Controls.mouseOff.y != 0) {
+      cam.offsetPitch(Controls.mouseOff.y*0.4);
+      cam.offsetYaw  (Controls.mouseOff.x*0.5);
+      Controls.mouseOff = new Vector2I();
+    }
+  }
+
+  public static void targetInput(long deltaTimeMillis, RigidBody target) {
+    if (Controls.KEY_DOWN[KeyEvent.VK_I]) {target.offsetPosition(new Vector3(0, 0,  0.001*deltaTimeMillis));}
+    if (Controls.KEY_DOWN[KeyEvent.VK_K]) {target.offsetPosition(new Vector3(0, 0, -0.001*deltaTimeMillis));}
+    if (Controls.KEY_DOWN[KeyEvent.VK_J]) {target.offsetPosition(new Vector3(-0.001*deltaTimeMillis, 0, 0));}
+    if (Controls.KEY_DOWN[KeyEvent.VK_L]) {target.offsetPosition(new Vector3( 0.001*deltaTimeMillis, 0, 0));}
+    if (Controls.KEY_DOWN[KeyEvent.VK_O]) {target.offsetPosition(new Vector3(0, -0.001*deltaTimeMillis, 0));}
+    if (Controls.KEY_DOWN[KeyEvent.VK_U]) {target.offsetPosition(new Vector3(0,  0.001*deltaTimeMillis, 0));}
   }
 }
