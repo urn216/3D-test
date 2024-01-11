@@ -71,6 +71,7 @@ public class UICreator {
       new UIButton("Terrain" , () -> Core.loadScene(Scene.s4())),
       new UIButton("Voxels"  , () -> Core.loadScene(Scene.s4_1())),
       new UIButton("Marble 2", () -> Core.loadScene(Scene.s5())),
+      new UIButton("Cubes"   , () -> Core.loadScene(Scene.s7())),
       new UIButton("Back", UIController::back)
     );
 

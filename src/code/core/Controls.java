@@ -206,8 +206,8 @@ abstract class Controls {
     }
 
     if (Controls.mouseOff.x != 0 || Controls.mouseOff.y != 0) {
-      cam.offsetPitch(Controls.mouseOff.y*0.4);
-      cam.offsetYaw  (Controls.mouseOff.x*0.5);
+      cam.offsetPitch(Controls.mouseOff.y*0.25);
+      cam.offsetYaw  (Controls.mouseOff.x*0.3);
       Controls.mouseOff = new Vector2I();
     }
   }

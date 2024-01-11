@@ -8,7 +8,7 @@ import mki.io.FileIO;
 import mki.math.matrix.Quaternion;
 import mki.math.vector.Vector2;
 import mki.math.vector.Vector3;
-
+import mki.math.vector.Vector3I;
 import code.math.tri.Tri3D;
 
 public class Model {
@@ -17,7 +17,7 @@ public class Model {
   protected final Tri3D  [] faces;
   protected final Vector2[] vertUVs;
 
-  protected Material mat = new Material(new Vector3(255), 0, new Vector3());
+  protected Material mat = new Material(new Vector3I(255), 0, new Vector3());
 
   protected double radius = 1;
 
@@ -53,7 +53,9 @@ public class Model {
           int a = scan.nextInt(), b = scan.nextInt(), c = scan.nextInt();
           fs.add(new Tri3D(
             new Vector3[]{vs.get(a-1), vs.get(b-1), vs.get(c-1)}, 
-            new int[]{a, b, c}
+            new Vector2[]{new Vector2(), new Vector2(), new Vector2()}, 
+            new int[]{a, b, c}, 
+            new int[]{0, 0, 0}
           ));
         }
         else {

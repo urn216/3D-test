@@ -40,7 +40,7 @@ public class RaySphere {
     Vector3 surface = rayStart.add(dir.scale(closest));
     Vector3 sNormal = surface.subtract(close.getPosition()).unitize();
     Vector3 intensity = intensityStep(surface, sNormal, bodies, close, close.getModel().getMat().getIntensity(), numSteps);
-    Vector2 Puv = MathHelp.sphereUVPoint(sNormal); //get the uv coordinates for this point
+    Vector2 Puv = MathHelp.sphereUVPoint(close.getRotation().reverse().rotate(sNormal)); //get the uv coordinates for this point
     if (numRef>0 && close.getModel().getMat().getReflectivity() != 0) {return close.getModel().getMat().getReflection(getCol(surface, dir.subtract(sNormal.scale(2*sNormal.dot(dir))), bodies, numSteps-1, numRef-1), intensity, Puv.x, Puv.y);}
     return close.getModel().getMat().getIntenseColour(intensity, Puv.x, Puv.y);
   }

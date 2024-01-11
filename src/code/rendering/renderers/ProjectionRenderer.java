@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 
 import mki.math.MathHelp;
 import mki.math.matrix.Quaternion;
+import mki.math.vector.Vector2;
 import mki.math.vector.Vector3;
 
 import code.math.tri.Tri3D;
@@ -19,7 +20,7 @@ class ProjectionRenderer extends Renderer {
 
   private static final Vector3[] clippingPlanes = new Vector3[4];
 
-  private static final double q = FAR_CLIPPING_PLANE/(FAR_CLIPPING_PLANE-NEAR_CLIPPING_PLANE);
+  // private static final double q = FAR_CLIPPING_PLANE/(FAR_CLIPPING_PLANE-NEAR_CLIPPING_PLANE);
 
   private static final double lightDistSquared = new Vector3(4000, 10000, 1000).magsquare();
   private static final Vector3 lightDir = new Vector3(0.4, 1, 0.1).unitize();
@@ -165,24 +166,40 @@ class ProjectionRenderer extends Renderer {
   private void clip2Verts(Tri3D tri, Vector3[] verts, int A, int o, BiConsumer<Tri3D, Integer> c, BiFunction<Vector3, Vector3, Double> primer) {
     int B = (A+1)%3;
     int C = (A+2)%3;
+
     Vector3 vBsA = verts[B].subtract(verts[A]);
     Vector3 vCsA = verts[C].subtract(verts[A]);
-    Vector3 vABPrime = verts[A].add(vBsA.scale(primer.apply(verts[A], vBsA)));
-    Vector3 vACPrime = verts[A].add(vCsA.scale(primer.apply(verts[A], vCsA)));
+    double tAB = primer.apply(verts[A], vBsA);
+    double tAC = primer.apply(verts[A], vCsA);
 
-    c.accept(tri.projectVerts(verts[B], vABPrime, verts[C]), o);
-    c.accept(tri.projectVerts(verts[C], vABPrime, vACPrime), o+1);
+    Vector2[] texels = tri.getVertUVs();
+
+    Vector3 vABPrime = verts[A].add(vBsA.scale(tAB));
+    Vector3 vACPrime = verts[A].add(vCsA.scale(tAC));
+    Vector2 uvABPrime = texels[A].add(texels[B].subtract(texels[A]).scale(tAB));
+    Vector2 uvACPrime = texels[A].add(texels[C].subtract(texels[A]).scale(tAC));
+
+    c.accept(tri.projectVerts(verts[B], vABPrime, verts[C], texels[B], uvABPrime, texels[C]), o);
+    c.accept(tri.projectVerts(verts[C], vABPrime, vACPrime, texels[C], uvABPrime, uvACPrime), o+1);
   }
 
   private void clip1Vert(Tri3D tri, Vector3[] verts, int A, int B, int o, BiConsumer<Tri3D, Integer> c, BiFunction<Vector3, Vector3, Double> primer) {
     int C = (A+1)%3;
     C = C == B ? (A+2)%3 : C;
+
     Vector3 vCsA = verts[C].subtract(verts[A]);
     Vector3 vCsB = verts[C].subtract(verts[B]);
-    Vector3 vACPrime = verts[A].add(vCsA.scale(primer.apply(verts[A], vCsA)));
-    Vector3 vBCPrime = verts[B].add(vCsB.scale(primer.apply(verts[B], vCsB)));
+    double tAC = primer.apply(verts[A], vCsA);
+    double tBC = primer.apply(verts[B], vCsB);
 
-    c.accept(tri.projectVerts(verts[C], vACPrime, vBCPrime), o);
+    Vector2[] texels = tri.getVertUVs();
+
+    Vector3 vACPrime = verts[A].add(vCsA.scale(tAC));
+    Vector3 vBCPrime = verts[B].add(vCsB.scale(tBC));
+    Vector2 uvACPrime = texels[A].add(texels[C].subtract(texels[A]).scale(tAC));
+    Vector2 uvBCPrime = texels[B].add(texels[C].subtract(texels[B]).scale(tBC));
+
+    c.accept(tri.projectVerts(verts[C], vACPrime, vBCPrime, texels[C], uvACPrime, uvBCPrime), o);
   }
 
   /**
@@ -200,26 +217,34 @@ class ProjectionRenderer extends Renderer {
 
     double aspRat = d.getAspectRatio();
 
-    Vector3[] verts = tri.getVerts();
+    Vector3[] verts  = tri.getVerts();
+    Vector2[] vertUVs  = tri.getVertUVs();
     Vector3 normal = tri.getNormal();
     // Vector3 vert0  = verts[0].scale(-1).unitize();
     // double distSquared = verts[0].magsquare();
 
+    tri.setVertUVs(
+      vertUVs[0].scale(1/verts[0].z), 
+      vertUVs[1].scale(1/verts[1].z), 
+      vertUVs[2].scale(1/verts[2].z)
+    );
+
     tri.setVerts(
-      projectVector3(verts[0], aspRat).add(1, 1, 0).scale(0.5*width, 0.5*height-1, 1),
-      projectVector3(verts[1], aspRat).add(1, 1, 0).scale(0.5*width, 0.5*height-1, 1),
-      projectVector3(verts[2], aspRat).add(1, 1, 0).scale(0.5*width, 0.5*height-1, 1)
+      projectVector3(verts[0], aspRat).add(1, 1, 0).scale(0.5*width-1, 0.5*height-1, 1),
+      projectVector3(verts[1], aspRat).add(1, 1, 0).scale(0.5*width-1, 0.5*height-1, 1),
+      projectVector3(verts[2], aspRat).add(1, 1, 0).scale(0.5*width-1, 0.5*height-1, 1)
     );
 
     //COLOUR
 
-    int colour = mat.getIntenseColour(
-      // lightCol.scale(MathHelp.intensity((normal.dot(lightDir)+1)/2, lightDistSquared))
-      lightCol.scale(MathHelp.intensity(Math.max(normal.dot(lightDir), 0), lightDistSquared))
-      // .add(glowLCol.scale(MathHelp.intensity(Math.max(normal.dot(vert0), 0),distSquared)))
-    );
-    d.fillTri(tri, colour);
-    // d.drawTri(tri, -16777216|~colour);
+    Vector3 globalIllumination = lightCol.scale(MathHelp.intensity(Math.max(normal.dot(lightDir), 0), lightDistSquared));
+    // Vector3 globalIllumination = lightCol.scale(MathHelp.intensity((normal.dot(lightDir)+1)/2, lightDistSquared));
+
+    d.fillTri(tri, mat, globalIllumination);
+    // d.drawTri(tri, -16777216|~mat.getIntenseColour(
+    //   globalIllumination
+    //   // .add(glowLCol.scale(MathHelp.intensity(Math.max(normal.dot(vert0), 0),distSquared)))
+    // ));
   }
 
   /**
@@ -234,7 +259,8 @@ class ProjectionRenderer extends Renderer {
     return new Vector3(
       vecWorld.x*f/vecWorld.z, 
       -vecWorld.y*f/(vecWorld.z*aspRat),
-      (-NEAR_CLIPPING_PLANE/vecWorld.z+1)*q
+      // (-NEAR_CLIPPING_PLANE/vecWorld.z+1)*q
+      1/vecWorld.z
     );
   }
 }

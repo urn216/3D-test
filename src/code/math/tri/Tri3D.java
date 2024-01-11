@@ -55,7 +55,11 @@ public class Tri3D {
   }
 
   public Tri3D projectVerts(Vector3 v0, Vector3 v1, Vector3 v2) {
-    return new Tri3D(new Vector3[]{v0, v1, v2}, this.vertUVs, this.vertexIndeces, this.vertexTextureIndeces, this.normal);
+    return new Tri3D(new Vector3[]{v0, v1, v2}, this.vertUVs.clone(), this.vertexIndeces, this.vertexTextureIndeces, this.normal);
+  }
+
+  public Tri3D projectVerts(Vector3 v0, Vector3 v1, Vector3 v2, Vector2 uv0, Vector2 uv1, Vector2 uv2) {
+    return new Tri3D(new Vector3[]{v0, v1, v2}, new Vector2[]{uv0, uv1, uv2}, this.vertexIndeces, this.vertexTextureIndeces, this.normal);
   }
 
   /**
@@ -95,7 +99,7 @@ public class Tri3D {
   }
 
   public Vector2 getUVCoords(double u, double v) {
-    return vertUVs[0] == null ? new Vector2() : vertUVs[1].scale(u).add(vertUVs[2].scale(v)).add(vertUVs[0].scale(1-u-v));
+    return vertUVs[1].scale(u).add(vertUVs[2].scale(v)).add(vertUVs[0].scale(1-u-v));
   }
 
   public void setVerts(Vector3 v0, Vector3 v1, Vector3 v2) {
@@ -110,8 +114,14 @@ public class Tri3D {
     this.normal = edges[2].unitize();
   }
 
+  public void setVertUVs(Vector2 v0, Vector2 v1, Vector2 v2) {
+    this.vertUVs[0] = v0;
+    this.vertUVs[1] = v1;
+    this.vertUVs[2] = v2;
+  }
+
   public String toString() {
-    if (vertUVs[0] == null) {
+    if (vertexTextureIndeces[0] == 0) {
       return vertexIndeces[0]+" "+vertexIndeces[1]+" "+vertexIndeces[2];
     }
     return vertexIndeces[0]+"/"+vertexTextureIndeces[0]+" "+vertexIndeces[1]+"/"+vertexTextureIndeces[1]+" "+vertexIndeces[2]+"/"+vertexTextureIndeces[2];
