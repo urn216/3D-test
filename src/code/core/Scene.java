@@ -27,13 +27,13 @@ public abstract class Scene {
       new Sphere(new Vector3(-1, -1, 2.5), 0.1, new Material(new Vector3I(255, 255, 255), 0f, new Vector3(0, 5, 10), "decal/degrad.png")),
       new Sphere(new Vector3(4000, 10000, 1000), 80, new Material(new Vector3I(255, 255, 255), 0f, new Vector3(Integer.MAX_VALUE))),
       new Sphere(new Vector3(0, 0, 10), 1, new Material(new Vector3I(255, 140, 1), 0.9f, new Vector3())),
-      new Sphere(new Vector3(-3, 0, 8), 1, new Material(new Vector3I(1, 140, 255), 0.5f, new Vector3(), "env/cobblestone.png")),
+      new Sphere(new Vector3(-3, 0, 8), 1, new Material(new Vector3I(1, 140, 255), 0.5f, new Vector3(), "env/cobblestone.png", "env/cobblestone_normal.png")),
       new Sphere(new Vector3(-4, -3, 50), 20, new Material(new Vector3I(1, 255, 114), 0.99f, new Vector3())),
       new Sphere(new Vector3(4, 3, 13), 1, new Material(new Vector3I(1, 255, 1), 0.5f, new Vector3())),
-      new Sphere(new Vector3(0, -100, 0), 95, new Material(new Vector3I(100, 1, 255), 0.3f, new Vector3(), "env/test.png")),
-      new Sphere(new Vector3(10, -5, 15), 2, new Material(new Vector3I(255, 200, 50), 0f, new Vector3(), "env/shapesbw.png")),
-      new Sphere(new Vector3(10, -2.6, 15), 1.5, new Material(new Vector3I(255, 200, 50), 0f, new Vector3(), "env/shapesbw.png")),
-      new Sphere(new Vector3(10, -0.6, 15), 1, new Material(new Vector3I(255, 200, 50), 0.7f, new Vector3(), "env/shapesbw.png")),
+      new Sphere(new Vector3(0, -100, 0), 95, new Material(new Vector3I(100, 1, 255), 0.3f, new Vector3(), "env/test.png", "env/test_normal.png")),
+      new Sphere(new Vector3(10, -5, 15), 2, new Material(new Vector3I(255, 200, 50), 0f, new Vector3(), "env/shapesbw.png", "env/shapes_normal.png")),
+      new Sphere(new Vector3(10, -2.6, 15), 1.5, new Material(new Vector3I(255, 200, 50), 0f, new Vector3(), "env/shapesbw.png", "env/shapes_normal.png")),
+      new Sphere(new Vector3(10, -0.6, 15), 1, new Material(new Vector3I(255, 200, 50), 0.7f, new Vector3(), "env/shapesbw.png", "env/shapes_normal.png")),
       new LowPoly(new Vector3(0.5, -1.2, 4.3), new Material(new Vector3I(255, 255, 255), 0.4f, new Vector3(), "decal/degrad.png"))
     };
   };
@@ -42,7 +42,7 @@ public abstract class Scene {
     return new RigidBody[] {
       new Sphere(new Vector3(-1, -1, 2.5), 0.1, new Material(new Vector3I(255, 255, 255), 0f, new Vector3(0, 5, 10))),
       new Sphere(new Vector3(4000, 10000, 1000), 80, new Material(new Vector3I(255, 255, 255), 0f, new Vector3(Integer.MAX_VALUE))),
-      new Dropship(new Vector3(0, 0, 40), new Material(new Vector3I(255, 255, 255), 0f, new Vector3(), "env/mossy_stone_bricks.png", "env/mossy_stone_bricks_normal.png"))
+      new Dropship(new Vector3(0, 0, 40), new Material(new Vector3I(255, 255, 255), 0f, new Vector3(), "env/test.png", "env/test_normal.png"))
     };
   };
 
@@ -114,7 +114,7 @@ public abstract class Scene {
   public static RigidBody[] cubes() {
     Material bricks = new Material(new Vector3I(255), 0.04f, new Vector3(), "env/mossy_stone_bricks.png", "env/mossy_stone_bricks_normal.png");
     Material gold   = new Material(new Vector3I(255), 0.6f , new Vector3(25.5, 20.0, 5.0), "env/gold_block.png", "env/gold_block_normal.png");
-    Material grass  = new Material(new Vector3I(255), 0f   , new Vector3(), "env/grass_block_top.png");
+    Material grass  = new Material(new Vector3I(255), 0f   , new Vector3(), "env/grass_block_top.png", "env/grass_block_top_normal.png");
     return new RigidBody[] {
       new Cube(new Vector3( 0, -0.6, 5),  1,           gold  ),
       new Quad(new Vector3( 0, -1  , 2),  3, 1,  1, 1, bricks),
@@ -128,12 +128,11 @@ public abstract class Scene {
 
   public static RigidBody[] cubesNM() {
     Material gold   = new Material(new Vector3I(255), 0.8f, new Vector3(), "env/gold_block.png", "env/gold_block_normal.png");
-    Material grass  = new Material(new Vector3I(255), 0f, new Vector3(), "env/grass_block_top.png");
+    Material grass  = new Material(new Vector3I(255), 0f, new Vector3(), "env/cobblestone.png", "env/cobblestone_normal.png");
     return new RigidBody[] {
       new Sphere(new Vector3(3, -0.6, 5), 0.2, new Material(new Vector3I(255, 255, 255), 0f, new Vector3(100))),
       new Cube(new Vector3( 0, -0.6, 5),  1,           gold  ),
       new Quad(new Vector3( 0, -2  , 5), 15, 1, 15, 1, grass ),
-      // new Sphere(new Vector3(4000, 10000, 1000), 80, new Material(new Vector3I(255, 255, 255), 0f, new Vector3(Integer.MAX_VALUE))),
     };
   };
 }
