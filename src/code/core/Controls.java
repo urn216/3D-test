@@ -202,7 +202,7 @@ abstract class Controls {
       Core.setRenderer(Renderer.raySphere());
     }
     if (Controls.KEY_DOWN[KeyEvent.VK_B]) {
-      Core.setRenderer(Renderer.projection());
+      Core.setRenderer(Renderer.rasterizer());
     }
 
     if (Controls.mouseOff.x != 0 || Controls.mouseOff.y != 0) {

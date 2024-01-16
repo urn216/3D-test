@@ -16,7 +16,7 @@ import code.rendering.Drawing;
 import code.world.Material;
 import code.world.RigidBody;
 
-class ProjectionRenderer extends Renderer {
+class RasterRenderer extends Renderer {
 
   private static final Vector3[] clippingPlanes = new Vector3[4];
 
@@ -41,6 +41,7 @@ class ProjectionRenderer extends Renderer {
   @Override
   public void render(Drawing d, Vector3 cameraPosition, Quaternion cameraRotation, RigidBody[] bodies) {
     d.fill(-16777216);
+    // d.fill(~0);
 
     Quaternion worldRotation = cameraRotation.reverse();
 
@@ -213,7 +214,7 @@ class ProjectionRenderer extends Renderer {
    */
   private void renderTri(Drawing d, Tri3D tri, Material mat) {
     int width  = d.getWidth ();
-    int height = d.getHeight();
+    int height = d.getHeight()-1;
 
     double aspRat = d.getAspectRatio();
 
@@ -230,15 +231,15 @@ class ProjectionRenderer extends Renderer {
     );
 
     tri.setVerts(
-      projectVector3(verts[0], aspRat).add(1, 1, 0).scale(0.5*width-1, 0.5*height-1, 1),
-      projectVector3(verts[1], aspRat).add(1, 1, 0).scale(0.5*width-1, 0.5*height-1, 1),
-      projectVector3(verts[2], aspRat).add(1, 1, 0).scale(0.5*width-1, 0.5*height-1, 1)
+      projectVector3(verts[0], aspRat).add(1, 1, 0).scale(0.5*width, 0.5*height, 1),
+      projectVector3(verts[1], aspRat).add(1, 1, 0).scale(0.5*width, 0.5*height, 1),
+      projectVector3(verts[2], aspRat).add(1, 1, 0).scale(0.5*width, 0.5*height, 1)
     );
 
     //COLOUR
 
-    Vector3 globalIllumination = lightCol.scale(MathHelp.intensity(Math.max(normal.dot(lightDir), 0), lightDistSquared));
-    // Vector3 globalIllumination = lightCol.scale(MathHelp.intensity((normal.dot(lightDir)+1)/2, lightDistSquared));
+    // Vector3 globalIllumination = lightCol.scale(MathHelp.intensity(Math.max(normal.dot(lightDir), 0), lightDistSquared));
+    Vector3 globalIllumination = lightCol.scale(MathHelp.intensity((normal.dot(lightDir)+1)/2, lightDistSquared));
 
     d.fillTri(tri, mat, globalIllumination);
     // d.drawTri(tri, -16777216|~mat.getIntenseColour(

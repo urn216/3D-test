@@ -13,6 +13,8 @@ public class Tri3D {
   private final int[] vertexTextureIndeces;
   
   private Vector3 normal;
+  private Vector3 pU;
+  private Vector3 pV;
 
   public Tri3D(Vector3[] verts, int[] vertexIndeces) {
     this(verts, new Vector2[3], vertexIndeces, new int[3]);
@@ -33,12 +35,14 @@ public class Tri3D {
     this.edges[2] = this.edges[0].cross(this.edges[1]);
 
     this.normal = edges[2].unitize();
+    this.pV = (normal.y > 0.99 || normal.y < -0.99 ? Vector3.UNIT_X : Vector3.UNIT_Y).cross(normal).unitize();
+    this.pU = normal.cross(pV).unitize();
 
     this.vertUVs = vertUVs;
     this.vertexTextureIndeces = vertexTextureIndeces;
   }
 
-  private Tri3D(Vector3[] verts, Vector2[] vertUVs, int[] vertexIndeces, int[] vertexTextureIndeces, Vector3 normal) {
+  private Tri3D(Vector3[] verts, Vector2[] vertUVs, int[] vertexIndeces, int[] vertexTextureIndeces, Vector3 normal, Vector3 pU, Vector3 pV) {
     this.verts = verts;
     this.vertexIndeces = vertexIndeces;
 
@@ -49,17 +53,19 @@ public class Tri3D {
     this.edges[2] = this.edges[0].cross(this.edges[1]);
 
     this.normal = normal;
+    this.pU = pU;
+    this.pV = pV;
 
     this.vertUVs = vertUVs;
     this.vertexTextureIndeces = vertexTextureIndeces;
   }
 
   public Tri3D projectVerts(Vector3 v0, Vector3 v1, Vector3 v2) {
-    return new Tri3D(new Vector3[]{v0, v1, v2}, this.vertUVs.clone(), this.vertexIndeces, this.vertexTextureIndeces, this.normal);
+    return new Tri3D(new Vector3[]{v0, v1, v2}, this.vertUVs.clone(), this.vertexIndeces, this.vertexTextureIndeces, this.normal, this.pU, this.pV);
   }
 
   public Tri3D projectVerts(Vector3 v0, Vector3 v1, Vector3 v2, Vector2 uv0, Vector2 uv1, Vector2 uv2) {
-    return new Tri3D(new Vector3[]{v0, v1, v2}, new Vector2[]{uv0, uv1, uv2}, this.vertexIndeces, this.vertexTextureIndeces, this.normal);
+    return new Tri3D(new Vector3[]{v0, v1, v2}, new Vector2[]{uv0, uv1, uv2}, this.vertexIndeces, this.vertexTextureIndeces, this.normal, this.pU, this.pV);
   }
 
   /**
@@ -90,6 +96,18 @@ public class Tri3D {
   	return normal;
   }
 
+  public Vector3 getpU() {
+    return pU;
+  }
+
+  public Vector3 getpV() {
+    return pV;
+  }
+
+  public Vector3 getDisplacedNormal(Vector3 displacement) {
+    return normal.add(pU.scale(displacement.x)).add(pV.scale(displacement.y)).subtract(normal.scale(displacement.z)).unitize();
+  }
+
   public int[] getVertexIndeces() {
     return vertexIndeces;
   }
@@ -112,6 +130,8 @@ public class Tri3D {
     this.edges[2] = this.edges[0].cross(this.edges[1]);
 
     this.normal = edges[2].unitize();
+    this.pV = (normal.y > 0.99 || normal.y < -0.99 ? Vector3.UNIT_X : Vector3.UNIT_Y).cross(normal).unitize();
+    this.pU = normal.cross(pV).unitize();
   }
 
   public void setVertUVs(Vector2 v0, Vector2 v1, Vector2 v2) {

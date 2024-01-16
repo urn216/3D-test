@@ -27,8 +27,8 @@ public abstract class Core {
   
   public static final Settings GLOBAL_SETTINGS;
   
-  private static final double TICKS_PER_SECOND = 60;
-  private static final double MILLISECONDS_PER_TICK = 1000/TICKS_PER_SECOND;
+  private static final long TICKS_PER_SECOND = 60;
+  private static final long MILLISECONDS_PER_TICK = 900/TICKS_PER_SECOND;
 
   private static final long START_TIME = System.currentTimeMillis();
   private static final int SPLASH_TIME = 1000;
@@ -66,16 +66,17 @@ public abstract class Core {
       GLOBAL_SETTINGS.getIntSetting("resolution_X"),
       GLOBAL_SETTINGS.getIntSetting("resolution_Y"),
       GLOBAL_SETTINGS.getDoubleSetting("fieldOfView"),
-      Renderer.projection()
+      Renderer.rasterizer()
     );
   }
   
   /**
-  * Main method. Called on execution. Performs basic startup
-  *
-  * @param args Ignored for now
-  */
-  public static void main(String[] args) {
+   * Main method. Called on execution. Performs basic startup
+   *
+   * @param args Ignored for now
+   * @throws InterruptedException if thread sleeping fails for whatever reason. Catastrophic error should kill process.
+   */
+  public static void main(String[] args) throws InterruptedException {
     playGame();
   }
   
@@ -125,7 +126,7 @@ public abstract class Core {
     quit = true;
   }
   
-  public static void playGame() {
+  public static void playGame() throws InterruptedException {
     while (true) {
       long tickTime = System.currentTimeMillis();
       long deltaTimeMillis = tickTime - pTTime;
@@ -153,10 +154,9 @@ public abstract class Core {
         System.exit(0);
       }
       WINDOW.PANEL.repaint();
+      
       tickTime = System.currentTimeMillis() - tickTime;
-      try {
-        Thread.sleep(Math.max((long)(MILLISECONDS_PER_TICK - tickTime), 0));
-      } catch(InterruptedException e){System.out.println(e); System.exit(0);}
+      Thread.sleep(Math.max(MILLISECONDS_PER_TICK - tickTime, 0));
     }
   }
   

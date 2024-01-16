@@ -16,7 +16,17 @@ public abstract class Renderer {
 
   public static Renderer rayTri() {return new RayTriRenderer();}
   public static Renderer raySphere() {return new RaySphereRenderer();}
-  public static Renderer projection() {return new ProjectionRenderer();}
+  public static Renderer rasterizer() {return new RasterRenderer();}
+
+  private static boolean normalMap = false;
+
+  public static boolean isNormalMap() {
+    return normalMap;
+  }
+
+  public static void setNormalMap(boolean normalMap) {
+    Renderer.normalMap = normalMap;
+  }
 
   public void updateConstants(double fov, int width, int height) {
     this.fov = fov;

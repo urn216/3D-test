@@ -65,13 +65,15 @@ public class UICreator {
     );
 
     UIElement newGame = leftList(
-      new UIButton("Marbles" , () -> Core.loadScene(Scene.s1())),
-      new UIButton("Gunship" , () -> Core.loadScene(Scene.s2())),
-      new UIButton("Room"    , () -> Core.loadScene(Scene.s3())),
-      new UIButton("Terrain" , () -> Core.loadScene(Scene.s4())),
-      new UIButton("Voxels"  , () -> Core.loadScene(Scene.s4_1())),
-      new UIButton("Marble 2", () -> Core.loadScene(Scene.s5())),
-      new UIButton("Cubes"   , () -> Core.loadScene(Scene.s7())),
+      new UIButton("Marbles" , () -> Core.loadScene(Scene.spheres())),
+      new UIButton("Gunship" , () -> Core.loadScene(Scene.gunship())),
+      new UIButton("Room"    , () -> Core.loadScene(Scene.roomBright())),
+      new UIButton("Terrain" , () -> Core.loadScene(Scene.heightMap())),
+      new UIButton("Voxels"  , () -> Core.loadScene(Scene.voxelMap())),
+      new UIButton("Marble 2", () -> Core.loadScene(Scene.threeSpheres())),
+      new UIButton("Room 2"  , () -> Core.loadScene(Scene.roomReflection())),
+      new UIButton("Cubes"   , () -> Core.loadScene(Scene.cubes())),
+      new UIButton("Cubes NM", () -> Core.loadScene(Scene.cubesNM())),
       new UIButton("Back", UIController::back)
     );
 
@@ -91,12 +93,13 @@ public class UICreator {
     
     UIElement outPanel = leftList(
       new UISlider.Double("FPS: %.0f", Core::getFps, (f)->{}, 0, 100),
-      new UIButton("Ray S"  , () -> Core.setRenderer(Renderer.raySphere())),
-      new UIButton("Ray T"  , () -> Core.setRenderer(Renderer.rayTri())),
-      new UIButton("Proj"   , () -> Core.setRenderer(Renderer.projection())),
-      new UIButton("Options", () -> UIController.setState(UIState.OPTIONS) ),
-      new UIButton("Menu"   , Core::quitToMenu),
-      new UIButton("Quit"   , Core::quitToDesk)
+      new UIButton("Ray (SPH)" , () -> Core.setRenderer(Renderer.raySphere())),
+      new UIButton("Ray (TRI)" , () -> Core.setRenderer(Renderer.rayTri())),
+      new UIButton("Rasterizer", () -> Core.setRenderer(Renderer.rasterizer())),
+      new UIToggle("Normal"    , Renderer::isNormalMap, Renderer::setNormalMap),
+      new UIButton("Options"   , () -> UIController.setState(UIState.OPTIONS) ),
+      new UIButton("Main Menu" , Core::quitToMenu),
+      new UIButton("Quit"      , Core::quitToDesk)
     );
 
     UIElement options = rightList(0.2, optionList);
@@ -111,7 +114,7 @@ public class UICreator {
   }
 
   protected static UIElement leftList(UIComponent... components) {
-    return leftList(0.07, components);
+    return leftList(0.078, components);
   }
 
   protected static UIElement leftList(double width, UIComponent... components) {

@@ -17,14 +17,22 @@ public class Material {
   private final Vector3 intensity;
   private final float reflectivity;
 
-  private final int[] texture;
   private final int tSize;
+  private final int nSize;
+
+  private final int[] texture;
+  private final int[] normals;
+  private final float[] normalMagnitudes;
 
   public Material(Vector3I rgb, float reflectivity, Vector3 intensity) {
     this(rgb, reflectivity, intensity, "decal/mono.png");
   }
 
   public Material(Vector3I rgb, float reflectivity, Vector3 intensity, String tFile) {
+    this(rgb, reflectivity, intensity, tFile, null);
+  }
+
+  public Material(Vector3I rgb, float reflectivity, Vector3 intensity, String tFile, String nFile) {
     if (rgb.x > 255 || rgb.x < 0 || rgb.y > 255 || rgb.y < 0 || rgb.z > 255 || rgb.z < 0) {throw new RuntimeException("rgb must be between 0 and 255!");}
     if (intensity.x < 0 || intensity.y < 0 || intensity.z < 0) {throw new RuntimeException("Cannot have negative light intensity!");}
     if (reflectivity < 0 || reflectivity > 1) {throw new RuntimeException("Reflectivity must be a percentage (0 <= r <= 1)!");}
@@ -40,6 +48,15 @@ public class Material {
 
     this.texture = Texture.getTexture(tFile);
     this.tSize = (int)Math.sqrt(this.texture.length);
+    
+    this.normals = nFile == null ? new int[] {-8355585} : Texture.getTexture(nFile);
+    this.nSize = (int)Math.sqrt(this.normals.length);
+    
+    this.normalMagnitudes = new float[this.normals.length];
+    for (int i = 0; i < normalMagnitudes.length; i++) {
+      int norm = this.normals[i];
+      this.normalMagnitudes[i] = (float)new Vector3(((norm&RED_MASK)>>16)/128.0 - 1, ((norm&GREEN_MASK)>>8)/128.0 - 1, (norm&BLUE_MASK)/-128.0 + 1).magnitude();
+    }
   }
 
   private static int colourFix(double col) {return Math.min(255, (int)col);}
@@ -49,7 +66,7 @@ public class Material {
   public int getIntenseColour(Vector3 oIntensity) {return (ALPHA_MASK) | (colourFix(r*oIntensity.x) << 16) | (colourFix(g*oIntensity.y) << 8) | (colourFix(b*oIntensity.z));}
 
   public int getIntenseColour(Vector3 oIntensity, double u, double v) {
-    int rgb = getNearestNeighbourFilteringTexel(u, v);
+    int rgb = getNearestNeighbourFilteringTexel(texture, tSize, u, v);
 
     return (ALPHA_MASK) | (colourFix(((rgb & RED_MASK) >> 16)*this.rf*oIntensity.x) << 16) | (colourFix(((rgb & GREEN_MASK) >> 8)*this.gf*oIntensity.y) << 8) | (colourFix((rgb & BLUE_MASK)*this.bf*oIntensity.z));
   }
@@ -64,6 +81,10 @@ public class Material {
 
   public boolean isEmissive() {
     return emissive;
+  }
+
+  public int[] getNormalMap() {
+    return normals;
   }
 
   public float getReflectivity() {
@@ -87,7 +108,7 @@ public class Material {
   }
 
   public int getReflection(int other, Vector3 oIntensity, double u, double v) {
-    int rgb = getNearestNeighbourFilteringTexel(u, v);
+    int rgb = getNearestNeighbourFilteringTexel(texture, tSize, u, v);
 
     float r = ((other & RED_MASK  ) >> 16)*reflectivity+((rgb & RED_MASK  ) >> 16)*(this.r/255f)*(1-reflectivity);
     float g = ((other & GREEN_MASK) >> 8 )*reflectivity+((rgb & GREEN_MASK) >> 8 )*(this.g/255f)*(1-reflectivity);
@@ -96,11 +117,22 @@ public class Material {
     return (ALPHA_MASK) | (colourFix(r*oIntensity.x) << 16) | (colourFix(g*oIntensity.y) << 8) | (colourFix(b*oIntensity.z));
   }
 
-  public int getNearestNeighbourFilteringTexel(double u, double v) {
+  public Vector3 getNormal(double u, double v) {
+    int rgb = getNearestNeighbourFilteringTexel(normals, nSize, u, v);
+    float magnitude = normalMagnitudes[((int)(u*tSize)+(int)(v*tSize)*tSize) % normalMagnitudes.length];
+
+    return new Vector3(
+      (((rgb &   RED_MASK)>>16) /  128.0 - 1) / magnitude, 
+      (((rgb & GREEN_MASK)>> 8) /  128.0 - 1) / magnitude, 
+      (( rgb &  BLUE_MASK     ) / -128.0 + 1) / magnitude
+    );
+  }
+
+  public static int getNearestNeighbourFilteringTexel(int[] texture, int tSize, double u, double v) {
     return texture[((int)(u*tSize)+(int)(v*tSize)*tSize) % texture.length];
   }
 
-  public int getBilinearFilteringTexel(double u, double v) {
+  public static int getBilinearFilteringTexel(int[] texture, int tSize, double u, double v) {
     u = (u%1)*tSize;
     int uMin = (int)u;
     int uMax = (uMin+1)%tSize;
@@ -137,6 +169,7 @@ public class Material {
 
   private static final int[] skybox = FileIO.readImageInt("BG/star_map.png");
   private static final int skyboxSize = (int)Math.sqrt(skybox.length);
+  
   /**
   * A static method for getting a point in a skybox.
   *

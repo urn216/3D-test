@@ -3,7 +3,7 @@ package code.math.ray;
 import mki.math.MathHelp;
 import mki.math.vector.Vector2;
 import mki.math.vector.Vector3;
-
+import code.rendering.renderers.Renderer;
 import code.world.Material;
 import code.world.RigidBody;
 
@@ -39,8 +39,9 @@ public class RaySphere {
     // We did collide with an object, so let's look at it.
     Vector3 surface = rayStart.add(dir.scale(closest));
     Vector3 sNormal = surface.subtract(close.getPosition()).unitize();
-    Vector3 intensity = intensityStep(surface, sNormal, bodies, close, close.getModel().getMat().getIntensity(), numSteps);
     Vector2 Puv = MathHelp.sphereUVPoint(close.getRotation().reverse().rotate(sNormal)); //get the uv coordinates for this point
+    if (Renderer.isNormalMap()) sNormal = displaceNormal(sNormal, close.getModel().getMat().getNormal(Puv.x, Puv.y));
+    Vector3 intensity = intensityStep(surface, sNormal, bodies, close, close.getModel().getMat().getIntensity(), numSteps);
     if (numRef>0 && close.getModel().getMat().getReflectivity() != 0) {return close.getModel().getMat().getReflection(getCol(surface, dir.subtract(sNormal.scale(2*sNormal.dot(dir))), bodies, numSteps-1, numRef-1), intensity, Puv.x, Puv.y);}
     return close.getModel().getMat().getIntenseColour(intensity, Puv.x, Puv.y);
   }
@@ -79,5 +80,14 @@ public class RaySphere {
       intensity = intensity.add(otherSI.scale(MathHelp.intensity(1, distToSurface*distToSurface)));
     }
     return intensity;
+  }
+
+
+
+  private static Vector3 displaceNormal(Vector3 normal, Vector3 displacement) {
+    Vector3 pV = (normal.y > 0.99 || normal.y < -0.99 ? Vector3.UNIT_X : Vector3.UNIT_Y).cross(normal).unitize();
+    Vector3 pU = normal.cross(pV).unitize();
+    
+    return normal.add(pU.scale(displacement.x)).add(pV.scale(displacement.y)).subtract(normal.scale(displacement.z)).unitize();
   }
 }

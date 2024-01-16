@@ -327,6 +327,9 @@ public class Drawing {
       MathHelp.round(vrts[0]), 
       MathHelp.round(vrts[1]), 
       MathHelp.round(vrts[2])
+      // vrts[0].castToInt(), 
+      // vrts[1].castToInt(), 
+      // vrts[2].castToInt()
     };
 
     if (p[0].y == p[1].y && p[0].y == p[2].y) return;
