@@ -20,7 +20,7 @@ public abstract class Renderer {
 
   private static boolean normalMap = false;
 
-  public static boolean isNormalMap() {
+  public static boolean usesNormalMap() {
     return normalMap;
   }
 

@@ -236,6 +236,15 @@ class RasterRenderer extends Renderer {
       projectVector3(verts[2], aspRat).add(1, 1, 0).scale(0.5*width, 0.5*height, 1)
     );
 
+    // tri = tri.projectVerts(
+    //   projectVector3(verts[0], aspRat).add(1, 1, 0).scale(0.5*width, 0.5*height, 1),
+    //   projectVector3(verts[1], aspRat).add(1, 1, 0).scale(0.5*width, 0.5*height, 1),
+    //   projectVector3(verts[2], aspRat).add(1, 1, 0).scale(0.5*width, 0.5*height, 1),
+    //   vertUVs[0].scale(1/verts[0].z), 
+    //   vertUVs[1].scale(1/verts[1].z), 
+    //   vertUVs[2].scale(1/verts[2].z)
+    // );
+
     //COLOUR
 
     // Vector3 globalIllumination = lightCol.scale(MathHelp.intensity(Math.max(normal.dot(lightDir), 0), lightDistSquared));

@@ -35,8 +35,8 @@ public class Tri3D {
     this.edges[2] = this.edges[0].cross(this.edges[1]);
 
     this.normal = edges[2].unitize();
-    this.pV = (normal.y > 0.99 || normal.y < -0.99 ? Vector3.UNIT_X : Vector3.UNIT_Y).cross(normal).unitize();
-    this.pU = normal.cross(pV).unitize();
+    this.pU = normal.y > 0.99 || normal.y < -0.99 ? new Vector3(-1, 0, 0) : Vector3.UNIT_Y.cross(normal).unitize();
+    this.pV = normal.cross(pU).unitize();
 
     this.vertUVs = vertUVs;
     this.vertexTextureIndeces = vertexTextureIndeces;
@@ -105,7 +105,7 @@ public class Tri3D {
   }
 
   public Vector3 getDisplacedNormal(Vector3 displacement) {
-    return normal.add(pU.scale(displacement.x)).add(pV.scale(displacement.y)).subtract(normal.scale(displacement.z)).unitize();
+    return normal.subtract(pU.scale(displacement.x)).add(pV.scale(displacement.y)).subtract(normal.scale(displacement.z)).unitize();
   }
 
   public int[] getVertexIndeces() {
@@ -130,8 +130,8 @@ public class Tri3D {
     this.edges[2] = this.edges[0].cross(this.edges[1]);
 
     this.normal = edges[2].unitize();
-    this.pV = (normal.y > 0.99 || normal.y < -0.99 ? Vector3.UNIT_X : Vector3.UNIT_Y).cross(normal).unitize();
-    this.pU = normal.cross(pV).unitize();
+    this.pU = normal.y > 0.99 || normal.y < -0.99 ? new Vector3(-1, 0, 0) : Vector3.UNIT_Y.cross(normal).unitize();
+    this.pV = normal.cross(pU).unitize();
   }
 
   public void setVertUVs(Vector2 v0, Vector2 v1, Vector2 v2) {

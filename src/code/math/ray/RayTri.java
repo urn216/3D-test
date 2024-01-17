@@ -56,7 +56,7 @@ public class RayTri {
     Vector3 surface = rayStart.add(dir.scale(closest));
     Vector2 Puv = cTri.getUVCoords(cU, cV); //get the uv coordinates for this point
     // Vector3 sNormal = close instanceof Sphere ? surface.subtract(close.getPosition()).unitize() : cTri.getNormal();
-    Vector3 sNormal = Renderer.isNormalMap() ? cTri.getDisplacedNormal(close.getModel().getMat().getNormal(Puv.x, Puv.y)) : cTri.getNormal();
+    Vector3 sNormal = Renderer.usesNormalMap() ? cTri.getDisplacedNormal(close.getModel().getMat().getNormal(Puv.x, Puv.y)) : cTri.getNormal();
     // Vector3 sNormal = cTri.getNormal();
     Vector3 intensity = intensityStep(surface, sNormal, bodies, close, close.getModel().getMat().getIntensity(), numSteps);
     if (numRef>0 && close.getModel().getMat().getReflectivity() != 0) {return close.getModel().getMat().getReflection(getCol(surface, dir.subtract(sNormal.scale(2*sNormal.dot(dir))), bodies, numSteps-1, numRef-1), intensity, Puv.x, Puv.y);}
