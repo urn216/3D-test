@@ -1,6 +1,7 @@
 package code.rendering;
 
 import java.awt.image.BufferedImage;
+import java.util.function.BiFunction;
 
 import mki.math.MathHelp;
 import mki.math.vector.Vector2;
@@ -9,7 +10,6 @@ import mki.math.vector.Vector3;
 import mki.math.vector.Vector3I;
 import code.math.tri.Tri2D;
 import code.math.tri.Tri3D;
-import code.world.Material;
 
 public class Drawing {
   private final int[] contents;
@@ -163,7 +163,7 @@ public class Drawing {
    * @param normal A unit {@code Vector3} orthogonal to the plane this line is to travel across
    * @param c The colour of the line
    */
-  public void drawLineHoriz(int x1, int x2, int y, double z1, double z2, double u1, double u2, double v1, double v2, Material mat, Vector3 globalIllumination) {
+  public void drawLineHoriz(int x1, int x2, int y, double z1, double z2, double u1, double u2, double v1, double v2, BiFunction<Double, Double, Integer> c) {
     int incrx = (x2-x1)>>31;
     x1+=incrx; x2+=incrx;
     int sx = (incrx<<1)+1;
@@ -175,7 +175,7 @@ public class Drawing {
     double vf = (v2-v1)/numSteps;
 
     for (; x1!=x2; x1+=sx, z1+=zf, u1+=uf, v1+=vf) {
-      drawPixel(x1, y, z1, mat.getIntenseColour(globalIllumination, u1/z1, v1/z1));
+      drawPixel(x1, y, z1, c.apply(u1/z1, v1/z1));
     }
   }
 
@@ -239,11 +239,11 @@ public class Drawing {
 
     if (p[0].y == p[1].y && p[0].y == p[2].y) return;
 
-    double zOff = 0.001*tri.getNormal().z;
+    // double zOff = 0.001*tri.getNormal().z;
 
-    drawLine(p[0].x, p[0].y, vrts[0].z+zOff, p[1].x, p[1].y, vrts[1].z+zOff, c);
-    drawLine(p[0].x, p[0].y, vrts[0].z+zOff, p[2].x, p[2].y, vrts[2].z+zOff, c);
-    drawLine(p[1].x, p[1].y, vrts[1].z+zOff, p[2].x, p[2].y, vrts[2].z+zOff, c);
+    drawLine(p[0].x, p[0].y, vrts[0].z, p[1].x, p[1].y, vrts[1].z, c);
+    drawLine(p[0].x, p[0].y, vrts[0].z, p[2].x, p[2].y, vrts[2].z, c);
+    drawLine(p[1].x, p[1].y, vrts[1].z, p[2].x, p[2].y, vrts[2].z, c);
   }
 
   /**
@@ -319,7 +319,7 @@ public class Drawing {
    * @param mat
    * @param globalIllumination
    */
-  public void fillTri(Tri3D tri, Material mat, Vector3 globalIllumination) {
+  public void fillTri(Tri3D tri, BiFunction<Double, Double, Integer> colour) {
     Vector3[] vrts = tri.getVerts();
     Vector2[] uv = tri.getVertUVs();
 
@@ -380,8 +380,7 @@ public class Drawing {
       us[y+offset], 
       MathHelp.lerp(uvs[0].y, uvs[2].y, c),
       vs[y+offset], 
-      mat, 
-      globalIllumination
+      colour
     ));
   }
 }

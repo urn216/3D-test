@@ -220,37 +220,53 @@ class RasterRenderer extends Renderer {
 
     Vector3[] verts  = tri.getVerts();
     Vector2[] vertUVs  = tri.getVertUVs();
-    Vector3 normal = tri.getNormal();
     // Vector3 vert0  = verts[0].scale(-1).unitize();
     // double distSquared = verts[0].magsquare();
 
-    tri.setVertUVs(
-      vertUVs[0].scale(1/verts[0].z), 
-      vertUVs[1].scale(1/verts[1].z), 
-      vertUVs[2].scale(1/verts[2].z)
-    );
-
-    tri.setVerts(
-      projectVector3(verts[0], aspRat).add(1, 1, 0).scale(0.5*width, 0.5*height, 1),
-      projectVector3(verts[1], aspRat).add(1, 1, 0).scale(0.5*width, 0.5*height, 1),
-      projectVector3(verts[2], aspRat).add(1, 1, 0).scale(0.5*width, 0.5*height, 1)
-    );
-
-    // tri = tri.projectVerts(
-    //   projectVector3(verts[0], aspRat).add(1, 1, 0).scale(0.5*width, 0.5*height, 1),
-    //   projectVector3(verts[1], aspRat).add(1, 1, 0).scale(0.5*width, 0.5*height, 1),
-    //   projectVector3(verts[2], aspRat).add(1, 1, 0).scale(0.5*width, 0.5*height, 1),
+    // tri.setVertUVs(
     //   vertUVs[0].scale(1/verts[0].z), 
     //   vertUVs[1].scale(1/verts[1].z), 
     //   vertUVs[2].scale(1/verts[2].z)
     // );
 
+    // tri.setVerts(
+    //   projectVector3(verts[0], aspRat).add(1, 1, 0).scale(0.5*width, 0.5*height, 1),
+    //   projectVector3(verts[1], aspRat).add(1, 1, 0).scale(0.5*width, 0.5*height, 1),
+    //   projectVector3(verts[2], aspRat).add(1, 1, 0).scale(0.5*width, 0.5*height, 1)
+    // );
+
+    Tri3D triFlattened = tri.projectVerts(
+      projectVector3(verts[0], aspRat).add(1, 1, 0).scale(0.5*width, 0.5*height, 1),
+      projectVector3(verts[1], aspRat).add(1, 1, 0).scale(0.5*width, 0.5*height, 1),
+      projectVector3(verts[2], aspRat).add(1, 1, 0).scale(0.5*width, 0.5*height, 1),
+      vertUVs[0].scale(1/verts[0].z), 
+      vertUVs[1].scale(1/verts[1].z), 
+      vertUVs[2].scale(1/verts[2].z)
+    );
+
     //COLOUR
 
     // Vector3 globalIllumination = lightCol.scale(MathHelp.intensity(Math.max(normal.dot(lightDir), 0), lightDistSquared));
-    Vector3 globalIllumination = lightCol.scale(MathHelp.intensity((normal.dot(lightDir)+1)/2, lightDistSquared));
+    
+    // Vector3 normal = Renderer.usesNormalMap() ?  : cTri.getNormal();
+    //
 
-    d.fillTri(tri, mat, globalIllumination);
+    d.fillTri(triFlattened, Renderer.usesNormalMap()? 
+      (u, v)->{
+        Vector3 globalIllumination = lightCol.scale(MathHelp.intensity(
+          (tri.getDisplacedNormal(mat.getNormal(u, v)).dot(lightDir)+1)/2, 
+          lightDistSquared
+        ));
+        return mat.getIntenseColour(globalIllumination, u, v);
+      }: 
+      (u, v)->{
+        Vector3 globalIllumination = lightCol.scale(MathHelp.intensity(
+          (tri.getNormal().dot(lightDir)+1)/2, 
+          lightDistSquared
+        ));
+        return mat.getIntenseColour(globalIllumination, u, v);
+      }
+    );
     // d.drawTri(tri, -16777216|~mat.getIntenseColour(
     //   globalIllumination
     //   // .add(glowLCol.scale(MathHelp.intensity(Math.max(normal.dot(vert0), 0),distSquared)))
