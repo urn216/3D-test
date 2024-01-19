@@ -1,6 +1,9 @@
 package code.core;
 
+import code.rendering.Constants;
 import code.rendering.renderers.Renderer;
+import code.world.Material;
+import mki.math.QuadFunction;
 import mki.math.vector.Vector2;
 import mki.math.vector.Vector2I;
 import mki.ui.control.*;
@@ -39,12 +42,29 @@ public class UICreator {
       new Vector2I(1280, 720 ),
       new Vector2I(1920, 1080)
     ),
+    new UIText("", 1, 0),
+    new UIToggle(
+      "Normal Maps", 
+      Constants::usesNormalMap, 
+      Constants::setNormalMapUse
+    ),
+    new UIDropDown<QuadFunction<int[], Integer, Double, Double, Integer>>(
+      "Filtering: %s",
+      ( ) -> {
+        return Constants.getFilteringMode().toString();
+      },
+      (f) -> {
+        Constants.setFilteringMode(f);
+      },
+      Material::getNearestNeighbourFilteringTexel,
+      Material::getBilinearFilteringTexel
+    ),
     new UISlider.Double(
       "FOV: %.0f",
       ( ) -> Core.getActiveCam().getFieldOfView(),
       (f) -> {
         Core.GLOBAL_SETTINGS.setDoubleSetting("fieldOfView", f);
-        Core.getActiveCam().setFieldOfView(f);
+        Core.setFieldOfView(f);
       },
       30,
       100
@@ -96,7 +116,6 @@ public class UICreator {
       new UIButton("Ray (SPH)" , () -> Core.setRenderer(Renderer.raySphere())),
       new UIButton("Ray (TRI)" , () -> Core.setRenderer(Renderer.rayTri())),
       new UIButton("Rasterizer", () -> Core.setRenderer(Renderer.rasterizer())),
-      new UIToggle("Normal"    , Renderer::usesNormalMap, Renderer::setNormalMap),
       new UIButton("Options"   , () -> UIController.setState(UIState.OPTIONS) ),
       new UIButton("Main Menu" , Core::quitToMenu),
       new UIButton("Quit"      , Core::quitToDesk)

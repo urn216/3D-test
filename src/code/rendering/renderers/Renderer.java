@@ -18,16 +18,6 @@ public abstract class Renderer {
   public static Renderer raySphere() {return new RaySphereRenderer();}
   public static Renderer rasterizer() {return new RasterRenderer();}
 
-  private static boolean normalMap = false;
-
-  public static boolean usesNormalMap() {
-    return normalMap;
-  }
-
-  public static void setNormalMap(boolean normalMap) {
-    Renderer.normalMap = normalMap;
-  }
-
   public void updateConstants(double fov, int width, int height) {
     this.fov = fov;
     this.f = 1/Math.tan(fov/2);

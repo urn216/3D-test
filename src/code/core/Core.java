@@ -43,6 +43,7 @@ public abstract class Core {
   private static RigidBody lightSource = null;
   
   private static Camera3D cam;
+  private static double camFOVChange = -1;
 
   private static long pTTime = System.currentTimeMillis();
   private static long pFTime = System.currentTimeMillis();
@@ -99,6 +100,10 @@ public abstract class Core {
     cam.setRenderer(r);
   }
 
+  public static void setFieldOfView(double f) {
+    camFOVChange = f;
+  }
+
   public static void quitToMenu() {
     cam.setPosition(new Vector3());
     cam.resetRotation();
@@ -149,6 +154,11 @@ public abstract class Core {
       }
       
       cam.draw(bodies);
+
+      if (camFOVChange > 0) {
+        cam.setFieldOfView(camFOVChange);
+        camFOVChange = -1;
+      }
 
       if (quit) {
         System.exit(0);

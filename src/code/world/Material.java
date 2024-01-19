@@ -1,5 +1,6 @@
 package code.world;
 
+import code.rendering.Constants;
 import mki.io.FileIO;
 
 import mki.math.vector.Vector3;
@@ -66,7 +67,7 @@ public class Material {
   public int getIntenseColour(Vector3 oIntensity) {return (ALPHA_MASK) | (colourFix(r*oIntensity.x) << 16) | (colourFix(g*oIntensity.y) << 8) | (colourFix(b*oIntensity.z));}
 
   public int getIntenseColour(Vector3 oIntensity, double u, double v) {
-    int rgb = getNearestNeighbourFilteringTexel(texture, tSize, u, v);
+    int rgb = Constants.getFilteringMode().apply(texture, tSize, u, v);
 
     return (ALPHA_MASK) | (colourFix(((rgb & RED_MASK) >> 16)*this.rf*oIntensity.x) << 16) | (colourFix(((rgb & GREEN_MASK) >> 8)*this.gf*oIntensity.y) << 8) | (colourFix((rgb & BLUE_MASK)*this.bf*oIntensity.z));
   }
@@ -108,7 +109,7 @@ public class Material {
   }
 
   public int getReflection(int other, Vector3 oIntensity, double u, double v) {
-    int rgb = getNearestNeighbourFilteringTexel(texture, tSize, u, v);
+    int rgb = Constants.getFilteringMode().apply(texture, tSize, u, v);
 
     float r = ((other & RED_MASK  ) >> 16)*reflectivity+((rgb & RED_MASK  ) >> 16)*(this.r/255f)*(1-reflectivity);
     float g = ((other & GREEN_MASK) >> 8 )*reflectivity+((rgb & GREEN_MASK) >> 8 )*(this.g/255f)*(1-reflectivity);
@@ -118,7 +119,7 @@ public class Material {
   }
 
   public Vector3 getNormal(double u, double v) {
-    int rgb = getNearestNeighbourFilteringTexel(normals, nSize, u, v);
+    int rgb = Constants.getFilteringMode().apply(normals, nSize, u, v);
     float magnitude = normalMagnitudes[((int)(u*tSize)+(int)(v*tSize)*tSize) % normalMagnitudes.length];
 
     return new Vector3(

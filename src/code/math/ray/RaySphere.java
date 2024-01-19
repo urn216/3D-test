@@ -3,7 +3,7 @@ package code.math.ray;
 import mki.math.MathHelp;
 import mki.math.vector.Vector2;
 import mki.math.vector.Vector3;
-import code.rendering.renderers.Renderer;
+import code.rendering.Constants;
 import code.world.Material;
 import code.world.RigidBody;
 
@@ -40,10 +40,13 @@ public class RaySphere {
     Vector3 surface = rayStart.add(dir.scale(closest));
     Vector3 sNormal = surface.subtract(close.getPosition()).unitize();
     Vector2 Puv = MathHelp.sphereUVPoint(close.getRotation().reverse().rotate(sNormal)); //get the uv coordinates for this point
-    if (Renderer.usesNormalMap()) sNormal = displaceNormal(sNormal, close.getModel().getMat().getNormal(Puv.x, Puv.y));
-    Vector3 intensity = intensityStep(surface, sNormal, bodies, close, close.getModel().getMat().getIntensity(), numSteps);
-    if (numRef>0 && close.getModel().getMat().getReflectivity() != 0) {return close.getModel().getMat().getReflection(getCol(surface, dir.subtract(sNormal.scale(2*sNormal.dot(dir))), bodies, numSteps-1, numRef-1), intensity, Puv.x, Puv.y);}
-    return close.getModel().getMat().getIntenseColour(intensity, Puv.x, Puv.y);
+    Material mat = close.getModel().getMat();
+
+    sNormal = Constants.getSphereNormal().apply(sNormal, mat, Puv.x, Puv.y);
+
+    Vector3 intensity = intensityStep(surface, sNormal, bodies, close, mat.getIntensity(), numSteps);
+    if (numRef>0 && mat.getReflectivity() != 0) {return mat.getReflection(getCol(surface, dir.subtract(sNormal.scale(2*sNormal.dot(dir))), bodies, numSteps-1, numRef-1), intensity, Puv.x, Puv.y);}
+    return mat.getIntenseColour(intensity, Puv.x, Puv.y);
   }
 
   private static double reaches(Vector3 rayStart, Vector3 dir, RigidBody[] bodies, RigidBody goal, RigidBody sourceBody) {
@@ -84,7 +87,7 @@ public class RaySphere {
 
 
 
-  private static Vector3 displaceNormal(Vector3 normal, Vector3 displacement) {
+  public static Vector3 displaceNormal(Vector3 normal, Vector3 displacement) {
     Vector3 pU = normal.y > 0.99 || normal.y < -0.99 ? new Vector3(-1, 0, 0) : Vector3.UNIT_Y.cross(normal).unitize();
     Vector3 pV = normal.cross(pU).unitize();
     

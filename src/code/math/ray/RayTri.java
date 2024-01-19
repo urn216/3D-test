@@ -5,7 +5,7 @@ import mki.math.vector.Vector2;
 import mki.math.vector.Vector3;
 
 import code.math.tri.Tri3D;
-import code.rendering.renderers.Renderer;
+import code.rendering.Constants;
 import code.world.Material;
 import code.world.RigidBody;
 
@@ -55,12 +55,14 @@ public class RayTri {
     }
     Vector3 surface = rayStart.add(dir.scale(closest));
     Vector2 Puv = cTri.getUVCoords(cU, cV); //get the uv coordinates for this point
+    Material mat = close.getModel().getMat();
+
     // Vector3 sNormal = close instanceof Sphere ? surface.subtract(close.getPosition()).unitize() : cTri.getNormal();
-    Vector3 sNormal = Renderer.usesNormalMap() ? cTri.getDisplacedNormal(close.getModel().getMat().getNormal(Puv.x, Puv.y)) : cTri.getNormal();
-    // Vector3 sNormal = cTri.getNormal();
-    Vector3 intensity = intensityStep(surface, sNormal, bodies, close, close.getModel().getMat().getIntensity(), numSteps);
-    if (numRef>0 && close.getModel().getMat().getReflectivity() != 0) {return close.getModel().getMat().getReflection(getCol(surface, dir.subtract(sNormal.scale(2*sNormal.dot(dir))), bodies, numSteps-1, numRef-1), intensity, Puv.x, Puv.y);}
-    return close.getModel().getMat().getIntenseColour(intensity, Puv.x, Puv.y);
+    Vector3 sNormal = Constants.getTriNormal().apply(cTri, mat, Puv.x, Puv.y);
+    
+    Vector3 intensity = intensityStep(surface, sNormal, bodies, close, mat.getIntensity(), numSteps);
+    if (numRef>0 && mat.getReflectivity() != 0) {return mat.getReflection(getCol(surface, dir.subtract(sNormal.scale(2*sNormal.dot(dir))), bodies, numSteps-1, numRef-1), intensity, Puv.x, Puv.y);}
+    return mat.getIntenseColour(intensity, Puv.x, Puv.y);
     // return close.getMat().getAbsColour();
   }
 

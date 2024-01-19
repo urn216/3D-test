@@ -12,6 +12,7 @@ import mki.math.vector.Vector2;
 import mki.math.vector.Vector3;
 
 import code.math.tri.Tri3D;
+import code.rendering.Constants;
 import code.rendering.Drawing;
 import code.world.Material;
 import code.world.RigidBody;
@@ -251,17 +252,9 @@ class RasterRenderer extends Renderer {
     // Vector3 normal = Renderer.usesNormalMap() ?  : cTri.getNormal();
     //
 
-    d.fillTri(triFlattened, Renderer.usesNormalMap()? 
-      (u, v)->{
+    d.fillTri(triFlattened, (u, v)->{
         Vector3 globalIllumination = lightCol.scale(MathHelp.intensity(
-          (tri.getDisplacedNormal(mat.getNormal(u, v)).dot(lightDir)+1)/2, 
-          lightDistSquared
-        ));
-        return mat.getIntenseColour(globalIllumination, u, v);
-      }: 
-      (u, v)->{
-        Vector3 globalIllumination = lightCol.scale(MathHelp.intensity(
-          (tri.getNormal().dot(lightDir)+1)/2, 
+          (Constants.getTriNormal().apply(tri, mat, u, v).dot(lightDir)+1)/2, 
           lightDistSquared
         ));
         return mat.getIntenseColour(globalIllumination, u, v);
