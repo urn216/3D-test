@@ -1,10 +1,10 @@
 package code.core;
 
-import mki.io.FileIO;
-
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
+
+import mki.io.FileIO;
 
 class Settings {
   private static final String LOCATION = "../settings.txt";

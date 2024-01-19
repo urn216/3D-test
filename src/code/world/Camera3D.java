@@ -1,14 +1,14 @@
 package code.world;
 
+import code.rendering.Drawing;
+import code.rendering.renderers.Renderer;
+
 import java.awt.image.BufferedImage;
 
 import mki.math.MathHelp;
 import mki.math.matrix.Quaternion;
 import mki.math.vector.Vector2I;
 import mki.math.vector.Vector3;
-
-import code.rendering.Drawing;
-import code.rendering.renderers.Renderer;
 
 /**
 * A camera allows a player to see what's happening in the game.

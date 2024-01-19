@@ -1,15 +1,17 @@
 package code.world;
 
+import code.math.tri.Tri3D;
+
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Scanner;
 
 import mki.io.FileIO;
+
 import mki.math.matrix.Quaternion;
 import mki.math.vector.Vector2;
 import mki.math.vector.Vector3;
 import mki.math.vector.Vector3I;
-import code.math.tri.Tri3D;
 
 public class Model {
 

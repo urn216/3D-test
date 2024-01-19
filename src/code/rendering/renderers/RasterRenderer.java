@@ -1,21 +1,24 @@
 package code.rendering.renderers;
 
+import code.math.tri.Tri3D;
+
+import code.rendering.Constants;
+import code.rendering.Drawing;
+
+import code.world.Material;
+import code.world.RigidBody;
+
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+
 import java.util.stream.Stream;
 
 import mki.math.MathHelp;
 import mki.math.matrix.Quaternion;
 import mki.math.vector.Vector2;
 import mki.math.vector.Vector3;
-
-import code.math.tri.Tri3D;
-import code.rendering.Constants;
-import code.rendering.Drawing;
-import code.world.Material;
-import code.world.RigidBody;
 
 class RasterRenderer extends Renderer {
 

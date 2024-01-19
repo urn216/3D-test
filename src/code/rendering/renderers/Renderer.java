@@ -1,10 +1,11 @@
 package code.rendering.renderers;
 
+import code.rendering.Drawing;
+
+import code.world.RigidBody;
+
 import mki.math.matrix.Quaternion;
 import mki.math.vector.Vector3;
-
-import code.rendering.Drawing;
-import code.world.RigidBody;
 
 public abstract class Renderer {
   

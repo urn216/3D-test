@@ -1,23 +1,24 @@
 package code.core;
 
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentAdapter;
+
+import java.awt.Graphics;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
+import java.awt.image.BufferedImage;
+import java.awt.Insets;
+
+import java.util.function.BiConsumer;
+
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import mki.io.FileIO;
 
 import mki.math.vector.Vector2;
-
-import java.awt.Graphics;
-import java.awt.image.BufferedImage;
-import java.util.function.BiConsumer;
-import java.awt.Insets;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
-
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentAdapter;
 
 public final class Window {
   

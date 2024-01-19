@@ -1,23 +1,25 @@
 package code.core;
 
-import java.awt.Cursor;
-import java.awt.AWTException;
-import java.awt.MouseInfo;
-import java.awt.Point;
-import java.awt.Robot;
-import java.awt.event.KeyAdapter;
-import java.awt.event.MouseAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseEvent;
-import java.awt.image.BufferedImage;
-
-import javax.swing.JFrame;
-
 import code.rendering.renderers.Renderer;
 import code.world.Camera3D;
 import code.world.RigidBody;
+
+import java.awt.AWTException;
+import java.awt.Cursor;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
+import java.awt.MouseInfo;
+import java.awt.Point;
+import java.awt.Robot;
+
+import javax.swing.JFrame;
+
 import mki.math.vector.Vector2I;
 import mki.math.vector.Vector3;
+
 import mki.ui.control.UIActionSetter;
 import mki.ui.control.UIController;
 

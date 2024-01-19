@@ -1,19 +1,20 @@
 package code.core;
 
-import java.awt.image.BufferedImage;
-
-import mki.io.FileIO;
-import mki.math.vector.Vector3;
-
-import mki.ui.control.UIController;
-
 import code.rendering.renderers.Renderer;
+
 import code.world.Camera3D;
 import code.world.RigidBody;
 
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+
+import mki.io.FileIO;
+
+import mki.math.vector.Vector3;
+
+import mki.ui.control.UIController;
 
 enum State {
   MAINMENU,

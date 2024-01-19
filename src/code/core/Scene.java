@@ -1,12 +1,11 @@
 package code.core;
 
-import mki.math.vector.Vector2;
-import mki.math.vector.Vector3;
-import mki.math.vector.Vector3I;
 import code.math.tri.Tri3D;
+
 import code.world.Material;
 import code.world.Model;
 import code.world.RigidBody;
+
 import code.world.object.Cube;
 import code.world.object.Dropship;
 import code.world.object.LowPoly;
@@ -15,6 +14,10 @@ import code.world.object.MapBlock;
 import code.world.object.Quad;
 import code.world.object.Room;
 import code.world.object.Sphere;
+
+import mki.math.vector.Vector2;
+import mki.math.vector.Vector3;
+import mki.math.vector.Vector3I;
 
 public abstract class Scene {
 

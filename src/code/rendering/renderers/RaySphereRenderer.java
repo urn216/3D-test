@@ -1,13 +1,15 @@
 package code.rendering.renderers;
 
-import mki.math.matrix.Quaternion;
-import mki.math.vector.Vector3;
+import code.math.ray.RaySphere;
+
+import code.rendering.Drawing;
+
+import code.world.RigidBody;
 
 import java.util.stream.IntStream;
 
-import code.math.ray.RaySphere;
-import code.rendering.Drawing;
-import code.world.RigidBody;
+import mki.math.matrix.Quaternion;
+import mki.math.vector.Vector3;
 
 class RaySphereRenderer extends Renderer {
 

@@ -1,10 +1,10 @@
 package code.world.object;
 
-import mki.math.vector.Vector3;
-
 import code.world.Material;
 import code.world.Model;
 import code.world.RigidBody;
+
+import mki.math.vector.Vector3;
 
 public class MapBlock extends RigidBody {
 

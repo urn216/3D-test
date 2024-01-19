@@ -1,6 +1,10 @@
 package code.rendering;
 
+import code.math.tri.Tri2D;
+import code.math.tri.Tri3D;
+
 import java.awt.image.BufferedImage;
+
 import java.util.function.BiFunction;
 
 import mki.math.MathHelp;
@@ -8,8 +12,6 @@ import mki.math.vector.Vector2;
 import mki.math.vector.Vector2I;
 import mki.math.vector.Vector3;
 import mki.math.vector.Vector3I;
-import code.math.tri.Tri2D;
-import code.math.tri.Tri3D;
 
 public class Drawing {
   private final int[] contents;
