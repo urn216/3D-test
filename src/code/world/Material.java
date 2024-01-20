@@ -112,9 +112,9 @@ public class Material {
   public int getReflection(int other, Vector3 oIntensity, double u, double v) {
     int rgb = Constants.getFilteringMode().apply(texture, tSize, u, v);
 
-    float r = ((other & RED_MASK  ) >> 16)*reflectivity+((rgb & RED_MASK  ) >> 16)*(this.r/255f)*(1-reflectivity);
-    float g = ((other & GREEN_MASK) >> 8 )*reflectivity+((rgb & GREEN_MASK) >> 8 )*(this.g/255f)*(1-reflectivity);
-    float b = ( other & BLUE_MASK        )*reflectivity+( rgb & BLUE_MASK        )*(this.b/255f)*(1-reflectivity);
+    float r = ((other & RED_MASK  ) >> 16)*reflectivity+((rgb & RED_MASK  ) >> 16)*(this.rf)*(1-reflectivity);
+    float g = ((other & GREEN_MASK) >> 8 )*reflectivity+((rgb & GREEN_MASK) >> 8 )*(this.gf)*(1-reflectivity);
+    float b = ( other & BLUE_MASK        )*reflectivity+( rgb & BLUE_MASK        )*(this.bf)*(1-reflectivity);
 
     return (ALPHA_MASK) | (colourFix(r*oIntensity.x) << 16) | (colourFix(g*oIntensity.y) << 8) | (colourFix(b*oIntensity.z));
   }

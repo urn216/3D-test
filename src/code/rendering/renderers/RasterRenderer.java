@@ -32,6 +32,8 @@ class RasterRenderer extends Renderer {
   private static final Vector3 lightCol = new Vector3(Integer.MAX_VALUE);
   private static final Vector3 glowLCol  = new Vector3(0, 5, 10);
 
+  private static final int BACKGROUND_COLOUR = -16777216;
+
   @Override
   public void updateConstants(double fov, int width, int height) {
     super.updateConstants(fov, width, height);
@@ -45,7 +47,7 @@ class RasterRenderer extends Renderer {
 
   @Override
   public void render(Drawing d, Vector3 cameraPosition, Quaternion cameraRotation, RigidBody[] bodies) {
-    d.fill(-16777216);
+    d.fill(BACKGROUND_COLOUR);
     // d.fill(~0);
 
     Quaternion worldRotation = cameraRotation.reverse();
@@ -266,12 +268,11 @@ class RasterRenderer extends Renderer {
       Vector3 lightOffset = lightPos.subtract(pixelWorldLocation);
 
       Vector3 normal = Constants.getTriNormal().apply(tri, mat, p.x, p.y);
-      return mat.getIntenseColour(
-        lightCol.scale(MathHelp.intensity(Math.max(normal.dot(lightDir), 0), lightDistSquared)) // remove in favour of point light
-        .add(
-        glowLCol.scale(MathHelp.intensity(Math.max(normal.dot(lightOffset.unitize()), 0), lightOffset.magsquare())) // do in a loop
-        )
-        .add(mat.getIntensity()) // ???
+      return mat.getReflection(
+        BACKGROUND_COLOUR, // fudged reflections for now
+        mat.getIntensity() // ???
+        .add(lightCol.scale(MathHelp.intensity(Math.max(normal.dot(lightDir), 0), lightDistSquared))) // remove in favour of point light
+        .add(glowLCol.scale(MathHelp.intensity(Math.max(normal.dot(lightOffset.unitize()), 0), lightOffset.magsquare()))) // do in a loop
         , 
         p.x, 
         p.y
