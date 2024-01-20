@@ -20,6 +20,9 @@ public abstract class Constants {
   private static QuadFunction<  Tri3D, Material, Double, Double, Vector3> triNormal = triNormalFalse;
 
 
+  private static boolean dynamicRasterLighting = true;
+
+
   private static QuadFunction<int[], Integer, Double, Double, Integer> filteringMode = Material::getNearestNeighbourFilteringTexel;
 
   public static boolean usesNormalMap() {
@@ -32,6 +35,10 @@ public abstract class Constants {
 
   public static QuadFunction<Tri3D, Material, Double, Double, Vector3> getTriNormal() {
     return triNormal;
+  }
+
+  public static boolean usesDynamicRasterLighting() {
+    return dynamicRasterLighting;
   }
 
   public static void setNormalMapUse(boolean normalMap) {
@@ -52,5 +59,9 @@ public abstract class Constants {
 
   public static void setFilteringMode(QuadFunction<int[], Integer, Double, Double, Integer> filteringMode) {
     Constants.filteringMode = filteringMode;
+  }
+
+  public static void setDynamicRasterLighting(boolean dynamicRasterLighting) {
+    Constants.dynamicRasterLighting = dynamicRasterLighting;
   }
 }

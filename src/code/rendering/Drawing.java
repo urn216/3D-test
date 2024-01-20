@@ -165,7 +165,7 @@ public class Drawing {
    * @param normal A unit {@code Vector3} orthogonal to the plane this line is to travel across
    * @param c The colour of the line
    */
-  public void drawLineHoriz(int x1, int x2, int y, double z1, double z2, double u1, double u2, double v1, double v2, BiFunction<Double, Double, Integer> c) {
+  public void drawLineHoriz(int x1, int x2, int y, double z1, double z2, double u1, double u2, double v1, double v2, BiFunction<Vector3, Vector2, Integer> c) {
     int incrx = (x2-x1)>>31;
     x1+=incrx; x2+=incrx;
     int sx = (incrx<<1)+1;
@@ -177,7 +177,7 @@ public class Drawing {
     double vf = (v2-v1)/numSteps;
 
     for (; x1!=x2; x1+=sx, z1+=zf, u1+=uf, v1+=vf) {
-      drawPixel(x1, y, z1, c.apply(u1/z1, v1/z1));
+      drawPixel(x1, y, z1, c.apply(new Vector3(x1, y, z1), new Vector2(u1/z1, v1/z1)));
     }
   }
 
@@ -321,7 +321,7 @@ public class Drawing {
    * @param mat
    * @param globalIllumination
    */
-  public void fillTri(Tri3D tri, BiFunction<Double, Double, Integer> colour) {
+  public void fillTri(Tri3D tri, BiFunction<Vector3, Vector2, Integer> colour) {
     Vector3[] vrts = tri.getVerts();
     Vector2[] uv = tri.getVertUVs();
 

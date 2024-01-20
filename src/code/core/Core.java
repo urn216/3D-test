@@ -97,6 +97,10 @@ public abstract class Core {
     return state;
   }
 
+  public static RigidBody getLightSource() {
+    return lightSource;
+  }
+
   public static void setRenderer(Renderer r) {
     cam.setRenderer(r);
   }

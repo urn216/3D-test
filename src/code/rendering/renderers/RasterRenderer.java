@@ -1,5 +1,6 @@
 package code.rendering.renderers;
 
+import code.core.Core;
 import code.math.tri.Tri3D;
 
 import code.rendering.Constants;
@@ -29,7 +30,7 @@ class RasterRenderer extends Renderer {
   private static final double lightDistSquared = new Vector3(4000, 10000, 1000).magsquare();
   private static final Vector3 lightDir = new Vector3(0.4, 1, 0.1).unitize();
   private static final Vector3 lightCol = new Vector3(Integer.MAX_VALUE);
-  // private static final Vector3 glowLCol  = new Vector3(25, 25, 50);
+  private static final Vector3 glowLCol  = new Vector3(0, 5, 10);
 
   @Override
   public void updateConstants(double fov, int width, int height) {
@@ -48,6 +49,9 @@ class RasterRenderer extends Renderer {
     // d.fill(~0);
 
     Quaternion worldRotation = cameraRotation.reverse();
+
+    Vector3 lightPos = Core.getLightSource() == null ? new Vector3() : Core.getLightSource().getPosition().subtract(cameraPosition);
+    //TODO gather all light offsets and colours
 
     //drawing objects
     Stream.of(bodies).parallel().forEach((b) -> {
@@ -79,7 +83,7 @@ class RasterRenderer extends Renderer {
 
       if (partial) s = s.<Tri3D>mapMulti(this::clipTri);
       
-      s.forEach((tri) -> renderTri(d, tri, b.getModel().getMat()));
+      s.forEach((tri) -> renderTri(d, tri, b.getModel().getMat(), lightPos, cameraRotation));
     });
   }
 
@@ -216,7 +220,7 @@ class RasterRenderer extends Renderer {
    * @param mat The {@code Material} of the {@code RigidBody} the input tri belongs to. 
    * (This contains texture and surface information for drawing.)
    */
-  private void renderTri(Drawing d, Tri3D tri, Material mat) {
+  private void renderTri(Drawing d, Tri3D tri, Material mat, Vector3 lightPos, Quaternion cameraRotation) {
     int width  = d.getWidth ();
     int height = d.getHeight()-1;
 
@@ -255,14 +259,33 @@ class RasterRenderer extends Renderer {
     // Vector3 normal = Renderer.usesNormalMap() ?  : cTri.getNormal();
     //
 
-    d.fillTri(triFlattened, (u, v)->{
-        Vector3 globalIllumination = lightCol.scale(MathHelp.intensity(
-          (Constants.getTriNormal().apply(tri, mat, u, v).dot(lightDir)+1)/2, 
-          lightDistSquared
-        ));
-        return mat.getIntenseColour(globalIllumination, u, v);
-      }
-    );
+    BiFunction<Vector3, Vector2, Integer> lighting = Constants.usesDynamicRasterLighting() ?
+    (v, p)->{ // dynamic lighting (full noise!)
+      double z = v.z;
+      Vector3 pixelWorldLocation = cameraRotation.rotate(new Vector3((v.x*2.0/width-1)/(z*f), -((v.y*2.0/height-1)*aspRat)/(z*f), 1.0/v.z));
+      Vector3 lightOffset = lightPos.subtract(pixelWorldLocation);
+
+      Vector3 normal = Constants.getTriNormal().apply(tri, mat, p.x, p.y);
+      return mat.getIntenseColour(
+        lightCol.scale(MathHelp.intensity(Math.max(normal.dot(lightDir), 0), lightDistSquared)) // remove in favour of point light
+        .add(
+        glowLCol.scale(MathHelp.intensity(Math.max(normal.dot(lightOffset.unitize()), 0), lightOffset.magsquare())) // do in a loop
+        )
+        .add(mat.getIntensity()) // ???
+        , 
+        p.x, 
+        p.y
+      );
+    }:
+    (v, p)->{ // directional sky light (no dynamic lighting)
+      return mat.getIntenseColour(
+        lightCol.scale(MathHelp.intensity((Constants.getTriNormal().apply(tri, mat, p.x, p.y).dot(lightDir)+1)/2, lightDistSquared)), 
+        p.x, 
+        p.y
+      );
+    };
+
+    d.fillTri(triFlattened, lighting);
     // d.drawTri(tri, -16777216|~mat.getIntenseColour(
     //   globalIllumination
     //   // .add(glowLCol.scale(MathHelp.intensity(Math.max(normal.dot(vert0), 0),distSquared)))
