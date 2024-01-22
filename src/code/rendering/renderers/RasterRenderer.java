@@ -1,6 +1,5 @@
 package code.rendering.renderers;
 
-import code.core.Core;
 import code.math.tri.Tri3D;
 
 import code.rendering.Constants;
@@ -30,7 +29,6 @@ class RasterRenderer extends Renderer {
   private static final double lightDistSquared = new Vector3(4000, 10000, 1000).magsquare();
   private static final Vector3 lightDir = new Vector3(0.4, 1, 0.1).unitize();
   private static final Vector3 lightCol = new Vector3(Integer.MAX_VALUE);
-  private static final Vector3 glowLCol  = new Vector3(0, 5, 10);
 
   private static final int BACKGROUND_COLOUR = -16777216;
 
@@ -52,8 +50,10 @@ class RasterRenderer extends Renderer {
 
     Quaternion worldRotation = cameraRotation.reverse();
 
-    Vector3 lightPos = Core.getLightSource() == null ? new Vector3() : Core.getLightSource().getPosition().subtract(cameraPosition);
-    //TODO gather all light offsets and colours
+    Vector3[] lights = Stream.of(bodies).parallel().filter((b) -> b.getModel().getMat().isEmissive()).mapMulti((b, c) -> {
+      c.accept(b.getPosition().subtract(cameraPosition));
+      c.accept(b.getModel().getMat().getIntensity());
+    }).toArray((i) -> new Vector3[i]);
 
     //drawing objects
     Stream.of(bodies).parallel().forEach((b) -> {
@@ -85,7 +85,7 @@ class RasterRenderer extends Renderer {
 
       if (partial) s = s.<Tri3D>mapMulti(this::clipTri);
       
-      s.forEach((tri) -> renderTri(d, tri, b.getModel().getMat(), lightPos, cameraRotation));
+      s.forEach((tri) -> renderTri(d, tri, b.getModel().getMat(), cameraRotation, lights));
     });
   }
 
@@ -222,7 +222,7 @@ class RasterRenderer extends Renderer {
    * @param mat The {@code Material} of the {@code RigidBody} the input tri belongs to. 
    * (This contains texture and surface information for drawing.)
    */
-  private void renderTri(Drawing d, Tri3D tri, Material mat, Vector3 lightPos, Quaternion cameraRotation) {
+  private void renderTri(Drawing d, Tri3D tri, Material mat, Quaternion cameraRotation, Vector3... lights) {
     int width  = d.getWidth ();
     int height = d.getHeight()-1;
 
@@ -230,20 +230,6 @@ class RasterRenderer extends Renderer {
 
     Vector3[] verts  = tri.getVerts();
     Vector2[] vertUVs  = tri.getVertUVs();
-    // Vector3 vert0  = verts[0].scale(-1).unitize();
-    // double distSquared = verts[0].magsquare();
-
-    // tri.setVertUVs(
-    //   vertUVs[0].scale(1/verts[0].z), 
-    //   vertUVs[1].scale(1/verts[1].z), 
-    //   vertUVs[2].scale(1/verts[2].z)
-    // );
-
-    // tri.setVerts(
-    //   projectVector3(verts[0], aspRat).add(1, 1, 0).scale(0.5*width, 0.5*height, 1),
-    //   projectVector3(verts[1], aspRat).add(1, 1, 0).scale(0.5*width, 0.5*height, 1),
-    //   projectVector3(verts[2], aspRat).add(1, 1, 0).scale(0.5*width, 0.5*height, 1)
-    // );
 
     Tri3D triFlattened = tri.projectVerts(
       projectVector3(verts[0], aspRat).add(1, 1, 0).scale(0.5*width, 0.5*height, 1),
@@ -256,27 +242,20 @@ class RasterRenderer extends Renderer {
 
     //COLOUR
 
-    // Vector3 globalIllumination = lightCol.scale(MathHelp.intensity(Math.max(normal.dot(lightDir), 0), lightDistSquared));
-    
-    // Vector3 normal = Renderer.usesNormalMap() ?  : cTri.getNormal();
-    //
-
     BiFunction<Vector3, Vector2, Integer> lighting = Constants.usesDynamicRasterLighting() ?
     (v, p)->{ // dynamic lighting (full noise!)
       double z = v.z;
       Vector3 pixelWorldLocation = cameraRotation.rotate(new Vector3((v.x*2.0/width-1)/(z*f), -((v.y*2.0/height-1)*aspRat)/(z*f), 1.0/v.z));
-      Vector3 lightOffset = lightPos.subtract(pixelWorldLocation);
-
       Vector3 normal = Constants.getTriNormal().apply(tri, mat, p.x, p.y);
-      return mat.getReflection(
-        BACKGROUND_COLOUR, // fudged reflections for now
-        mat.getIntensity() // ???
-        .add(lightCol.scale(MathHelp.intensity(Math.max(normal.dot(lightDir), 0), lightDistSquared))) // remove in favour of point light
-        .add(glowLCol.scale(MathHelp.intensity(Math.max(normal.dot(lightOffset.unitize()), 0), lightOffset.magsquare()))) // do in a loop
-        , 
-        p.x, 
-        p.y
-      );
+      Vector3 intensity = mat.getIntensity();
+
+      for (int i = 0; i < lights.length; i+=2) {
+        Vector3 lightOffset = lights[i].subtract(pixelWorldLocation);
+        intensity = intensity.add(lights[i+1].scale(MathHelp.intensity(Math.max(normal.dot(lightOffset.unitize()), 0), lightOffset.magsquare())));
+      }
+
+      // fudged reflections for now
+      return mat.getReflection(BACKGROUND_COLOUR, intensity, p.x, p.y);
     }:
     (v, p)->{ // directional sky light (no dynamic lighting)
       return mat.getIntenseColour(
