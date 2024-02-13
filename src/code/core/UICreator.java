@@ -51,6 +51,11 @@ public class UICreator {
       Constants::usesNormalMap, 
       Constants::setNormalMapUse
     ),
+    new UIToggle(
+      "Dynamic Lights", //TEMPORARY (Want dedicated options for each renderer. This only matters for rasterizer)
+      Constants::usesDynamicRasterLighting, 
+      Constants::setDynamicRasterLighting
+    ),
     new UIDropDown<QuadFunction<int[], Integer, Double, Double, Integer>>(
       "Filtering: %s",
       ( ) -> {
@@ -119,6 +124,8 @@ public class UICreator {
       new UIButton("Ray (SPH)" , () -> Core.setRenderer(Renderer.raySphere())),
       new UIButton("Ray (TRI)" , () -> Core.setRenderer(Renderer.rayTri())),
       new UIButton("Rasterizer", () -> Core.setRenderer(Renderer.rasterizer())),
+      new UIButton("Mtn Raster", () -> Core.setRenderer(Renderer.motionSensor())),
+      new UIButton("Wireframe" , () -> Core.setRenderer(Renderer.wireframe())),
       new UIButton("Options"   , () -> UIController.setState(UIState.OPTIONS) ),
       new UIButton("Main Menu" , Core::quitToMenu),
       new UIButton("Quit"      , Core::quitToDesk)

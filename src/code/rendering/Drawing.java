@@ -44,6 +44,15 @@ public class Drawing {
     return aspectRatio;
   }
 
+  /**
+   * Gets a copy of the depth buffer
+   * 
+   * @return a cloned depth buffer
+   */
+  public double[] getDepths() {
+    return depths.clone();
+  }
+
   public void asBufferedImage(BufferedImage image) {
     image.setRGB(0, 0, width, height, contents, 0, width);
   }
@@ -62,6 +71,16 @@ public class Drawing {
   }
 
   /**
+   * Simply clears the depth buffer. {@code fill} fulfils this responsibility, 
+   * and calling both is therefore unnecessary.
+   */
+  public synchronized void clearDepthBuffer() {
+    for (int i = 0; i < contents.length; i++) {
+      depths[i] = 0;
+    }
+  }
+
+  /**
    * Draws a single pixel onto this {@code Drawing} canvas. If the depth given is behind a previous pixel it will not be drawn.
    * 
    * @param x The {@code x} coordinate to draw to
@@ -71,7 +90,7 @@ public class Drawing {
    */
   public synchronized void drawPixel(int x, int y, double z, int c) {
     int i = x+y*width;
-    if (depths[i] > z) return;
+    if (depths[i] >= z) return;
     contents[i] = c;
     depths[i] = z;
   }
@@ -87,6 +106,50 @@ public class Drawing {
     int i = x+y*width;
     contents[i] = c;
     depths[i] = Double.MAX_VALUE;
+  }
+
+  /**
+   * Draws a single pixel onto this {@code Drawing} canvas.
+   * 
+   * @param i The index to draw to
+   * @param c The colour of the pixel
+   */
+  public synchronized void drawPixel(int i, int c) {
+    contents[i] = c;
+  }
+
+  /**
+   * Toggles a single pixel in this {@code Drawing} canvas. Puts it at the front of the depth buffer.
+   * 
+   * @param x The {@code x} coordinate to draw to
+   * @param y The {@code y} coordinate to draw to
+   */
+  public synchronized void togglePixel(int x, int y) {
+    int i = x+y*width;
+    if (depths[i] > 0) return;
+    contents[i] = ~contents[i] | -16777216;
+    depths[i] = Double.MAX_VALUE;
+  }
+
+  /**
+   * Toggles a single pixel in this {@code Drawing} canvas.
+   * 
+   * @param i The index to toggle
+   */
+  public synchronized void togglePixel(int i) {
+    contents[i] = ~contents[i] | -16777216;
+  }
+
+  /**
+   * Sets the depth of a single pixel of this {@code Drawing} canvas. If the depth given is behind a previous pixel it will not be set.
+   * 
+   * @param x The {@code x} coordinate to set
+   * @param y The {@code y} coordinate to set
+   * @param z The {@code z} coordinate to represent the depth of the pixel in world-space from the viewing camera
+   */
+  public synchronized void setPixelDepth(int x, int y, double z) {
+    int i = x+y*width;
+    if (depths[i] < z) depths[i] = z;
   }
 
   /**
@@ -156,6 +219,27 @@ public class Drawing {
   }
 
   /**
+   * Sets the depths for a horizontal line across this {@code Drawing} canvas.
+   * 
+   * @param x1 One of the endpoints of the horizontal line
+   * @param x2 The other endpoint of the horizontal line
+   * @param y The {@code y} coordinate to draw the line at
+   * @param z1 One of the depth endpoints of the horizontal line
+   * @param z2 The other depth endpoint of the horizontal line
+   */
+  public void setLineHorizDepths(int x1, int x2, int y, double z1, double z2) {
+    int incrx = (x2-x1)>>31;
+    x1+=incrx; x2+=incrx;
+    int sx = (incrx<<1)+1;
+
+    double zf = (z2-z1)/(sx*(x2-x1));
+
+    for (; x1!=x2; x1+=sx, z1+=zf) {
+      setPixelDepth(x1, y, z1);
+    }
+  }
+
+  /**
    * Draws a horizontal line from a texture across this {@code Drawing} canvas with a depth calculation at each pixel.
    * 
    * @param x1 One of the endpoints of the horizontal line
@@ -214,6 +298,18 @@ public class Drawing {
     for (; y1!=y2; y1+=sy) {
       drawPixel(x, y1, zOff-b*y1, c);
     }
+  }
+
+  /**
+   * Toggles a line across this {@code Drawing} canvas without depth considerations
+   * 
+   * @param x1 One of the {@code x} coordinate endpoints of the line
+   * @param y1 One of the {@code y} coordinate endpoints of the line
+   * @param x2 The other {@code x} coordinate endpoint of the line
+   * @param y2 The other {@code y} coordinate endpoint of the line
+   */
+  public void toggleLine(int x1, int y1, int x2, int y2) {
+    MathHelp.line2DToInt(x1, y1, x2, y2, (x, y) -> togglePixel(x, y));
   }
 
   /**
@@ -318,8 +414,7 @@ public class Drawing {
 
   /**
    * @param tri
-   * @param mat
-   * @param globalIllumination
+   * @param colour
    */
   public void fillTri(Tri3D tri, BiFunction<Vector3, Vector2, Integer> colour) {
     Vector3[] vrts = tri.getVerts();
@@ -383,6 +478,65 @@ public class Drawing {
       MathHelp.lerp(uvs[0].y, uvs[2].y, c),
       vs[y+offset], 
       colour
+    ));
+  }
+
+  /**
+   * Toggles the outline of a triangle onto this {@code Drawing} canvas. No depth calculations.
+   * 
+   * @param tri the 2-dimensional triangle to toggle
+   */
+  public void toggleTri(Tri3D tri) {
+    Vector3I[] p = new Vector3I[] {tri.getVerts()[0].castToInt(), tri.getVerts()[1].castToInt(), tri.getVerts()[2].castToInt()};
+    toggleLine(p[0].x, p[0].y, p[1].x, p[1].y);
+    toggleLine(p[0].x, p[0].y, p[2].x, p[2].y);
+    toggleLine(p[1].x, p[1].y, p[2].x, p[2].y);
+  }
+  
+  /**
+   * @param tri
+   */
+  public void setTriDepth(Tri3D tri) {
+    Vector3[] vrts = tri.getVerts();
+
+    Vector3I[] p = new Vector3I[] {
+      MathHelp.round(vrts[0]), 
+      MathHelp.round(vrts[1]), 
+      MathHelp.round(vrts[2])
+    };
+
+    if (p[0].y == p[1].y && p[0].y == p[2].y) return;
+
+    Double  [] z = new Double  [] {
+      vrts[0].z, 
+      vrts[1].z, 
+      vrts[2].z
+    };
+
+    if (p[1].y < p[0].y) {MathHelp.swap(p, 0, 1); MathHelp.swap(z, 0, 1);}
+    if (p[2].y < p[0].y) {MathHelp.swap(p, 0, 2); MathHelp.swap(z, 0, 2);} //Ordering vertices so p[0] is the highest and p[2] is the lowest
+    if (p[2].y < p[1].y) {MathHelp.swap(p, 1, 2); MathHelp.swap(z, 1, 2);}
+
+    int[] xs = new int[p[2].y-p[0].y+1];
+    double[] zs = new double[xs.length];
+    int offset = -p[0].y;
+    xs[0] = p[1].x;
+    zs[0] = z[1];
+
+    if (p[0].y != p[1].y) MathHelp.line2DToInt(p[0].x, p[0].y, p[1].x, p[1].y, (x, y, c) -> {
+      xs[y+offset] = x;
+      zs[y+offset] = MathHelp.lerp(z[0], z[1], c);
+    });
+    if (p[1].y != p[2].y) MathHelp.line2DToInt(p[1].x, p[1].y, p[2].x, p[2].y, (x, y, c) -> {
+      xs[y+offset] = x;
+      zs[y+offset] = MathHelp.lerp(z[1], z[2], c);
+    });
+    MathHelp.line2DToInt(p[0].x, p[0].y, p[2].x, p[2].y, (x, y, c) -> setLineHorizDepths(
+      x, 
+      xs[y+offset], 
+      y, 
+      MathHelp.lerp(z[0], z[2], c),
+      zs[y+offset]
     ));
   }
 }

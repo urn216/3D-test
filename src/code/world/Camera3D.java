@@ -97,9 +97,10 @@ public class Camera3D {
     this.renderer.updateConstants(this.fieldOfView, imageWidth, imageHeight);
   }
 
-  public void setRenderer(Renderer renderer) {
+  public synchronized void setRenderer(Renderer renderer) {
     this.renderer = renderer;
     this.renderer.updateConstants(this.fieldOfView, this.image.getWidth(), this.image.getHeight());
+    this.renderer.initialise(imageContents);
   }
 
   public void resetRotation() {
@@ -150,7 +151,7 @@ public class Camera3D {
     this.upDir = this.q.rotate(new Vector3(0, 1, 0));
   }
 
-  public void draw(RigidBody[] bodies) {
+  public synchronized void draw(RigidBody[] bodies) {
     renderer.render(imageContents, position, q, bodies);
     synchronized (this) {
       imageContents.asBufferedImage(image);

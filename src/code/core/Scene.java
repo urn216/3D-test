@@ -60,7 +60,8 @@ public abstract class Scene {
     return new RigidBody[] {
       new Sphere(new Vector3(-1, -1, 2.5), 0.1, new Material(new Vector3I(255, 255, 255), 0f, new Vector3(0, 5, 10))),
       new Sphere(new Vector3(4000, 10000, 1000), 80, new Material(new Vector3I(255, 255, 255), 0f, new Vector3(Integer.MAX_VALUE))),
-      new Map(new Vector3(0, -28, 0), 1, new Material(new Vector3I(150, 150, 150), 0f, new Vector3()))
+      new Map(new Vector3(0, -28, 0), 1, new Material(new Vector3I(150, 150, 150), 0f, new Vector3(), "env/terrain.png")),
+      // new Cube(new Vector3(), 1, new Material(new Vector3I(150, 150, 150), 0f, new Vector3(), "env/terrain.png"))
     };
   };
 
@@ -68,7 +69,8 @@ public abstract class Scene {
     return new RigidBody[] {
       new Sphere(new Vector3(-1, -1, 2.5), 0.1, new Material(new Vector3I(255, 255, 255), 0f, new Vector3(0, 5, 10))),
       new Sphere(new Vector3(4000, 10000, 1000), 80, new Material(new Vector3I(255, 255, 255), 0f, new Vector3(Integer.MAX_VALUE))),
-      new MapBlock(new Vector3(0, -28, 0), 1, new Material(new Vector3I(150, 150, 150), 0f, new Vector3()))
+      new MapBlock(new Vector3(0, -28, 0), 1, new Material(new Vector3I(150, 150, 150), 0f, new Vector3(), "env/terrain.png")),
+      // new Cube(new Vector3(), 1, new Material(new Vector3I(150, 150, 150), 0f, new Vector3(), "env/terrain.png"))
     };
   };
 

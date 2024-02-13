@@ -12,7 +12,7 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-
+// import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import mki.math.MathHelp;
@@ -23,6 +23,8 @@ import mki.math.vector.Vector3;
 class RasterRenderer extends Renderer {
 
   private static final Vector3[] clippingPlanes = new Vector3[4];
+
+  // private static final double EDGE_DETECTION_THRESHOLD = 0.02;
 
   // private static final double q = FAR_CLIPPING_PLANE/(FAR_CLIPPING_PLANE-NEAR_CLIPPING_PLANE);
 
@@ -87,6 +89,24 @@ class RasterRenderer extends Renderer {
       
       s.forEach((tri) -> renderTri(d, tri, b.getModel().getMat(), cameraRotation, lights));
     });
+
+    // EDGE DETECTION
+
+    // double[] currentDepths = d.getDepths();
+
+    // int w = d.getWidth ();
+    // int h = d.getHeight();
+    
+    // IntStream.range(0, currentDepths.length).parallel().forEach((i) -> {
+    //   int x = i%w;
+    //   int y = i/w;
+    //   if (
+    //     (x !=  0  && Math.abs(currentDepths[x-1 + ( y )*w] - currentDepths[i]) > EDGE_DETECTION_THRESHOLD) || 
+    //     (x != w-1 && Math.abs(currentDepths[x+1 + ( y )*w] - currentDepths[i]) > EDGE_DETECTION_THRESHOLD) || 
+    //     (y !=  0  && Math.abs(currentDepths[ x  + (y-1)*w] - currentDepths[i]) > EDGE_DETECTION_THRESHOLD) || 
+    //     (y != h-1 && Math.abs(currentDepths[ x  + (y+1)*w] - currentDepths[i]) > EDGE_DETECTION_THRESHOLD)
+    //   ) d.drawPixel(i, -16777216);
+    // });
   }
 
   /**
