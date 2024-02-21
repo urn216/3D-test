@@ -49,7 +49,7 @@ public class Model {
       }
       else {type = "gap";}
       if (type.equals("v")) {vs.add(new Vector3(scan.nextDouble()*scale, scan.nextDouble()*scale, scan.nextDouble()*scale));}
-      else if (type.equals("vt")) {vts.add(new Vector2(scan.nextDouble(), scan.nextDouble()));}
+      else if (type.equals("vt")) {vts.add(new Vector2(scan.nextDouble(), 1-scan.nextDouble()));}
       else if (type.equals("f")) {
         if (vts.isEmpty()) {
           int a = scan.nextInt(), b = scan.nextInt(), c = scan.nextInt();
