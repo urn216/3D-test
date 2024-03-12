@@ -17,8 +17,9 @@ import mki.math.vector.Vector3I;
 public class Model {
 
   protected final Vector3[] verts;
-  protected final Tri3D  [] faces;
   protected final Vector2[] vertUVs;
+
+  protected Tri3D[] faces;
 
   protected Material mat = new Material(new Vector3I(255), 0, new Vector3());
 
@@ -79,17 +80,31 @@ public class Model {
 
   public double calculateRadius() {
     double biggest = 0;
-    for (Vector3 vert : verts) {
-      double dist = vert.magnitude();
+    for (int i = 0; i < verts.length; i++) {
+      double dist = verts[i].magsquare();
       if (dist > biggest) biggest = dist;
     }
-    System.out.println("RADIUS   : "+ biggest);
-    System.out.println("NUM VERTS: "+ verts.length);
-    this.radius = biggest;
-    return biggest;
+    // System.out.println("RADIUS   : "+ biggest);
+    // System.out.println("NUM VERTS: "+ verts.length);
+    this.radius = Math.sqrt(biggest);
+    return this.radius;
   }
 
-  public Tri3D[] getFaces() {return faces;}
+  public Tri3D[] getFaces() {
+    return faces;
+  }
+
+  public Vector3[] getVerts() {
+    return verts;
+  }
+
+  public Vector2[] getVertUVs() {
+    return vertUVs;
+  }
+
+  public void setFaces(Tri3D[] faces) {
+    this.faces = faces;
+  }
 
   public void setRadius(double radius) {this.radius = radius;}
 
