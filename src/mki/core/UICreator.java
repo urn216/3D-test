@@ -90,15 +90,15 @@ class UICreator {
     );
 
     UIElement newGame = leftList(
-      new UIButton("Marbles" , () -> Core.loadScene(Scene.spheres())),
-      new UIButton("Gunship" , () -> Core.loadScene(Scene.gunship())),
-      new UIButton("Room"    , () -> Core.loadScene(Scene.roomBright())),
-      new UIButton("Terrain" , () -> Core.loadScene(Scene.heightMap())),
-      new UIButton("Voxels"  , () -> Core.loadScene(Scene.voxelMap())),
-      new UIButton("Marble 2", () -> Core.loadScene(Scene.threeSpheres())),
-      new UIButton("Room 2"  , () -> Core.loadScene(Scene.roomReflection())),
-      new UIButton("Cubes"   , () -> Core.loadScene(Scene.cubes())),
-      new UIButton("Cubes NM", () -> Core.loadScene(Scene.cubesNM())),
+      new UIButton("Marbles" , () -> Core.loadScene(Scene::spheres)),
+      new UIButton("Gunship" , () -> Core.loadScene(Scene::gunship)),
+      new UIButton("Room"    , () -> Core.loadScene(Scene::roomBright)),
+      new UIButton("Terrain" , () -> Core.loadScene(Scene::heightMap)),
+      new UIButton("Voxels"  , () -> Core.loadScene(Scene::voxelMap)),
+      new UIButton("Marble 2", () -> Core.loadScene(Scene::threeSpheres)),
+      new UIButton("Room 2"  , () -> Core.loadScene(Scene::roomReflection)),
+      new UIButton("Cubes"   , () -> Core.loadScene(Scene::cubes)),
+      new UIButton("Cubes NM", () -> Core.loadScene(Scene::cubesNM)),
       new UIButton("Back", UIController::back)
     );
 

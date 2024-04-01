@@ -71,7 +71,19 @@ public class Camera3D {
 
   public Vector3 getRightDir() {return rightDir;}
 
-  public Quaternion getRotationQ() {
+  public double getPitch() {
+    return pitch;
+  }
+
+  public double getYaw() {
+    return yaw;
+  }
+
+  public double getRoll() {
+    return roll;
+  }
+
+  public Quaternion getRotation() {
     return q;
   }
 
@@ -117,9 +129,13 @@ public class Camera3D {
   }
 
   public void setPitch(double theta) {
-    this.pitch = MathHelp.clamp(theta, -85, 85);
+    this.pitch = fixPitch(theta);
 
     updateQ();
+  }
+
+  protected static double fixPitch(double theta) {
+    return MathHelp.clamp(theta, -90, 90);
   }
 
   public void offsetYaw(double theta) {
@@ -127,9 +143,13 @@ public class Camera3D {
   }
 
   public void setYaw(double theta) {
-    this.yaw = (360 + theta) % 360;
+    this.yaw = fixYaw(theta);
 
     updateQ();
+  }
+
+  protected static double fixYaw(double theta) {
+    return (360 + theta) % 360;
   }
 
   public void offsetRoll(double theta) {
@@ -137,7 +157,19 @@ public class Camera3D {
   }
 
   public void setRoll(double theta) {
-    this.roll = theta;
+    this.roll = fixRoll(theta);
+
+    updateQ();
+  }
+
+  protected static double fixRoll(double theta) {
+    return (360 + theta) % 360;
+  }
+
+  public void setRotation(double pitch, double yaw, double roll) {
+    this.pitch = fixPitch(pitch);
+    this.yaw   = fixYaw  (yaw  );
+    this.roll  = fixRoll (roll );
 
     updateQ();
   }
@@ -155,5 +187,9 @@ public class Camera3D {
     synchronized (this) {
       imageContents.asBufferedImage(image);
     }
+  }
+
+  public synchronized void draw() {
+    draw(RigidBody.getActiveBodies());
   }
 }

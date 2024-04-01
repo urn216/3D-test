@@ -13,8 +13,8 @@ public class Quad extends RigidBody {
   public Quad(Vector3 position, double xSize, double ySize, double zSize, double textureSize, Material mat) {
     super(position, generateQuad(xSize, ySize, zSize, textureSize));
 
+    this.model.setRadius(Math.sqrt((xSize*xSize/4)+(ySize*ySize/4)+(zSize*zSize/4)));
     this.model.setMat(mat);
-    this.model.calculateRadius();
   }
   
   public static Model generateQuad(double xSize, double ySize, double zSize, double textureSize) {

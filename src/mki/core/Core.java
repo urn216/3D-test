@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.util.function.Supplier;
 
 import mki.io.FileIO;
 
@@ -37,8 +38,7 @@ public abstract class Core {
   private static State state = State.SPLASH;
   
   private static boolean quit = false;
-  
-  private static RigidBody[] bodies = {};
+
   private static RigidBody lightSource = null;
   
   private static Camera3D cam;
@@ -110,19 +110,19 @@ public abstract class Core {
   }
 
   public static void quitToMenu() {
+    RigidBody.clearBodies();
     cam.setPosition(new Vector3());
     cam.resetRotation();
-    Core.bodies = new RigidBody[0];
     Core.lightSource = null;
     Core.state = State.MAINMENU;
     UIController.setCurrentPane("Main Menu");
   }
 
-  public static void loadScene(RigidBody[] bodies) {
+  public static void loadScene(Supplier<RigidBody[]> bodySupplier) {
+    RigidBody.clearBodies();
     cam.setPosition(new Vector3());
     cam.resetRotation();
-    Core.bodies = bodies;
-    Core.lightSource = bodies[0];
+    Core.lightSource = bodySupplier.get()[0];
     Core.state = State.RUN;
     UIController.setCurrentPane("HUD");
   }
@@ -158,7 +158,7 @@ public abstract class Core {
         }
       }
       
-      cam.draw(bodies);
+      cam.draw();
 
       if (camFOVChange > 0) {
         cam.setFieldOfView(camFOVChange);

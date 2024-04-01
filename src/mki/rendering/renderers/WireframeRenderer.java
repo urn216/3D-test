@@ -41,6 +41,8 @@ class WireframeRenderer extends Renderer {
 
     //drawing objects
     Stream.of(bodies).parallel().forEach((b) -> {
+      if (b == null) return;
+      
       Vector3 offset = b.getPosition().subtract(cameraPosition);
       Vector3 offrot = worldRotation.rotate(offset);
 

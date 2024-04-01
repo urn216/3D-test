@@ -71,8 +71,6 @@ abstract class Controls {
       @Override
       public void mousePressed(MouseEvent e) {
         mouseUpdateAction.set(e);
-
-        MOUSE_DOWN[e.getButton()] = true;
         
         if (UIController.getHighlightedInteractable() == null) MOUSE_DOWN[e.getButton()] = true;
         

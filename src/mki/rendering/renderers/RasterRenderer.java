@@ -52,13 +52,15 @@ class RasterRenderer extends Renderer {
 
     Quaternion worldRotation = cameraRotation.reverse();
 
-    Vector3[] lights = Stream.of(bodies).parallel().filter((b) -> b.getModel().getMat().isEmissive()).mapMulti((b, c) -> {
+    Vector3[] lights = Stream.of(bodies).parallel().filter((b) -> b != null && b.getModel().getMat().isEmissive()).mapMulti((b, c) -> {
       c.accept(b.getPosition().subtract(cameraPosition));
       c.accept(b.getModel().getMat().getIntensity());
     }).toArray((i) -> new Vector3[i]);
 
     //drawing objects
     Stream.of(bodies).parallel().forEach((b) -> {
+      if (b == null) return;
+      
       Vector3 offset = b.getPosition().subtract(cameraPosition);
       Vector3 offrot = worldRotation.rotate(offset);
 

@@ -33,7 +33,7 @@ class RayTriRenderer extends Renderer {
 
         Vector3 pixelDir = new Vector3(yaw, pitch, NEAR_CLIPPING_PLANE).unitize();
         Vector3 rayDir = cameraRotation.rotate(pixelDir);
-        d.drawPixel(x, y, RayTri.getCol(cameraPosition, rayDir, bodies, numSteps, numReflections));
+        d.drawPixel(x, y, RayTri.getColour(cameraPosition, rayDir, bodies, numSteps, numReflections));
       });
     });
   }
