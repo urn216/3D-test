@@ -73,7 +73,7 @@ public class Material {
   public int getIntenseColour(Vector3 oIntensity, double u, double v) {
     int rgb = Constants.getFilteringMode().apply(texture, tSize, u, v);
 
-    return (ALPHA_MASK) | (colourFix(((rgb & RED_MASK) >> 16)*this.rf*oIntensity.x) << 16) | (colourFix(((rgb & GREEN_MASK) >> 8)*this.gf*oIntensity.y) << 8) | (colourFix((rgb & BLUE_MASK)*this.bf*oIntensity.z));
+    return (ALPHA_MASK&rgb) | (colourFix(((rgb & RED_MASK) >> 16)*this.rf*oIntensity.x) << 16) | (colourFix(((rgb & GREEN_MASK) >> 8)*this.gf*oIntensity.y) << 8) | (colourFix((rgb & BLUE_MASK)*this.bf*oIntensity.z));
   }
 
   public Vector3 getIntensity() {
@@ -119,7 +119,7 @@ public class Material {
     float g = ((other & GREEN_MASK) >> 8 )*reflectivity+((rgb & GREEN_MASK) >> 8 )*(this.gf)*(1-reflectivity);
     float b = ( other & BLUE_MASK        )*reflectivity+( rgb & BLUE_MASK        )*(this.bf)*(1-reflectivity);
 
-    return (ALPHA_MASK) | (colourFix(r*oIntensity.x) << 16) | (colourFix(g*oIntensity.y) << 8) | (colourFix(b*oIntensity.z));
+    return (ALPHA_MASK&rgb) | (colourFix(r*oIntensity.x) << 16) | (colourFix(g*oIntensity.y) << 8) | (colourFix(b*oIntensity.z));
   }
 
   public Vector3 getNormal(double u, double v) {

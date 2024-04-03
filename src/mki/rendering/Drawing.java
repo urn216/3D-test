@@ -91,7 +91,7 @@ public class Drawing {
    */
   public synchronized void drawPixel(int x, int y, double z, int c) {
     int i = x+y*width;
-    if (depths[i] >= z) return;
+    if (depths[i] >= z || (c|-16777216) != c) return;
     contents[i] = c;
     depths[i] = z;
   }
