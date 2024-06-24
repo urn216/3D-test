@@ -12,16 +12,17 @@ import mki.math.tri.Tri3D;
 
 import mki.math.vector.Vector2;
 import mki.math.vector.Vector3;
-import mki.math.vector.Vector3I;
 
 public class Model {
+
+  private static final Material DEFAULT_MATERIAL = new Material();
 
   protected final Vector3[] verts;
   protected final Vector2[] vertUVs;
 
   protected Tri3D[] faces;
 
-  protected Material mat = new Material(new Vector3I(255), 0, new Vector3());
+  protected Material mat = Model.DEFAULT_MATERIAL;
 
   protected double radius = 1;
 

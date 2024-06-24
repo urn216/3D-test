@@ -48,7 +48,7 @@ public class RaySphere {
 
     sNormal = Constants.getSphereNormal().apply(sNormal, mat, Puv.x, Puv.y);
 
-    Vector3 intensity = intensityStep(surface, sNormal, bodies, close, mat.getIntensity(), numSteps);
+    Vector3 intensity = intensityStep(surface, sNormal, bodies, close, mat.getEmissivity(), numSteps);
     if (numRef>0 && mat.getReflectivity() != 0) {return mat.getReflection(getColour(surface, dir.subtract(sNormal.scale(2*sNormal.dot(dir))), bodies, numSteps-1, numRef-1), intensity, Puv.x, Puv.y);}
     return mat.getIntenseColour(intensity, Puv.x, Puv.y);
   }
@@ -81,7 +81,7 @@ public class RaySphere {
       double distToSurface = reaches(rayStart, dir, bodies, destBody, sourceBody);
       if (Double.isNaN(distToSurface)) continue;
       double distToLightSquare = rayStart.subtract(destBody.getPosition()).magsquare();
-      otherCI = destBody.getModel().getMat().getIntensity();
+      otherCI = destBody.getModel().getMat().getEmissivity();
       if (numSteps > 0) {
         otherSI = otherSI.add(destBody.getModel().getMat().getAdjIntensity(
         intensityStep(rayStart.add(dir.scale(Math.sqrt(distToLightSquare)-destBody.getModel().getRadius())), dir.scale(-1), bodies, destBody, new Vector3(), numSteps-1)

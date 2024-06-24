@@ -1,7 +1,7 @@
 package mki.rendering;
 
 import mki.math.QuadFunction;
-
+import mki.math.TriFunction;
 import mki.math.tri.Tri3D;
 
 import mki.math.vector.Vector3;
@@ -23,7 +23,10 @@ public abstract class Constants {
   private static boolean dynamicRasterLighting = true;
 
 
-  private static QuadFunction<int[], Integer, Double, Double, Integer> filteringMode = Material::getNearestNeighbourFilteringTexel;
+  private static boolean fog = false;
+
+
+  private static TriFunction<int[][], Double, Double, Integer> filteringMode = Material::getNearestNeighbourFilteringTexel;
 
   public static boolean usesNormalMap() {
     return normalMap;
@@ -41,6 +44,10 @@ public abstract class Constants {
     return dynamicRasterLighting;
   }
 
+  public static boolean usesFog() {
+    return fog;
+  }
+
   public static void setNormalMapUse(boolean normalMap) {
     Constants.normalMap = normalMap;
     if (normalMap) {
@@ -53,15 +60,19 @@ public abstract class Constants {
     }
   }
 
-  public static QuadFunction<int[], Integer, Double, Double, Integer> getFilteringMode() {
+  public static TriFunction<int[][], Double, Double, Integer> getFilteringMode() {
     return filteringMode;
   }
 
-  public static void setFilteringMode(QuadFunction<int[], Integer, Double, Double, Integer> filteringMode) {
+  public static void setFilteringMode(TriFunction<int[][], Double, Double, Integer> filteringMode) {
     Constants.filteringMode = filteringMode;
   }
 
   public static void setDynamicRasterLighting(boolean dynamicRasterLighting) {
     Constants.dynamicRasterLighting = dynamicRasterLighting;
+  }
+
+  public static void setFogUse(boolean fog) {
+    Constants.fog = fog;
   }
 }

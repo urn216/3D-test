@@ -1,6 +1,5 @@
 package mki.world;
 
-import mki.math.MathHelp;
 import mki.math.matrix.Quaternion;
 import mki.math.vector.Vector3;
 
@@ -72,13 +71,9 @@ public abstract class RigidBody {
   }
 
   public void setPitch(double theta) {
-    this.pitch = fixPitch(theta);
+    this.pitch = fixAngle(theta);
 
     updateQ();
-  }
-
-  protected static double fixPitch(double theta) {
-    return MathHelp.clamp(theta, -90, 90);
   }
 
   public void offsetYaw(double theta) {
@@ -86,13 +81,9 @@ public abstract class RigidBody {
   }
 
   public void setYaw(double theta) {
-    this.yaw = fixYaw(theta);
+    this.yaw = fixAngle(theta);
 
     updateQ();
-  }
-
-  protected static double fixYaw(double theta) {
-    return (360 + theta) % 360;
   }
 
   public void offsetRoll(double theta) {
@@ -100,21 +91,21 @@ public abstract class RigidBody {
   }
 
   public void setRoll(double theta) {
-    this.roll = fixRoll(theta);
+    this.roll = fixAngle(theta);
 
     updateQ();
-  }
-
-  protected static double fixRoll(double theta) {
-    return (360 + theta) % 360;
   }
 
   public void setRotation(double pitch, double yaw, double roll) {
-    this.pitch = fixPitch(pitch);
-    this.yaw   = fixYaw  (yaw  );
-    this.roll  = fixRoll (roll );
+    this.pitch = fixAngle(pitch);
+    this.yaw   = fixAngle(yaw  );
+    this.roll  = fixAngle(roll );
 
     updateQ();
+  }
+
+  protected static double fixAngle(double theta) {
+    return (360 + theta) % 360;
   }
 
   private void updateQ() {
@@ -129,7 +120,7 @@ public abstract class RigidBody {
     return ACTIVE_BODIES;
   }
 
-  private static final void addBody(RigidBody b) {
+  public static final void addBody(RigidBody b) {
     if (size >= ACTIVE_BODIES.length) {
       RigidBody[] a = new RigidBody[ACTIVE_BODIES.length+10];
       System.arraycopy(ACTIVE_BODIES, 0, a, 0, ACTIVE_BODIES.length);

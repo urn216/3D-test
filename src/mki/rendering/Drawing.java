@@ -90,8 +90,13 @@ public class Drawing {
    * @param c The colour of the pixel
    */
   public synchronized void drawPixel(int x, int y, double z, int c) {
+    // if (x <  0     ) System.out.println("x too low : " + x + " < 0");
+    // if (x >= width ) System.out.println("x too high: " + x + " >= " + width);
+    // if (y <  0     ) System.out.println("y too low : " + y + " < 0");
+    // if (y >= height) System.out.println("y too high: " + y + " >= " + height);
+
     int i = x+y*width;
-    if (depths[i] >= z || (c|-16777216) != c) return;
+    if (depths[i] > z) return; // || (c|-16777216) != c
     contents[i] = c;
     depths[i] = z;
   }

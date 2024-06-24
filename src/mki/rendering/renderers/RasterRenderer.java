@@ -15,6 +15,7 @@ import mki.math.tri.Tri3D;
 
 import mki.math.vector.Vector2;
 import mki.math.vector.Vector3;
+// import mki.math.vector.Vector3I;
 import mki.rendering.Constants;
 import mki.rendering.Drawing;
 import mki.world.Material;
@@ -22,7 +23,11 @@ import mki.world.RigidBody;
 
 class RasterRenderer extends Renderer {
 
+  private double offset;
+
   private static final Vector3[] clippingPlanes = new Vector3[4];
+
+  private static double[] buffer;
 
   // private static final double EDGE_DETECTION_THRESHOLD = 0.02;
 
@@ -33,28 +38,38 @@ class RasterRenderer extends Renderer {
   private static final Vector3 lightCol = new Vector3(Integer.MAX_VALUE);
 
   private static final int BACKGROUND_COLOUR = -16777216;
+  private static int FOG_COLOUR = -16777216 | (120 << 16) | (200 << 8) | (255);
+  private static double FOG_MIN_DIST = 1000;
+  private static double FOG_STRENGTH = 0.16;
+
+  // private static final Material white = new Material(new Vector3I(150), 0, new Vector3());
+  // private static final Material red = new Material(new Vector3I(150, 0, 0), 0, new Vector3());
 
   @Override
   public void updateConstants(double fov, int width, int height) {
     super.updateConstants(fov, width, height);
+    this.offset = 2*NEAR_CLIPPING_PLANE/(f*width);
     double sin = Math.sin(fov/2);
     double cos = Math.cos(fov/2);
     clippingPlanes[0] = new Vector3( cos, 0, sin).unitize();
     clippingPlanes[1] = new Vector3(-cos, 0, sin).unitize();
     clippingPlanes[2] = new Vector3(0,  cos, sin*height/width).unitize();
     clippingPlanes[3] = new Vector3(0, -cos, sin*height/width).unitize();
+
+    buffer = new double[width*height];
   }
 
   @Override
   public void render(Drawing d, Vector3 cameraPosition, Quaternion cameraRotation, RigidBody[] bodies) {
     d.fill(BACKGROUND_COLOUR);
+    if (Constants.usesFog()) generateFog(d, cameraPosition, cameraRotation);
     // d.fill(~0);
 
     Quaternion worldRotation = cameraRotation.reverse();
 
     Vector3[] lights = Stream.of(bodies).parallel().filter((b) -> b != null && b.getModel().getMat().isEmissive()).mapMulti((b, c) -> {
       c.accept(b.getPosition().subtract(cameraPosition));
-      c.accept(b.getModel().getMat().getIntensity());
+      c.accept(b.getModel().getMat().getEmissivity());
     }).toArray((i) -> new Vector3[i]);
 
     //drawing objects
@@ -90,6 +105,9 @@ class RasterRenderer extends Renderer {
       if (partial) s = s.<Tri3D>mapMulti(this::clipTri);
       
       s.forEach((tri) -> renderTri(d, tri, b.getModel().getMat(), cameraRotation, lights));
+
+      // Alternative draw and clip combo to visualise clipping
+      // if (partial) s.forEach((tri) -> clipTri(tri, (t) -> renderTri(d, t, tri==t ? white : red, cameraRotation, lights)));
     });
 
     // EDGE DETECTION
@@ -109,6 +127,33 @@ class RasterRenderer extends Renderer {
     //     (y != h-1 && Math.abs(currentDepths[ x  + (y+1)*w] - currentDepths[i]) > EDGE_DETECTION_THRESHOLD)
     //   ) d.drawPixel(i, -16777216);
     // });
+  }
+
+  private void generateFog(Drawing d, Vector3 cameraPosition, Quaternion cameraRotation) {
+    int canvasWidth  = d.getWidth ();
+    int canvasHeight = d.getHeight();
+
+    for (int y = 0; y < canvasHeight; y++) {
+      double pitch = -(y-canvasHeight/2) * offset;
+      for (int x = 0; x < canvasWidth; x++) {
+        double yaw =  (x-canvasWidth /2) * offset;
+        
+        Vector3 pixelDir = new Vector3(yaw, pitch, NEAR_CLIPPING_PLANE).unitize();
+        Vector3 rayDir = cameraRotation.rotate(pixelDir);
+
+        if (rayDir.y <= 0) {
+          d.drawPixel(x, y, 0, BACKGROUND_COLOUR);
+          buffer[x + y*canvasWidth] = 0;
+        }
+        else {
+          double depth = rayDir.y/Math.max(rayDir.y, 5000-cameraPosition.y);
+          double percent = Math.min(1, Math.pow(FOG_MIN_DIST*depth, FOG_STRENGTH));
+  
+          d.drawPixel(x, y, 0, Material.blendColours(BACKGROUND_COLOUR, percent, FOG_COLOUR));
+          buffer[x + y*canvasWidth] = depth;
+        }
+      }
+    }
   }
 
   /**
@@ -269,7 +314,7 @@ class RasterRenderer extends Renderer {
       double z = v.z;
       Vector3 pixelWorldLocation = cameraRotation.rotate(new Vector3((v.x*2.0/width-1)/(z*f), -((v.y*2.0/height-1)*aspRat)/(z*f), 1.0/v.z));
       Vector3 normal = Constants.getTriNormal().apply(tri, mat, p.x, p.y);
-      Vector3 intensity = mat.getIntensity();
+      Vector3 intensity = mat.getEmissivity();
 
       for (int i = 0; i < lights.length; i+=2) {
         Vector3 lightOffset = lights[i].subtract(pixelWorldLocation);
@@ -278,16 +323,38 @@ class RasterRenderer extends Renderer {
 
       // fudged reflections for now
       return mat.getReflection(BACKGROUND_COLOUR, intensity, p.x, p.y);
-    }:
+    }: !Constants.usesFog() ?
     (v, p)->{ // directional sky light (no dynamic lighting)
       return mat.getIntenseColour(
         lightCol.scale(MathHelp.intensity((Constants.getTriNormal().apply(tri, mat, p.x, p.y).dot(lightDir)+1)/2, lightDistSquared)), 
         p.x, 
         p.y
       );
+    }:
+    (v, p)->{ // Fog Test
+      int base = mat.getIntenseColour(
+        lightCol.scale(MathHelp.intensity((Constants.getTriNormal().apply(tri, mat, p.x, p.y).dot(lightDir)+1)/2, lightDistSquared)), 
+        p.x, 
+        p.y
+      );
+
+      double percent = Math.min(1, Math.pow(FOG_MIN_DIST*Math.max(v.z, buffer[(int)v.x + (int)v.y * d.getWidth()]), FOG_STRENGTH));
+
+      return Material.blendColours(base, percent, FOG_COLOUR);
     };
 
     d.fillTri(triFlattened, lighting);
+
+    // Catching bug for drawing out of bounds pixels (I think it's a desync between moving tris and drawing them simultaneously)
+    // try {
+    //   d.fillTri(triFlattened, lighting);
+    // } catch (ArrayIndexOutOfBoundsException e) {
+    //   System.out.println("Bad Triangle:\n  " + triFlattened.getVerts()[0] + "\n  " + triFlattened.getVerts()[1] + "\n  " + triFlattened.getVerts()[2]);
+    //   System.out.println("Original:\n  " + tri.getVerts()[0] + "\n  " + tri.getVerts()[1] + "\n  " + tri.getVerts()[2]);
+    //   System.out.println("Material used was " + (mat == white ? "white" : mat == red ? "red" : "the default"));
+    // }
+
+    // Draw tri outlines
     // d.drawTri(tri, -16777216|~mat.getIntenseColour(
     //   globalIllumination
     //   // .add(glowLCol.scale(MathHelp.intensity(Math.max(normal.dot(vert0), 0),distSquared)))

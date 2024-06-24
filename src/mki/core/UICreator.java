@@ -1,6 +1,6 @@
 package mki.core;
 
-import mki.math.QuadFunction;
+import mki.math.TriFunction;
 import mki.math.vector.Vector2;
 import mki.math.vector.Vector2I;
 import mki.rendering.Constants;
@@ -53,7 +53,7 @@ class UICreator {
       Constants::usesDynamicRasterLighting, 
       Constants::setDynamicRasterLighting
     ),
-    new UIDropDown<QuadFunction<int[], Integer, Double, Double, Integer>>(
+    new UIDropDown<TriFunction<int[][], Double, Double, Integer>>(
       "Filtering: %s",
       ( ) -> {
         return Constants.getFilteringMode().toString();

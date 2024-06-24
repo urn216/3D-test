@@ -3,7 +3,6 @@ package mki.world;
 import mki.io.FileIO;
 
 import mki.math.vector.Vector3;
-import mki.math.vector.Vector3I;
 import mki.rendering.Constants;
 
 public class Material {
@@ -12,76 +11,139 @@ public class Material {
   private static final int BLUE_MASK = 255;
   private static final int ALPHA_MASK = 255 << 24;
 
-  private final int r, g, b;
-  private final float rf, gf, bf;
+  private int baseColour = ~0;
   private final boolean emissive;
-  private final Vector3 intensity;
+  private final Vector3 emissivity;
   private final float reflectivity;
 
-  private final int tSize;
-  private final int nSize;
-
-  private final int[] texture;
-  private final int[] normals;
+  private final int[][] texture;
+  private final int[][] normals;
   private final float[] normalMagnitudes;
 
-  public Material(Vector3I rgb, float reflectivity, Vector3 intensity) {
-    this(rgb, reflectivity, intensity, new int[] {~0}, new int[] {-8355585});
+  public Material() {
+    this(~0, 0, new Vector3(), Texture.getTexture("DEFAULT"), Texture.getTexture("DEFAULT_NORMAL"));
+  }
+  
+  public Material(java.awt.Color baseColour) {
+    this(baseColour, 0, new Vector3(), Texture.getTexture("DEFAULT"), Texture.getTexture("DEFAULT_NORMAL"));
+  }
+  
+  public Material(java.awt.Color baseColour, float reflectivity) {
+    this(baseColour, reflectivity, new Vector3(), Texture.getTexture("DEFAULT"), Texture.getTexture("DEFAULT_NORMAL"));
   }
 
-  public Material(Vector3I rgb, float reflectivity, Vector3 intensity, String tFile) {
-    this(rgb, reflectivity, intensity, Texture.getTexture(tFile), new int[] {-8355585});
+  public Material(java.awt.Color baseColour, float reflectivity, Vector3 emissivity) {
+    this(baseColour, reflectivity, emissivity, Texture.getTexture("DEFAULT"), Texture.getTexture("DEFAULT_NORMAL"));
   }
 
-  public Material(Vector3I rgb, float reflectivity, Vector3 intensity, String tFile, String nFile) {
-    this(rgb, reflectivity, intensity, Texture.getTexture(tFile), Texture.getTexture(nFile));
+  public Material(java.awt.Color baseColour, float reflectivity, Vector3 emissivity, String tFile) {
+    this(baseColour, reflectivity, emissivity, Texture.getTexture(tFile), Texture.getTexture("DEFAULT_NORMAL"));
   }
 
-  public Material(Vector3I rgb, float reflectivity, Vector3 intensity, int[] texture, int[] normals) {
-    if (rgb.x > 255 || rgb.x < 0 || rgb.y > 255 || rgb.y < 0 || rgb.z > 255 || rgb.z < 0) {throw new RuntimeException("rgb must be between 0 and 255!");}
-    if (intensity.x < 0 || intensity.y < 0 || intensity.z < 0) {throw new RuntimeException("Cannot have negative light intensity!");}
+  public Material(java.awt.Color baseColour, float reflectivity, Vector3 emissivity, String tFile, String nFile) {
+    this(baseColour, reflectivity, emissivity, Texture.getTexture(tFile), Texture.getTexture(nFile));
+  }
+
+  public Material(java.awt.Color baseColour, float reflectivity, Vector3 emissivity, int[][] texture, int[][] normals) {
+    this(baseColour.getRGB(), reflectivity, emissivity, texture, normals);
+  }
+  
+  public Material(int baseColour) {
+    this(baseColour, 0, new Vector3(), Texture.getTexture("DEFAULT"), Texture.getTexture("DEFAULT_NORMAL"));
+  }
+  
+  public Material(int baseColour, float reflectivity) {
+    this(baseColour, reflectivity, new Vector3(), Texture.getTexture("DEFAULT"), Texture.getTexture("DEFAULT_NORMAL"));
+  }
+
+  public Material(int baseColour, float reflectivity, Vector3 emissivity) {
+    this(baseColour, reflectivity, emissivity, Texture.getTexture("DEFAULT"), Texture.getTexture("DEFAULT_NORMAL"));
+  }
+
+  public Material(int baseColour, float reflectivity, Vector3 emissivity, String tFile) {
+    this(baseColour, reflectivity, emissivity, Texture.getTexture(tFile), Texture.getTexture("DEFAULT_NORMAL"));
+  }
+
+  public Material(int baseColour, float reflectivity, Vector3 emissivity, String tFile, String nFile) {
+    this(baseColour, reflectivity, emissivity, Texture.getTexture(tFile), Texture.getTexture(nFile));
+  }
+
+  public Material(int baseColour, float reflectivity, Vector3 emissivity, int[][] texture, int[][] normals) {
+    if (emissivity.x < 0 || emissivity.y < 0 || emissivity.z < 0) {throw new RuntimeException("Cannot have negative light intensity!");}
     if (reflectivity < 0 || reflectivity > 1) {throw new RuntimeException("Reflectivity must be a percentage (0 <= r <= 1)!");}
-    this.r = rgb.x;
-    this.rf = r/255f;
-    this.g = rgb.y;
-    this.gf = g/255f;
-    this.b = rgb.z;
-    this.bf = b/255f;
+    this.baseColour = baseColour;
     this.reflectivity = reflectivity;
-    this.emissive = intensity.x+intensity.y+intensity.z != 0;
-    this.intensity = intensity;
+    this.emissive = emissivity.x+emissivity.y+emissivity.z != 0;
+    this.emissivity = emissivity;
 
     this.texture = texture;
-    this.tSize = (int)Math.sqrt(this.texture.length);
     
     this.normals = normals;
-    this.nSize = (int)Math.sqrt(this.normals.length);
     
-    this.normalMagnitudes = new float[this.normals.length];
+    this.normalMagnitudes = new float[this.normals[0].length];
     for (int i = 0; i < normalMagnitudes.length; i++) {
-      int norm = this.normals[i];
+      int norm = this.normals[0][i];
       this.normalMagnitudes[i] = (float)new Vector3(((norm&RED_MASK)>>16)/128.0 - 1, ((norm&GREEN_MASK)>>8)/128.0 - 1, (norm&BLUE_MASK)/-128.0 + 1).magnitude();
     }
   }
 
-  private static int colourFix(double col) {return Math.min(255, (int)col);}
-
-  public int getAbsColour() {return (ALPHA_MASK) | (r << 16) | (g << 8) | (b);}
-
-  public int getIntenseColour(Vector3 oIntensity) {return (ALPHA_MASK) | (colourFix(r*oIntensity.x) << 16) | (colourFix(g*oIntensity.y) << 8) | (colourFix(b*oIntensity.z));}
-
-  public int getIntenseColour(Vector3 oIntensity, double u, double v) {
-    int rgb = Constants.getFilteringMode().apply(texture, tSize, u, v);
-
-    return (ALPHA_MASK&rgb) | (colourFix(((rgb & RED_MASK) >> 16)*this.rf*oIntensity.x) << 16) | (colourFix(((rgb & GREEN_MASK) >> 8)*this.gf*oIntensity.y) << 8) | (colourFix((rgb & BLUE_MASK)*this.bf*oIntensity.z));
+  private static int colourFix(Vector3 intensity, int... colours) {
+    double r = intensity.x, g = intensity.y, b = intensity.z;
+    for (int i = 0; i < colours.length; i++) {
+      // a *= ((colours[i] & ALPHA_MASK) >> 24);
+      r *= ((colours[i] & RED_MASK  ) >> 16);
+      g *= ((colours[i] & GREEN_MASK) >>  8);
+      b *= ((colours[i] & BLUE_MASK )      );
+    }
+    double denom = Math.pow(255, colours.length-1);
+    return(
+      // (int)Math.min(a/denom, 255) << 24 |
+      ALPHA_MASK |
+      (int)Math.min(r/denom, 255) << 16 |
+      (int)Math.min(g/denom, 255) <<  8 |
+      (int)Math.min(b/denom, 255)
+    );
   }
 
-  public Vector3 getIntensity() {
-    return intensity;
+  public static int blendColours(int one, double p, int two) {
+    return (
+      ALPHA_MASK |
+      (int)(((one & RED_MASK  ) >> 16) * p + ((two & RED_MASK  ) >> 16) * (1-p)) << 16 |
+      (int)(((one & GREEN_MASK) >>  8) * p + ((two & GREEN_MASK) >>  8) * (1-p)) <<  8 |
+      (int)(((one & BLUE_MASK )      ) * p + ((two & BLUE_MASK )      ) * (1-p))
+    );
   }
 
-  public Vector3 getAdjIntensity(Vector3 oIntensity) {
-    return new Vector3(rf*oIntensity.x, gf*oIntensity.y, bf*oIntensity.z);
+  public void setBaseColour(int baseColour) {
+    this.baseColour = baseColour;
+  }
+
+  public void setBaseColour(java.awt.Color baseColour) {
+    this.baseColour = baseColour.getRGB();
+  }
+
+  public int getBaseColour() {
+    return this.baseColour;
+  }
+
+  public int getIntenseColour(Vector3 recievedIntensity) {
+    return colourFix(recievedIntensity, baseColour);
+  }
+
+  public int getIntenseColour(Vector3 recievedIntensity, double u, double v) {
+    return colourFix(recievedIntensity, baseColour, Constants.getFilteringMode().apply(texture, u, v));
+  }
+
+  public Vector3 getEmissivity() {
+    return emissivity;
+  }
+
+  public Vector3 getAdjIntensity(Vector3 recievedIntensity) {
+    return new Vector3(
+      ((baseColour & RED_MASK  ) >> 16)/255.0*recievedIntensity.x,
+      ((baseColour & GREEN_MASK) >>  8)/255.0*recievedIntensity.y,
+      ((baseColour & BLUE_MASK )      )/255.0*recievedIntensity.z
+    );
   }
 
   public boolean isEmissive() {
@@ -89,7 +151,7 @@ public class Material {
   }
 
   public int[] getNormalMap() {
-    return normals;
+    return normals[0];
   }
 
   public float getReflectivity() {
@@ -97,34 +159,65 @@ public class Material {
   }
 
   public int[] getTexture() {
-    return texture;
+    return texture[0];
   }
 
-  public int getTextureSize() {
-    return tSize;
+  public int getTextureWidth() {
+    return texture[1][0];
   }
 
-  public int getReflection(int other, Vector3 oIntensity) {
-    float r = ((other & RED_MASK  ) >> 16)*reflectivity+this.r*(1-reflectivity);
-    float g = ((other & GREEN_MASK) >> 8 )*reflectivity+this.g*(1-reflectivity);
-    float b = ( other & BLUE_MASK        )*reflectivity+this.b*(1-reflectivity);
-
-    return (ALPHA_MASK) | (colourFix(r*oIntensity.x) << 16) | (colourFix(g*oIntensity.y) << 8) | (colourFix(b*oIntensity.z));
+  public int getTextureHeight() {
+    return texture[1][1];
   }
 
-  public int getReflection(int other, Vector3 oIntensity, double u, double v) {
-    int rgb = Constants.getFilteringMode().apply(texture, tSize, u, v);
+  public int getReflection(int reflectedColour, Vector3 recievedIntensity) {
+    double r = (
+      ((reflectedColour & RED_MASK  ) >> 16)*   reflectivity +
+      ((     baseColour & RED_MASK  ) >> 16)/255.0*(1-reflectivity)
+    );
+    double g = (
+      ((reflectedColour & GREEN_MASK) >>  8)*   reflectivity +
+      ((     baseColour & GREEN_MASK) >>  8)/255.0*(1-reflectivity)
+    );
+    double b = (
+      ( reflectedColour & BLUE_MASK        )*   reflectivity +
+      (      baseColour & BLUE_MASK        )/255.0*(1-reflectivity)
+    );
 
-    float r = ((other & RED_MASK  ) >> 16)*reflectivity+((rgb & RED_MASK  ) >> 16)*(this.rf)*(1-reflectivity);
-    float g = ((other & GREEN_MASK) >> 8 )*reflectivity+((rgb & GREEN_MASK) >> 8 )*(this.gf)*(1-reflectivity);
-    float b = ( other & BLUE_MASK        )*reflectivity+( rgb & BLUE_MASK        )*(this.bf)*(1-reflectivity);
+    return (ALPHA_MASK)
+    | ((int)Math.min(255, r*recievedIntensity.x) << 16)
+    | ((int)Math.min(255, g*recievedIntensity.y) <<  8)
+    | ((int)Math.min(255, b*recievedIntensity.z)      );
+  }
 
-    return (ALPHA_MASK&rgb) | (colourFix(r*oIntensity.x) << 16) | (colourFix(g*oIntensity.y) << 8) | (colourFix(b*oIntensity.z));
+  public int getReflection(int reflectedColour, Vector3 recievedIntensity, double u, double v) {
+    int textureColour = Constants.getFilteringMode().apply(texture, u, v);
+
+    double r = (
+      ((reflectedColour & RED_MASK  ) >> 16)*   reflectivity +
+      ((  textureColour & RED_MASK  ) >> 16)*(1-reflectivity)*
+      ((     baseColour & RED_MASK  ) >> 16)/255.0
+    );
+    double g = (
+      ((reflectedColour & GREEN_MASK) >>  8)*   reflectivity +
+      ((  textureColour & GREEN_MASK) >>  8)*(1-reflectivity)*
+      ((     baseColour & GREEN_MASK) >>  8)/255.0
+    );
+    double b = (
+      ( reflectedColour & BLUE_MASK        )*   reflectivity +
+      (   textureColour & BLUE_MASK        )*(1-reflectivity)*
+      (      baseColour & BLUE_MASK        )/255.0
+    );
+
+    return (ALPHA_MASK)
+    | ((int)Math.min(255, r*recievedIntensity.x) << 16)
+    | ((int)Math.min(255, g*recievedIntensity.y) <<  8)
+    | ((int)Math.min(255, b*recievedIntensity.z)      );
   }
 
   public Vector3 getNormal(double u, double v) {
-    int rgb = Constants.getFilteringMode().apply(normals, nSize, u, v);
-    float magnitude = normalMagnitudes[((int)(u*tSize)+(int)(v*tSize)*tSize) % normalMagnitudes.length];
+    int rgb = Constants.getFilteringMode().apply(normals, u, v);
+    float magnitude = normalMagnitudes[((int)(u*normals[1][0])+(int)(v*normals[1][1])*normals[1][0]) % normalMagnitudes.length];
 
     return new Vector3(
       (((rgb &   RED_MASK)>>16) /  128.0 - 1) / magnitude, 
@@ -133,25 +226,28 @@ public class Material {
     );
   }
 
-  public static int getNearestNeighbourFilteringTexel(int[] texture, int tSize, double u, double v) {
-    return texture[((int)(u*tSize)+(int)(v*tSize)*tSize) % texture.length];
+  public static int getNearestNeighbourFilteringTexel(int[][] texture, double u, double v) {
+    int w = texture[1][0], h = texture[1][1];
+    return texture[0][((int)(u*w)+(int)(v*h)*w) % texture[0].length];
   }
 
-  public static int getBilinearFilteringTexel(int[] texture, int tSize, double u, double v) {
-    u = (u%1)*tSize;
+  public static int getBilinearFilteringTexel(int[][] texture, double u, double v) {
+    int w = texture[1][0], h = texture[1][1];
+    
+    u = (u%1)*w;
     int uMin = (int)u;
-    int uMax = (uMin+1)%tSize;
+    int uMax = (uMin+1)%w;
     double uFrc = u-uMin;
 
-    v = (v%1)*tSize;
+    v = (v%1)*h;
     int vMin = (int)v;
-    int vMax = (vMin+1)%tSize;
+    int vMax = (vMin+1)%h;
     double vFrc = v-vMin;
 
-    int TL = texture[(uMin+vMin*tSize)];
-    int TR = texture[(uMax+vMin*tSize)];
-    int BL = texture[(uMin+vMax*tSize)];
-    int BR = texture[(uMax+vMax*tSize)];
+    int TL = texture[0][(uMin+vMin*w)];
+    int TR = texture[0][(uMax+vMin*w)];
+    int BL = texture[0][(uMin+vMax*w)];
+    int BR = texture[0][(uMax+vMax*w)];
 
     return ALPHA_MASK |
     ((int)(
