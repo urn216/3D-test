@@ -192,14 +192,7 @@ class UICreator {
     BUFFER_HEIGHT, 
     UIElement.TRANSITION_SLIDE_DOWN,
     () -> {Core.GLOBAL_SETTINGS.saveChanges();   UIController.retState();},
-    () -> {
-      Core.GLOBAL_SETTINGS.revertChanges();
-      Core.getActiveCam().setImageDimensions(
-        Core.GLOBAL_SETTINGS.getIntSetting("v_resolution_X"), 
-        Core.GLOBAL_SETTINGS.getIntSetting("v_resolution_Y")
-      );
-      UIController.retState();
-    },
+    () -> {Core.GLOBAL_SETTINGS.revertChanges(); UIController.retState();},
     "Save Changes?"
   );
   
