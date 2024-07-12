@@ -112,7 +112,7 @@ public abstract class RigidBody {
   private void updateQ() {
     this.rotation = Quaternion.fromPitchYawRoll(Math.toRadians(this.pitch), Math.toRadians(this.yaw), Math.toRadians(this.roll));
 
-    // this.model.setRotation(this.rotation);
+    this.model.setRotation(this.rotation);
   }
 
   public Model getModel() {return model;}
