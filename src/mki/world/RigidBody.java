@@ -1,7 +1,8 @@
 package mki.world;
 
-import mki.math.matrix.Quaternion;
 import mki.math.vector.Vector3;
+import mki.rendering.gpumath.Quaternion;
+import uk.ac.manchester.tornado.api.types.vectors.Float4;
 
 /**
 * Write a description of class RigidBody here.
@@ -12,7 +13,7 @@ import mki.math.vector.Vector3;
 public abstract class RigidBody {
 
   private static RigidBody[] ACTIVE_BODIES = new RigidBody[10];
-  private static int size = 0;
+  private static int NUM_ACTIVE_BODIES = 0;
 
   protected Vector3 position;
 
@@ -22,7 +23,7 @@ public abstract class RigidBody {
   private double yaw;
   private double roll;
 
-  private Quaternion rotation;
+  private Float4 rotation;
 
   public RigidBody(Vector3 position, Model model) {
     this.position = position;
@@ -48,7 +49,7 @@ public abstract class RigidBody {
     return roll;
   }
 
-  public Quaternion getRotation() {
+  public Float4 getRotation() {
     return rotation;
   }
 
@@ -63,7 +64,7 @@ public abstract class RigidBody {
   public void resetRotation() {
     this.pitch = this.yaw = this.roll = 0;
 
-    this.rotation = Quaternion.fromAxisAngle(0, new Vector3());
+    this.rotation = Quaternion.fromAxisAngle(0, new Float4());
   }
 
   public void offsetPitch(double theta) {
@@ -111,7 +112,7 @@ public abstract class RigidBody {
   private void updateQ() {
     this.rotation = Quaternion.fromPitchYawRoll(Math.toRadians(this.pitch), Math.toRadians(this.yaw), Math.toRadians(this.roll));
 
-    this.model.setRotation(this.rotation);
+    // this.model.setRotation(this.rotation);
   }
 
   public Model getModel() {return model;}
@@ -121,16 +122,16 @@ public abstract class RigidBody {
   }
 
   public static final void addBody(RigidBody b) {
-    if (size >= ACTIVE_BODIES.length) {
+    if (NUM_ACTIVE_BODIES >= ACTIVE_BODIES.length) {
       RigidBody[] a = new RigidBody[ACTIVE_BODIES.length+10];
       System.arraycopy(ACTIVE_BODIES, 0, a, 0, ACTIVE_BODIES.length);
       ACTIVE_BODIES = a;
     }
-    ACTIVE_BODIES[size++] = b;
+    ACTIVE_BODIES[NUM_ACTIVE_BODIES++] = b;
   }
 
   public static final boolean removeBody(RigidBody b) {
-    for (int i = 0; i < size; i++) {
+    for (int i = 0; i < NUM_ACTIVE_BODIES; i++) {
       if (!b.equals(ACTIVE_BODIES[i])) continue;
 
       removeIndex(i);
@@ -141,14 +142,18 @@ public abstract class RigidBody {
 
   public static final void removeIndex(int i) {
     final int newSize;
-    if ((newSize = size - 1) > i)
+    if ((newSize = NUM_ACTIVE_BODIES - 1) > i)
       System.arraycopy(ACTIVE_BODIES, i + 1, ACTIVE_BODIES, i, newSize - i);
-    ACTIVE_BODIES[size = newSize] = null;
+    ACTIVE_BODIES[NUM_ACTIVE_BODIES = newSize] = null;
   }
 
   public static final void clearBodies() {
     ACTIVE_BODIES = new RigidBody[10];
-    size = 0;
+    NUM_ACTIVE_BODIES = 0;
+  }
+
+  public static final int getNumberOfBodies() {
+    return NUM_ACTIVE_BODIES;
   }
 
 }

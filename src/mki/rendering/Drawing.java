@@ -13,10 +13,12 @@ import mki.math.vector.Vector2;
 import mki.math.vector.Vector2I;
 import mki.math.vector.Vector3;
 import mki.math.vector.Vector3I;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
 
 public class Drawing {
   private final int[] contents;
   private final double[] depths;
+  private final IntArray dims;
   private final int width;
   private final int height;
   private final double aspectRatio;
@@ -24,6 +26,7 @@ public class Drawing {
   public Drawing(int width, int height) {
     this.contents = new int[width*height];
     this.depths   = new double[width*height];
+    this.dims = IntArray.fromElements(width, height, 0);
     this.width = width;
     this.height = height;
     this.aspectRatio = 1.0*height/width;
@@ -39,6 +42,10 @@ public class Drawing {
 
   public int getHeight() {
     return height;
+  }
+
+  public IntArray getDims() {
+    return dims;
   }
 
   public double getAspectRatio() {
@@ -144,6 +151,7 @@ public class Drawing {
    */
   public synchronized void togglePixel(int i) {
     contents[i] = ~contents[i] | -16777216;
+    // contents.set(i, ~contents.get(i) | -16777216);
   }
 
   /**

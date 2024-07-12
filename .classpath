@@ -12,5 +12,6 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/_3DEngine/lib/Utilities-1.0.2/Utilities-1.0.2-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="C:\Users\willk\.m2\repository\tornado\tornado-api\1.0.6/tornado-api-1.0.6.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

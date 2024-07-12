@@ -18,6 +18,8 @@ public abstract class Renderer {
   public static Renderer rasterizer() {return new RasterRenderer();}
   public static Renderer motionSensor() {return new MotionRenderer();}
   public static Renderer wireframe() {return new WireframeRenderer();}
+  public static Renderer gpuRaySphere() {return new GPU_RaySphereRenderer();}
+  public static Renderer gpuFastSphere() {return new GPU_FastSphereRenderer();}
 
   public void updateConstants(double fov, int width, int height) {
     this.fov = fov;
@@ -25,6 +27,8 @@ public abstract class Renderer {
   }
 
   public void initialise(Drawing d) {}
+
+  public void destroy() {}
 
   public abstract void render(Drawing d, Vector3 cameraPosition, Quaternion cameraRotation, RigidBody[] bodies);
 }

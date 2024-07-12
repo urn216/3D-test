@@ -1,0 +1,1 @@
+C:\TornadoVM\setvars.cmd

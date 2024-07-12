@@ -45,17 +45,29 @@ public class Camera3D {
     this.position = position;
 
     this.renderer = renderer;
-
+    
     this.fieldOfView = Math.toRadians(fieldOfView);
-
+    
     setImageDimensions(imageWidth, imageHeight);
-
+    
     resetRotation();
+    
+    this.renderer.initialise(imageContents);
+  }
+
+  public void initialise() {
+    setPosition(new Vector3());
+    resetRotation();
+    this.renderer.initialise(imageContents);
+  }
+
+  public void destroy() {
+    this.renderer.destroy();
   }
 
   public double getFieldOfView() {return Math.toDegrees(fieldOfView);}
 
-  public synchronized BufferedImage getImage() {return image;}
+  public BufferedImage getImage() {return image;}
 
   public double getImageAspectRatio() {return imageContents.getAspectRatio();}
 
@@ -109,6 +121,7 @@ public class Camera3D {
   }
 
   public synchronized void setRenderer(Renderer renderer) {
+    this.renderer.destroy();
     this.renderer = renderer;
     this.renderer.updateConstants(this.fieldOfView, this.image.getWidth(), this.image.getHeight());
     this.renderer.initialise(imageContents);
@@ -182,14 +195,15 @@ public class Camera3D {
     this.upDir = this.q.rotate(new Vector3(0, 1, 0));
   }
 
-  public synchronized void draw(RigidBody[] bodies) {
+  public void draw(RigidBody[] bodies) {
     renderer.render(imageContents, position, q, bodies);
-    synchronized (this) {
-      imageContents.asBufferedImage(image);
-    }
+    imageContents.asBufferedImage(image);
+    // synchronized (this) {
+    //   imageContents.asBufferedImage(image);
+    // }
   }
 
-  public synchronized void draw() {
+  public void draw() {
     draw(RigidBody.getActiveBodies());
   }
 }

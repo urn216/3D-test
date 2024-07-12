@@ -5,6 +5,7 @@ import mki.math.MathHelp;
 import mki.math.vector.Vector2;
 import mki.math.vector.Vector3;
 import mki.rendering.Constants;
+import mki.rendering.gpumath.Quaternion;
 import mki.world.Material;
 import mki.world.RigidBody;
 
@@ -43,7 +44,7 @@ public class RaySphere {
     // We did collide with an object, so let's look at it.
     Vector3 surface = rayStart.add(dir.scale(closest));
     Vector3 sNormal = surface.subtract(close.getPosition()).unitize();
-    Vector2 Puv = MathHelp.sphereUVPoint(close.getRotation().reverse().rotate(sNormal)); //get the uv coordinates for this point
+    Vector2 Puv = MathHelp.sphereUVPoint(Quaternion.rotate(Quaternion.reverse(close.getRotation()), sNormal)); //get the uv coordinates for this point
     Material mat = close.getModel().getMat();
 
     sNormal = Constants.getSphereNormal().apply(sNormal, mat, Puv.x, Puv.y);

@@ -13,7 +13,7 @@ class RaySphereRenderer extends Renderer {
   private double offset;
   
   private int numSteps = 0;
-  private int numReflections = 3;
+  private int numReflections = 2;
 
   @Override
   public void updateConstants(double fov, int width, int height) {
