@@ -13,6 +13,7 @@ import mki.math.tri.Tri3D;
 
 import mki.math.vector.Vector2;
 import mki.math.vector.Vector3;
+import mki.math.vector.Vector4;
 import mki.rendering.Drawing;
 import mki.world.RigidBody;
 
@@ -27,24 +28,24 @@ class WireframeRenderer extends Renderer {
     super.updateConstants(fov, width, height);
     double sin = Math.sin(fov/2);
     double cos = Math.cos(fov/2);
-    clippingPlanes[0] = new Vector3( cos, 0, sin).unitize();
-    clippingPlanes[1] = new Vector3(-cos, 0, sin).unitize();
-    clippingPlanes[2] = new Vector3(0,  cos, sin*height/width).unitize();
-    clippingPlanes[3] = new Vector3(0, -cos, sin*height/width).unitize();
+    clippingPlanes[0] = new Vector3( cos, 0, sin).normal();
+    clippingPlanes[1] = new Vector3(-cos, 0, sin).normal();
+    clippingPlanes[2] = new Vector3(0,  cos, sin*height/width).normal();
+    clippingPlanes[3] = new Vector3(0, -cos, sin*height/width).normal();
   }
 
   @Override
-  public void render(Drawing d, Vector3 cameraPosition, Quaternion cameraRotation, RigidBody[] bodies) {
+  public void render(Drawing d, Vector3 cameraPosition, Vector4 cameraRotation, RigidBody[] bodies) {
     d.fill(BACKGROUND_COLOUR);
 
-    Quaternion worldRotation = cameraRotation.reverse();
+    Vector4 worldRotation = Quaternion.reverse(cameraRotation);
 
     //drawing objects
     Stream.of(bodies).parallel().forEach((b) -> {
       if (b == null) return;
       
       Vector3 offset = b.getPosition().subtract(cameraPosition);
-      Vector3 offrot = worldRotation.rotate(offset);
+      Vector3 offrot = Quaternion.rotate(worldRotation, offset);
 
       //clipping object
       double rad  = b.getModel().getRadius();
@@ -64,9 +65,9 @@ class WireframeRenderer extends Renderer {
       Stream<Tri3D> s = Stream.of(b.getModel().getFaces()).parallel()
       .filter((tri) -> tri.getVerts()[0].add(offset).dot(tri.getNormal()) < -0.00001)
       .map((tri) -> tri.projectVerts(
-        worldRotation.rotate(tri.getVerts()[0].add(offset)),
-        worldRotation.rotate(tri.getVerts()[1].add(offset)),
-        worldRotation.rotate(tri.getVerts()[2].add(offset))
+        Quaternion.rotate(worldRotation, tri.getVerts()[0].add(offset)),
+        Quaternion.rotate(worldRotation, tri.getVerts()[1].add(offset)),
+        Quaternion.rotate(worldRotation, tri.getVerts()[2].add(offset))
       ));
 
       if (partial) s = s.<Tri3D>mapMulti(this::clipTri);

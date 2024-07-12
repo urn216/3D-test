@@ -4,6 +4,7 @@ import java.util.stream.IntStream;
 
 import mki.math.matrix.Quaternion;
 import mki.math.vector.Vector3;
+import mki.math.vector.Vector4;
 import mki.rendering.Drawing;
 import mki.rendering.ray.RayTri;
 import mki.world.RigidBody;
@@ -22,7 +23,7 @@ class RayTriRenderer extends Renderer {
   }
   
   @Override
-  public void render(Drawing d, Vector3 cameraPosition, Quaternion cameraRotation, RigidBody[] bodies) {
+  public void render(Drawing d, Vector3 cameraPosition, Vector4 cameraRotation, RigidBody[] bodies) {
     int canvasWidth  = d.getWidth ();
     int canvasHeight = d.getHeight();
 
@@ -31,8 +32,8 @@ class RayTriRenderer extends Renderer {
       IntStream.range(0, canvasWidth).parallel().forEach((x) -> {
         double yaw =  (x-canvasWidth /2) * offset;
 
-        Vector3 pixelDir = new Vector3(yaw, pitch, NEAR_CLIPPING_PLANE).unitize();
-        Vector3 rayDir = cameraRotation.rotate(pixelDir);
+        Vector3 pixelDir = new Vector3(yaw, pitch, NEAR_CLIPPING_PLANE).normal();
+        Vector3 rayDir = Quaternion.rotate(cameraRotation, pixelDir);
         d.drawPixel(x, y, RayTri.getColour(cameraPosition, rayDir, bodies, numSteps, numReflections));
       });
     });

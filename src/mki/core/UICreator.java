@@ -21,10 +21,7 @@ class UICreator {
     new UIToggle(
       "Fullscreen", 
       Core.WINDOW::isFullScreen, 
-      (b) -> {
-        Core.GLOBAL_SETTINGS.setBoolSetting("fullScreen", b); 
-        Core.WINDOW.setFullscreen(b);
-      }
+      (b) -> Core.GLOBAL_SETTINGS.setBoolSetting("v_fullScreen", b)
     ),
     new UIDropDown<Vector2I>(
       "Resolution: %s",
@@ -32,12 +29,9 @@ class UICreator {
         Vector2I v = Core.getActiveCam().getImageDimensions();
         return v.x + " x " + v.y;
       },
-      (v) -> {
-        Core.GLOBAL_SETTINGS.setIntSetting("resolution_X", v.x);
-        Core.GLOBAL_SETTINGS.setIntSetting("resolution_Y", v.y);
-        Core.getActiveCam().setImageDimensions(v.x, v.y);
-      },
+      (v) -> Core.GLOBAL_SETTINGS.setVector2ISetting("v_resolution", v),
       new Vector2I(256 , 144 ),
+      new Vector2I(512 , 288 ),
       new Vector2I(560 , 315 ),
       new Vector2I(1280, 720 ),
       new Vector2I(1920, 1080)
@@ -46,17 +40,17 @@ class UICreator {
     new UIToggle(
       "Normal Maps", 
       Constants::usesNormalMap, 
-      Constants::setNormalMapUse
+      (b) -> Core.GLOBAL_SETTINGS.setBoolSetting("v_normalmapping", b)
     ),
     new UIToggle(
-      "Dynamic Lights", //TEMPORARY (Want dedicated options for each renderer. This only matters for rasterizer)
+      "Dynamic Lights",
       Constants::usesDynamicRasterLighting, 
-      Constants::setDynamicRasterLighting
+      (b) -> Core.GLOBAL_SETTINGS.setBoolSetting("v_fancylighting", b)
     ),
     new UIDropDown<TriFunction<int[][], Double, Double, Integer>>(
-      "Filtering: %s",
+      "Filtering Mode: %s",
       ( ) -> {
-        return Constants.getFilteringMode().toString();
+        return "NN";//Constants.getFilteringMode().toString();
       },
       (f) -> {
         Constants.setFilteringMode(f);
@@ -67,13 +61,12 @@ class UICreator {
     new UISlider.Double(
       "FOV: %.0f",
       ( ) -> Core.getActiveCam().getFieldOfView(),
-      (f) -> {
-        Core.GLOBAL_SETTINGS.setDoubleSetting("fieldOfView", f);
-        Core.setFieldOfView(f);
-      },
+      (f) -> Core.GLOBAL_SETTINGS.setDoubleSetting("v_fieldOfView", f),
       30,
       100
     ),
+    new UIText("", 1, 0),
+    new UIButton("Reset To Defaults", Core.GLOBAL_SETTINGS::resetToDefault),
     new UIButton("Back", UIController::back)
   };
 
@@ -115,24 +108,46 @@ class UICreator {
 
   public static UIPane createHUD() {
     UIPane HUD = new UIPane();
+
+    UIText fps = new UIText(() -> String.format("FPS: %.0f", Core.getFps()), 1, 1);
+    UIElement fpsCounter = new ElemListVert(
+      new Vector2(0   , 0),
+      new Vector2(0.07, UIHelp.calculateListHeight(BUFFER_HEIGHT, UIHelp.calculateComponentHeights(COMPON_HEIGHT, fps))),
+      COMPON_HEIGHT,
+      BUFFER_HEIGHT,
+      new UIComponent[]{fps},
+      UIElement.TRANSITION_SLIDE_LEFT
+    );
     
     UIElement outPanel = leftList(
-      new UISlider.Double("FPS: %.0f", Core::getFps, (f)->{}, 0, 100),
-      new UIButton("Ray (SPH)" , () -> Core.setRenderer(Renderer.raySphere())),
-      new UIButton("Ray (TRI)" , () -> Core.setRenderer(Renderer.rayTri())),
-      new UIButton("Rasterizer", () -> Core.setRenderer(Renderer.rasterizer())),
-      new UIButton("Mtn Raster", () -> Core.setRenderer(Renderer.motionSensor())),
-      new UIButton("Wireframe" , () -> Core.setRenderer(Renderer.wireframe())),
-      new UIButton("Options"   , () -> UIController.setState(UIState.OPTIONS) ),
-      new UIButton("Main Menu" , Core::quitToMenu),
-      new UIButton("Quit"      , Core::quitToDesk)
+      new UIButton("Return"   , UIController::back                          ),
+      new UIButton("Options"  , () -> UIController.setState(UIState.OPTIONS)),
+      new UIButton("Main Menu", Core::quitToMenu                            ),
+      new UIButton("Quit"     , Core::quitToDesk                            )
     );
 
-    UIElement options = rightList(0.2, optionList);
+    UIElement renderMethod = rightList(0.1,
+      new UIText("Ray Tracing", 1, 1),
+      new UIButton("Spheres-Old" , () -> Core.setRenderer(Renderer.raySphere())),
+      new UIButton("Spheres-Fast", () -> Core.setRenderer(Renderer.gpuFastSphere())),
+      new UIButton("Spheres-Slow", () -> Core.setRenderer(Renderer.gpuRaySphere())),
+      new UIButton("Tris-Old"    , () -> Core.setRenderer(Renderer.rayTri())),
+      new UIText("Rasterizing", 1, 1),
+      new UIButton("Rasterizer"  , () -> Core.setRenderer(Renderer.rasterizer())),
+      new UIButton("Motion Sense", () -> Core.setRenderer(Renderer.motionSensor())),
+      new UIButton("Wireframe"   , () -> Core.setRenderer(Renderer.wireframe()))
+    );
 
-    HUD.addState(UIState.DEFAULT, outPanel);
-    HUD.addState(UIState.OPTIONS, outPanel , UIState.DEFAULT, checkSettings);
-    HUD.addState(UIState.OPTIONS, options );
+    UIElement options = leftList(0.2, optionList);
+
+    HUD.setModeParent(UIState.DEFAULT, UIState.PAUSED);
+
+    HUD.addState(UIState.DEFAULT, fpsCounter );
+    HUD.addState(UIState.PAUSED , outPanel    , UIState.DEFAULT);
+    HUD.addState(UIState.PAUSED , fpsCounter );
+    HUD.addState(UIState.OPTIONS, renderMethod, UIState.PAUSED  , checkSettings);
+    HUD.addState(UIState.OPTIONS, options    );
+    HUD.addState(UIState.OPTIONS, fpsCounter );
 
     HUD.clear();
     
@@ -144,9 +159,10 @@ class UICreator {
   }
 
   protected static UIElement leftList(double width, UIComponent... components) {
+    double height = UIHelp.calculateListHeight(BUFFER_HEIGHT, UIHelp.calculateComponentHeights(COMPON_HEIGHT, components));
     return new ElemListVert(
-      new Vector2(0    , 0),
-      new Vector2(width, UIHelp.calculateListHeight(BUFFER_HEIGHT, UIHelp.calculateComponentHeights(COMPON_HEIGHT, components))),
+      new Vector2(0    , 0.4-height/2),
+      new Vector2(width, 0.4+height/2),
       COMPON_HEIGHT,
       BUFFER_HEIGHT,
       components,
@@ -155,13 +171,14 @@ class UICreator {
   }
 
   protected static UIElement rightList(UIComponent... components) {
-    return rightList(0.07, components);
+    return rightList(0.078, components);
   }
 
   protected static UIElement rightList(double width, UIComponent... components) {
+    double height = UIHelp.calculateListHeight(BUFFER_HEIGHT, UIHelp.calculateComponentHeights(COMPON_HEIGHT, components));
     return new ElemListVert(
-      new Vector2(1-width, 0),
-      new Vector2(1      , UIHelp.calculateListHeight(BUFFER_HEIGHT, UIHelp.calculateComponentHeights(COMPON_HEIGHT, components))),
+      new Vector2(1-width, 0.4-height/2),
+      new Vector2(1      , 0.4+height/2),
       COMPON_HEIGHT,
       BUFFER_HEIGHT,
       components,
@@ -178,10 +195,9 @@ class UICreator {
     () -> {
       Core.GLOBAL_SETTINGS.revertChanges();
       Core.getActiveCam().setImageDimensions(
-        Core.GLOBAL_SETTINGS.getIntSetting("resolution_X"), 
-        Core.GLOBAL_SETTINGS.getIntSetting("resolution_Y")
+        Core.GLOBAL_SETTINGS.getIntSetting("v_resolution_X"), 
+        Core.GLOBAL_SETTINGS.getIntSetting("v_resolution_Y")
       );
-      Core.getActiveCam().setFieldOfView(Core.GLOBAL_SETTINGS.getDoubleSetting("fieldOfView"));
       UIController.retState();
     },
     "Save Changes?"

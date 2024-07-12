@@ -15,6 +15,7 @@ import mki.math.tri.Tri3D;
 
 import mki.math.vector.Vector2;
 import mki.math.vector.Vector3;
+import mki.math.vector.Vector4;
 // import mki.math.vector.Vector3I;
 import mki.rendering.Constants;
 import mki.rendering.Drawing;
@@ -34,7 +35,7 @@ class RasterRenderer extends Renderer {
   // private static final double q = FAR_CLIPPING_PLANE/(FAR_CLIPPING_PLANE-NEAR_CLIPPING_PLANE);
 
   private static final double lightDistSquared = new Vector3(4000, 10000, 1000).magsquare();
-  private static final Vector3 lightDir = new Vector3(0.4, 1, 0.1).unitize();
+  private static final Vector3 lightDir = new Vector3(0.4, 1, 0.1).normal();
   private static final Vector3 lightCol = new Vector3(Integer.MAX_VALUE);
 
   private static final int BACKGROUND_COLOUR = -16777216;
@@ -51,21 +52,21 @@ class RasterRenderer extends Renderer {
     this.offset = 2*NEAR_CLIPPING_PLANE/(f*width);
     double sin = Math.sin(fov/2);
     double cos = Math.cos(fov/2);
-    clippingPlanes[0] = new Vector3( cos, 0, sin).unitize();
-    clippingPlanes[1] = new Vector3(-cos, 0, sin).unitize();
-    clippingPlanes[2] = new Vector3(0,  cos, sin*height/width).unitize();
-    clippingPlanes[3] = new Vector3(0, -cos, sin*height/width).unitize();
+    clippingPlanes[0] = new Vector3( cos, 0, sin).normal();
+    clippingPlanes[1] = new Vector3(-cos, 0, sin).normal();
+    clippingPlanes[2] = new Vector3(0,  cos, sin*height/width).normal();
+    clippingPlanes[3] = new Vector3(0, -cos, sin*height/width).normal();
 
     buffer = new double[width*height];
   }
 
   @Override
-  public void render(Drawing d, Vector3 cameraPosition, Quaternion cameraRotation, RigidBody[] bodies) {
+  public void render(Drawing d, Vector3 cameraPosition, Vector4 cameraRotation, RigidBody[] bodies) {
     d.fill(BACKGROUND_COLOUR);
     if (Constants.usesFog()) generateFog(d, cameraPosition, cameraRotation);
     // d.fill(~0);
 
-    Quaternion worldRotation = cameraRotation.reverse();
+    Vector4 worldRotation = Quaternion.reverse(cameraRotation);
 
     Vector3[] lights = Stream.of(bodies).parallel().filter((b) -> b != null && b.getModel().getMat().isEmissive()).mapMulti((b, c) -> {
       c.accept(b.getPosition().subtract(cameraPosition));
@@ -77,7 +78,7 @@ class RasterRenderer extends Renderer {
       if (b == null) return;
       
       Vector3 offset = b.getPosition().subtract(cameraPosition);
-      Vector3 offrot = worldRotation.rotate(offset);
+      Vector3 offrot = Quaternion.rotate(worldRotation, offset);
 
       //clipping object
       double rad  = b.getModel().getRadius();
@@ -97,9 +98,9 @@ class RasterRenderer extends Renderer {
       Stream<Tri3D> s = Stream.of(b.getModel().getFaces()).parallel()
       .filter((tri) -> tri.getVerts()[0].add(offset).dot(tri.getNormal()) < -0.00001)
       .map((tri) -> tri.projectVerts(
-        worldRotation.rotate(tri.getVerts()[0].add(offset)),
-        worldRotation.rotate(tri.getVerts()[1].add(offset)),
-        worldRotation.rotate(tri.getVerts()[2].add(offset))
+        Quaternion.rotate(worldRotation, tri.getVerts()[0].add(offset)),
+        Quaternion.rotate(worldRotation, tri.getVerts()[1].add(offset)),
+        Quaternion.rotate(worldRotation, tri.getVerts()[2].add(offset))
       ));
 
       if (partial) s = s.<Tri3D>mapMulti(this::clipTri);
@@ -129,7 +130,7 @@ class RasterRenderer extends Renderer {
     // });
   }
 
-  private void generateFog(Drawing d, Vector3 cameraPosition, Quaternion cameraRotation) {
+  private void generateFog(Drawing d, Vector3 cameraPosition, Vector4 cameraRotation) {
     int canvasWidth  = d.getWidth ();
     int canvasHeight = d.getHeight();
 
@@ -138,8 +139,8 @@ class RasterRenderer extends Renderer {
       for (int x = 0; x < canvasWidth; x++) {
         double yaw =  (x-canvasWidth /2) * offset;
         
-        Vector3 pixelDir = new Vector3(yaw, pitch, NEAR_CLIPPING_PLANE).unitize();
-        Vector3 rayDir = cameraRotation.rotate(pixelDir);
+        Vector3 pixelDir = new Vector3(yaw, pitch, NEAR_CLIPPING_PLANE).normal();
+        Vector3 rayDir = Quaternion.rotate(cameraRotation, pixelDir);
 
         if (rayDir.y <= 0) {
           d.drawPixel(x, y, 0, BACKGROUND_COLOUR);
@@ -289,7 +290,7 @@ class RasterRenderer extends Renderer {
    * @param mat The {@code Material} of the {@code RigidBody} the input tri belongs to. 
    * (This contains texture and surface information for drawing.)
    */
-  private void renderTri(Drawing d, Tri3D tri, Material mat, Quaternion cameraRotation, Vector3... lights) {
+  private void renderTri(Drawing d, Tri3D tri, Material mat, Vector4 cameraRotation, Vector3... lights) {
     int width  = d.getWidth ();
     int height = d.getHeight()-1;
 
@@ -312,13 +313,13 @@ class RasterRenderer extends Renderer {
     BiFunction<Vector3, Vector2, Integer> lighting = Constants.usesDynamicRasterLighting() ?
     (v, p)->{ // dynamic lighting (full noise!)
       double z = v.z;
-      Vector3 pixelWorldLocation = cameraRotation.rotate(new Vector3((v.x*2.0/width-1)/(z*f), -((v.y*2.0/height-1)*aspRat)/(z*f), 1.0/v.z));
+      Vector3 pixelWorldLocation = Quaternion.rotate(cameraRotation, new Vector3((v.x*2.0/width-1)/(z*f), -((v.y*2.0/height-1)*aspRat)/(z*f), 1.0/v.z));
       Vector3 normal = Constants.getTriNormal().apply(tri, mat, p.x, p.y);
       Vector3 intensity = mat.getEmissivity();
 
       for (int i = 0; i < lights.length; i+=2) {
         Vector3 lightOffset = lights[i].subtract(pixelWorldLocation);
-        intensity = intensity.add(lights[i+1].scale(MathHelp.intensity(Math.max(normal.dot(lightOffset.unitize()), 0), lightOffset.magsquare())));
+        intensity = intensity.add(lights[i+1].scale(MathHelp.intensity(Math.max(normal.dot(lightOffset.normal()), 0), lightOffset.magsquare())));
       }
 
       // fudged reflections for now

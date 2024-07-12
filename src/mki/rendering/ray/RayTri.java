@@ -107,7 +107,7 @@ public class RayTri {
       
       Vector3 otherCI = new Vector3(); //core intensity (emitted)
       Vector3 otherSI = new Vector3(); //surface intensity (reflected)
-      Vector3 dir = destBody.getPosition().subtract(rayStart).unitize(); //direction from this surface point to other object
+      Vector3 dir = destBody.getPosition().subtract(rayStart).normal(); //direction from this surface point to other object
       double distToSurface = reaches(rayStart, dir, bodies, destBody, sourceBody);
       if (Double.isNaN(distToSurface)) {continue;}
       double distToLightSquare = rayStart.subtract(destBody.getPosition()).magsquare();

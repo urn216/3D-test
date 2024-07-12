@@ -6,6 +6,7 @@ import mki.math.MathHelp;
 import mki.math.matrix.Quaternion;
 import mki.math.vector.Vector2I;
 import mki.math.vector.Vector3;
+import mki.math.vector.Vector4;
 import mki.rendering.Drawing;
 import mki.rendering.renderers.Renderer;
 
@@ -28,7 +29,7 @@ public class Camera3D {
   private double yaw;
   private double roll;
 
-  private Quaternion q;
+  private Vector4 q;
   
   private BufferedImage image;
   private Drawing imageContents;
@@ -45,17 +46,29 @@ public class Camera3D {
     this.position = position;
 
     this.renderer = renderer;
-
+    
     this.fieldOfView = Math.toRadians(fieldOfView);
-
+    
     setImageDimensions(imageWidth, imageHeight);
-
+    
     resetRotation();
+    
+    this.renderer.initialise(imageContents);
+  }
+
+  public void initialise() {
+    setPosition(new Vector3());
+    resetRotation();
+    this.renderer.initialise(imageContents);
+  }
+
+  public void destroy() {
+    this.renderer.destroy();
   }
 
   public double getFieldOfView() {return Math.toDegrees(fieldOfView);}
 
-  public synchronized BufferedImage getImage() {return image;}
+  public BufferedImage getImage() {return image;}
 
   public double getImageAspectRatio() {return imageContents.getAspectRatio();}
 
@@ -83,7 +96,7 @@ public class Camera3D {
     return roll;
   }
 
-  public Quaternion getRotation() {
+  public Vector4 getRotation() {
     return q;
   }
 
@@ -109,6 +122,7 @@ public class Camera3D {
   }
 
   public synchronized void setRenderer(Renderer renderer) {
+    this.renderer.destroy();
     this.renderer = renderer;
     this.renderer.updateConstants(this.fieldOfView, this.image.getWidth(), this.image.getHeight());
     this.renderer.initialise(imageContents);
@@ -121,7 +135,7 @@ public class Camera3D {
     this.rightDir = new Vector3(1, 0, 0);
     this.upDir = new Vector3(0, 1, 0);
 
-    this.q = Quaternion.fromAxisAngle(0, new Vector3());
+    this.q = new Vector4(1, 0, 0, 0);
   }
 
   public void offsetPitch(double theta) {
@@ -177,19 +191,20 @@ public class Camera3D {
   private void updateQ() {
     this.q = Quaternion.fromPitchYawRoll(Math.toRadians(this.pitch), Math.toRadians(this.yaw), Math.toRadians(this.roll));
 
-    this.dir = this.q.rotate(new Vector3(0, 0, 1));
-    this.rightDir = this.q.rotate(new Vector3(1, 0, 0));
-    this.upDir = this.q.rotate(new Vector3(0, 1, 0));
+    this.dir      = Quaternion.rotate(this.q, new Vector3(0, 0, 1));
+    this.rightDir = Quaternion.rotate(this.q, new Vector3(1, 0, 0));
+    this.upDir    = Quaternion.rotate(this.q, new Vector3(0, 1, 0));
   }
 
-  public synchronized void draw(RigidBody[] bodies) {
+  public void draw(RigidBody[] bodies) {
     renderer.render(imageContents, position, q, bodies);
-    synchronized (this) {
-      imageContents.asBufferedImage(image);
-    }
+    imageContents.asBufferedImage(image);
+    // synchronized (this) {
+    //   imageContents.asBufferedImage(image);
+    // }
   }
 
-  public synchronized void draw() {
+  public void draw() {
     draw(RigidBody.getActiveBodies());
   }
 }

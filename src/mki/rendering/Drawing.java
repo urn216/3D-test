@@ -144,6 +144,7 @@ public class Drawing {
    */
   public synchronized void togglePixel(int i) {
     contents[i] = ~contents[i] | -16777216;
+    // contents.set(i, ~contents.get(i) | -16777216);
   }
 
   /**

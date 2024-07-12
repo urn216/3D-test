@@ -7,7 +7,7 @@ import java.awt.image.BufferedImage;
 import java.util.function.Supplier;
 
 import mki.io.FileIO;
-
+import mki.math.vector.Vector2I;
 import mki.math.vector.Vector3;
 import mki.rendering.renderers.Renderer;
 import mki.ui.control.UIController;
@@ -37,12 +37,17 @@ public abstract class Core {
 
   private static State state = State.SPLASH;
   
-  private static boolean quit = false;
-
   private static RigidBody lightSource = null;
   
   private static Camera3D cam;
+  
+  private static boolean overheadToDo = false;
   private static double camFOVChange = -1;
+  private static Vector2I camResChange = null;
+  private static Renderer renderChange = null;
+  private static Supplier<RigidBody[]> bodySupplier = null;
+  private static boolean toMenu = false;
+  private static boolean quit = false;
 
   private static long pTTime = System.currentTimeMillis();
   private static long pFTime = System.currentTimeMillis();
@@ -62,14 +67,16 @@ public abstract class Core {
     UIController.putPane("HUD"      , UICreator.createHUD ());
 
     Material.setSkybox("BG/star_map.png");
-
+    
+    camResChange = GLOBAL_SETTINGS.getVector2ISetting("v_resolution");
     cam = new Camera3D(
       new Vector3(),
-      GLOBAL_SETTINGS.getIntSetting("resolution_X"),
-      GLOBAL_SETTINGS.getIntSetting("resolution_Y"),
-      GLOBAL_SETTINGS.getDoubleSetting("fieldOfView"),
-      Renderer.rasterizer()
+      camResChange.x,
+      camResChange.y,
+      GLOBAL_SETTINGS.getDoubleSetting("v_fieldOfView"),
+      Renderer.gpuFastSphere()
     );
+    camResChange = null;
   }
   
   /**
@@ -102,29 +109,28 @@ public abstract class Core {
   }
 
   public static void setRenderer(Renderer r) {
-    cam.setRenderer(r);
+    renderChange = r;
+    overheadToDo = true;
   }
 
   public static void setFieldOfView(double f) {
     camFOVChange = f;
+    overheadToDo = true;
+  }
+
+  public static void setResolution(Vector2I v) {
+    camResChange = v;
+    overheadToDo = true;
   }
 
   public static void quitToMenu() {
-    RigidBody.clearBodies();
-    cam.setPosition(new Vector3());
-    cam.resetRotation();
-    Core.lightSource = null;
-    Core.state = State.MAINMENU;
-    UIController.setCurrentPane("Main Menu");
+    toMenu = true;
+    overheadToDo = true;
   }
 
   public static void loadScene(Supplier<RigidBody[]> bodySupplier) {
-    RigidBody.clearBodies();
-    cam.setPosition(new Vector3());
-    cam.resetRotation();
-    Core.lightSource = bodySupplier.get()[0];
-    Core.state = State.RUN;
-    UIController.setCurrentPane("HUD");
+    Core.bodySupplier = bodySupplier;
+    overheadToDo = true;
   }
   
   /**
@@ -134,6 +140,49 @@ public abstract class Core {
     if (quit) System.exit(1);
     
     quit = true;
+    overheadToDo = true;
+  }
+
+  private static void performOverhead() {
+    if (quit) {
+      cam.destroy();
+      System.exit(0);
+    }
+
+    if (toMenu) {
+      RigidBody.clearBodies();
+      Core.lightSource = null;
+      cam.initialise();
+      Core.state = State.MAINMENU;
+      UIController.setCurrentPane("Main Menu");
+      toMenu = false;
+    }
+
+    if (bodySupplier != null) {
+      RigidBody.clearBodies();
+      Core.lightSource = bodySupplier.get()[0];
+      cam.initialise();
+      Core.state = State.RUN;
+      UIController.setCurrentPane("HUD");
+      bodySupplier = null;
+    }
+
+    if (camFOVChange > 0) {
+      cam.setFieldOfView(camFOVChange);
+      camFOVChange = -1;
+    }
+
+    if (camResChange != null) {
+      cam.setImageDimensions(camResChange.x, camResChange.y);
+      camResChange = null;
+    }
+
+    if (renderChange != null) {
+      cam.setRenderer(renderChange);
+      renderChange = null;
+    }
+
+    overheadToDo = false;
   }
   
   public static void playGame() throws InterruptedException {
@@ -160,14 +209,8 @@ public abstract class Core {
       
       cam.draw();
 
-      if (camFOVChange > 0) {
-        cam.setFieldOfView(camFOVChange);
-        camFOVChange = -1;
-      }
+      if (overheadToDo) performOverhead();
 
-      if (quit) {
-        System.exit(0);
-      }
       WINDOW.PANEL.repaint();
       
       tickTime = System.currentTimeMillis() - tickTime;
@@ -198,7 +241,7 @@ public abstract class Core {
 
     if (cFTime-pFTime >= 1000) {
       fps = fCount*1000.0/(cFTime-pFTime);
-      System.out.println(fps);
+      // System.out.println(fps);
       pFTime = cFTime;
       fCount=0;
     }

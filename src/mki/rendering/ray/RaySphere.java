@@ -1,7 +1,7 @@
 package mki.rendering.ray;
 
 import mki.math.MathHelp;
-
+import mki.math.matrix.Quaternion;
 import mki.math.vector.Vector2;
 import mki.math.vector.Vector3;
 import mki.rendering.Constants;
@@ -42,8 +42,8 @@ public class RaySphere {
     }
     // We did collide with an object, so let's look at it.
     Vector3 surface = rayStart.add(dir.scale(closest));
-    Vector3 sNormal = surface.subtract(close.getPosition()).unitize();
-    Vector2 Puv = MathHelp.sphereUVPoint(close.getRotation().reverse().rotate(sNormal)); //get the uv coordinates for this point
+    Vector3 sNormal = surface.subtract(close.getPosition()).normal();
+    Vector2 Puv = MathHelp.sphereUVPoint(Quaternion.rotate(Quaternion.reverse(close.getRotation()), sNormal)); //get the uv coordinates for this point
     Material mat = close.getModel().getMat();
 
     sNormal = Constants.getSphereNormal().apply(sNormal, mat, Puv.x, Puv.y);
@@ -77,7 +77,7 @@ public class RaySphere {
 
       Vector3 otherCI = new Vector3(); //core intensity (emitted)
       Vector3 otherSI = new Vector3(); //surface intensity (reflected)
-      Vector3 dir = destBody.getPosition().subtract(rayStart).unitize(); //direction from this surface point to other object
+      Vector3 dir = destBody.getPosition().subtract(rayStart).normal(); //direction from this surface point to other object
       double distToSurface = reaches(rayStart, dir, bodies, destBody, sourceBody);
       if (Double.isNaN(distToSurface)) continue;
       double distToLightSquare = rayStart.subtract(destBody.getPosition()).magsquare();
@@ -96,9 +96,9 @@ public class RaySphere {
 
 
   public static Vector3 displaceNormal(Vector3 normal, Vector3 displacement) {
-    Vector3 pU = normal.y > 0.99 || normal.y < -0.99 ? new Vector3(-1, 0, 0) : Vector3.UNIT_Y.cross(normal).unitize();
-    Vector3 pV = normal.cross(pU).unitize();
+    Vector3 pU = normal.y > 0.99 || normal.y < -0.99 ? new Vector3(-1, 0, 0) : Vector3.UNIT_Y.cross(normal).normal();
+    Vector3 pV = normal.cross(pU).normal();
     
-    return normal.subtract(pU.scale(displacement.x)).add(pV.scale(displacement.y)).subtract(normal.scale(displacement.z)).unitize();
+    return normal.subtract(pU.scale(displacement.x)).add(pV.scale(displacement.y)).subtract(normal.scale(displacement.z)).normal();
   }
 }

@@ -12,6 +12,7 @@ import mki.math.tri.Tri3D;
 
 import mki.math.vector.Vector2;
 import mki.math.vector.Vector3;
+import mki.math.vector.Vector4;
 
 public class Model {
 
@@ -115,10 +116,10 @@ public class Model {
 
   public void setMat(Material mat) {this.mat = mat;}
 
-  public void setRotation(Quaternion rotation) {
+  public void setRotation(Vector4 rotation) {
     Vector3[] rotatedVs = new Vector3[verts.length];
     for (int i = 0; i < rotatedVs.length; i++) {
-      rotatedVs[i] = rotation.rotate(verts[i]);
+      rotatedVs[i] = Quaternion.rotate(rotation, verts[i]);
     }
     for (int i = 0; i < faces.length; i++) {
       int[] indices = faces[i].getVertexIndeces();
